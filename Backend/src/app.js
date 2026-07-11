@@ -22,6 +22,10 @@ if (process.env.NODE_ENV === 'production') {
     const clientUrlString = process.env.CLIENT_URL || "http://localhost:5173";
     // Support multiple comma-separated URLs and remove trailing slashes
     allowedOrigins = clientUrlString.split(',').map(url => url.trim().replace(/\/$/, ''));
+    // Always fallback to the known deployed frontend to guarantee access
+    if (!allowedOrigins.includes("https://interview-aiml.onrender.com")) {
+        allowedOrigins.push("https://interview-aiml.onrender.com");
+    }
 } else {
     allowedOrigins = [ "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176" ];
 }

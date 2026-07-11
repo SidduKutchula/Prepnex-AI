@@ -1,0 +1,270 @@
+// ── Professional Semantic Design Tokens (2026) ────────────────────────────────
+// Clean, minimal, reliable color architecture. (Linear, OpenAI, Vercel inspired)
+
+:root, [data-theme="dark"] {
+  // ── Fonts ──────────────────────────────────────────────────────────────────
+  --font-display: 'Sora', 'Inter', -apple-system, sans-serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+
+  // ── Typography Scale ───────────────────────────────────────────────────────
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.75rem;
+  --text-4xl: 3.5rem;
+  --text-5xl: 4.5rem;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-relaxed: 1.7;
+
+  // ── Layout ─────────────────────────────────────────────────────────────────
+  --max-width-page: 1400px;
+  --max-width-content: 1440px;
+  --max-width-narrow: 860px;
+
+  // ===========================================================================
+  // DARK THEME (Default)
+  // ===========================================================================
+  
+  // Backgrounds
+  --bg-page:        #0B1220;
+  --bg-page-rgb:    11, 18, 32;
+  --bg-section:     #0B1220;
+  --bg-surface:     #1E293B;
+  --bg-card:        #1E293B;
+  --bg-card-hover:  #283548;
+  --bg-elevated:    #1E293B;
+  
+  // Borders & Dividers
+  --border:         #334155;
+  --border-subtle:  #1E293B;
+  --border-hover:   #475569;
+
+  // Text
+  --text-heading:   #FFFFFF;
+  --text-title:     #FFFFFF;
+  --text-body:      #F8FAFC;
+  --text-muted:     #CBD5E1;
+  --text-placeholder:#94A3B8;
+  --text-disabled:  #64748B;
+
+  // Inputs
+  --input-bg:           #0F172A;
+  --input-border:       #334155;
+  --input-text:         #FFFFFF;
+  --input-placeholder:  #94A3B8;
+  --input-border-hover: #475569;
+  --input-border-focus: #6366F1;
+  --input-ring:         rgba(99,102,241,0.2);
+
+  // Sidebar
+  --sidebar-bg:             #111827;
+  --sidebar-border:         #334155;
+  --sidebar-active-bg:      #312E81;
+  --sidebar-active-border:  #4F46E5;
+  --sidebar-hover-bg:       rgba(255, 255, 255, 0.03);
+  
+  // Navbar
+  --nav-bg:       rgba(17,24,39,0.9);
+  --nav-border:   #334155;
+  --nav-text:     #F8FAFC;
+  --nav-active:   #4F46E5;
+
+  // Dropdowns
+  --dropdown-surface: #1E293B;
+  --dropdown-border:  #334155;
+  --dropdown-hover:   rgba(255, 255, 255, 0.05);
+  --dropdown-selected:#312E81;
+
+  // Tables
+  --table-header:   #1E293B;
+  --table-hover:    rgba(255, 255, 255, 0.02);
+  --table-selected: #312E81;
+
+  // Shadows
+  --shadow-sm:         0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:         0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg:         0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-xl:         0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  --shadow-card:       0 8px 30px rgba(0,0,0,.4);
+  --shadow-card-hover: 0 18px 45px rgba(0,0,0,.6);
+  --shadow-dropdown:   0 10px 40px rgba(0,0,0,.7);
+
+  // ===========================================================================
+  // GLOBAL BRAND & SEMANTICS (Shared)
+  // ===========================================================================
+  
+  // Brand Colors
+  --accent:         #4F46E5;
+  --accent-hover:   #4338CA;
+  --accent-pressed: #3730A3;
+  --accent-light:   #EEF2FF;
+  --accent-subtle:  rgba(79,70,229,.15);
+  --on-accent:      #FFFFFF;
+  
+  // Semantics
+  --success:        #10B981;
+  --success-subtle: rgba(16, 185, 129, 0.15);
+  
+  --warning:        #F59E0B;
+  --warning-subtle: rgba(245, 158, 11, 0.15);
+  
+  --error:          #EF4444;
+  --error-subtle:   rgba(239, 68, 68, 0.15);
+  
+  --ai-purple:      #4F46E5;
+  --ai-purple-subtle: rgba(79,70,229,.15);
+  
+  --info:           #3B82F6;
+  --info-subtle:    rgba(59, 130, 246, 0.15);
+
+  // Progress & Roadmap
+  --progress-excellent: #10B981;
+  --progress-good:      #4F46E5;
+  --progress-average:   #F59E0B;
+  --progress-poor:      #EF4444;
+  --progress-upcoming:  #64748B;
+
+  // Badges
+  --badge-ats:      #4F46E5;
+  --badge-success:  #10B981;
+  --badge-warning:  #F59E0B;
+  --badge-error:    #EF4444;
+  --badge-ai:       #4F46E5;
+  --badge-history:  #F59E0B;
+
+  // Buttons
+  --btn-primary-bg:       #6366F1;
+  --btn-primary-hover:    #4F46E5;
+  --btn-primary-pressed:  #4338CA;
+  --btn-primary-text:     #FFFFFF;
+
+  --btn-secondary-bg:     transparent;
+  --btn-secondary-border: #334155;
+  --btn-secondary-text:   #F8FAFC;
+  --btn-secondary-hover:  #1E293B;
+
+  --btn-outline-bg:       transparent;
+  --btn-outline-border:   #334155; 
+  --btn-outline-hover:    #1E293B; 
+  
+  --btn-danger:           #EF4444;
+  --btn-success:          #10B981;
+
+  // Upload Area
+  --upload-bg:             rgba(79,70,229,0.02);
+  --upload-border:         #334155;
+  --upload-hover:          rgba(79,70,229,0.05);
+  --upload-icon:           #4F46E5;
+  --upload-success-bg:     rgba(16,185,129,0.05);
+  --upload-success-border: #10B981;
+
+  // Utilities
+  --focus-ring: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--accent);
+  --radius-sm:    6px;
+  --radius-md:    8px;
+  --radius-card:  12px;
+  --radius-lg:    16px;
+  --radius-xl:    24px;
+  --radius-btn:   8px;
+  --radius-input: 8px;
+  --radius-pill:  9999px;
+
+  --transition-fast: 150ms;
+  --transition-speed: 200ms;
+  --transition-med:   300ms;
+  --transition-slow:  500ms;
+
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-8:  48px;
+  --space-10: 64px;
+  --space-12: 80px;
+  --space-16: 80px;
+  --space-20: 112px;
+}
+
+[data-theme="light"] {
+  // Backgrounds
+  --bg-page:        #F8FAFC;
+  --bg-page-rgb:    248, 250, 252;
+  --bg-section:     #F8FAFC;
+  --bg-surface:     #FFFFFF;
+  --bg-card:        #FFFFFF;
+  --bg-card-hover:  #F1F5F9;
+  --bg-elevated:    #FFFFFF;
+  
+  // Borders & Dividers
+  --border:         #E2E8F0;
+  --border-subtle:  #F1F5F9;
+  --border-hover:   #CBD5E1;
+
+  // Text
+  --text-heading:   #000000;
+  --text-title:     #000000;
+  --text-body:      #0F172A;
+  --text-muted:     #334155;
+  --text-body:      #1E293B;
+  --text-muted:     #475569;
+  --text-placeholder:#64748B;
+  --text-disabled:  #94A3B8;
+
+  // Inputs
+  --input-bg:           #FFFFFF;
+  --input-border:       #E2E8F0;
+  --input-text:         #000000;
+  --input-placeholder:  #475569;
+  --input-border-hover: #94A3B8;
+  --input-border-focus: #4F46E5;
+  --input-ring:         rgba(79,70,229,0.15);
+
+  // Sidebar
+  --sidebar-bg:             #FFFFFF;
+  --sidebar-border:         #E2E8F0;
+  --sidebar-active-bg:      #EEF2FF;
+  --sidebar-active-border:  #4F46E5;
+  --sidebar-hover-bg:       #F8FAFC;
+  
+  // Navbar
+  --nav-bg:       rgba(255,255,255,0.9);
+  --nav-border:   #E2E8F0;
+  --nav-text:     #334155;
+  --nav-active:   #4F46E5;
+
+  // Dropdowns
+  --dropdown-surface: #FFFFFF;
+  --dropdown-border:  #E2E8F0;
+  --dropdown-hover:   #F8FAFC;
+  --dropdown-selected:#EEF2FF;
+
+  // Tables
+  --table-header:   #FFFFFF;
+  --table-hover:    #F8FAFC;
+  --table-selected: #EEF2FF;
+
+  // Buttons (Light specific overrides)
+  --btn-primary-bg:       #4F46E5;
+  --btn-primary-hover:    #4338CA;
+  --btn-primary-pressed:  #3730A3;
+  --btn-primary-text:     #FFFFFF;
+
+  --btn-secondary-bg:     #FFFFFF;
+  --btn-secondary-border: #E2E8F0;
+  --btn-secondary-text:   #0F172A;
+  --btn-secondary-hover:  #F8FAFC;
+
+  --btn-outline-border:   #E2E8F0;
+  --btn-outline-hover:    #F8FAFC;
+  
+  --shadow-card:       0 4px 15px rgba(0,0,0,.04);
+  --shadow-card-hover: 0 10px 25px rgba(0,0,0,.08);
+}

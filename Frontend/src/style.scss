@@ -1,0 +1,195 @@
+@use "./style/tokens" as *;
+@use "./style/button" as *;
+@use "./style/form" as *;
+
+// ── Feature Styles ────────────────────────────────────────────────────────────
+// Centralized to prevent Vite lazy-loading CSS flash (FOUC)
+@use "./features/auth/auth.form.scss";
+@use "./features/interview/style/intro.scss";
+@use "./features/interview/style/home.scss";
+@use "./features/interview/style/interview.scss";
+
+:root {
+  --bg-base: var(--bg-page);
+  --bg-panel: var(--bg-surface);
+  --bg-input: var(--bg-card);
+  --bg-input-focus: var(--bg-card-hover);
+  --border-color: var(--border);
+  --border-color-hover: var(--accent);
+
+  --text-primary: var(--text-heading);
+  --text-secondary: var(--text-body);
+
+  --accent-color: var(--accent);
+  --accent-color-hover: var(--accent-hover);
+  --accent-glow: var(--accent-subtle);
+
+  // Auth-specific aliases
+  --bg-card-auth: var(--bg-card);
+  --border-auth: var(--border);
+  --warn: var(--error);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// ── Base typography ───────────────────────────────────────────────────────────
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--leading-relaxed);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// ── Heading scale ─────────────────────────────────────────────────────────────
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.03em;
+}
+
+h1 { font-size: var(--text-5xl); font-weight: 700; }
+h2 { font-size: var(--text-4xl); font-weight: 700; }
+h3 { font-size: var(--text-3xl); font-weight: 600; }
+h4 { font-size: var(--text-2xl); font-weight: 600; }
+h5 { font-size: var(--text-xl); font-weight: 600; }
+h6 { font-size: var(--text-lg); font-weight: 600; }
+
+p {
+  font-size: var(--text-base);
+  color: var(--text-body);
+  line-height: var(--leading-relaxed);
+}
+
+small,
+.meta,
+.report-meta,
+.char-counter,
+.footer-info {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+// ── Links ─────────────────────────────────────────────────────────────────────
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast) ease;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+// ── Interactive element accessibility ─────────────────────────────────────────
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring) !important;
+}
+
+// ── Page entry animation ──────────────────────────────────────────────────────
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in {
+    animation: fadeInUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Global Scrollbar ──────────────────────────────────────────────────────────
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+// ── Theme transition ──────────────────────────────────────────────────────────
+body, html, #root, .glass-card,
+.dashboard-header, .interview-nav,
+.interview-sidebar, .panel, .stat-widget {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+// ── GPU performance hints ─────────────────────────────────────────────────────
+.widget-progress-fill,
+.match-score__bar-fill,
+.parsing-meter-fill,
+.meter-fill {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    will-change: auto !important;
+  }
+}
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+::selection {
+  background: var(--ai-purple-subtle);
+  color: var(--text-heading);
+}
+
+// ── Semantic Badges ───────────────────────────────────────────────────────────
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  
+  &-primary { background-color: var(--accent-subtle); color: var(--accent); border: 1px solid var(--accent-subtle); }
+  &-ai { background-color: var(--ai-purple-subtle); color: var(--ai-purple); border: 1px solid var(--ai-purple-subtle); }
+  &-success { background-color: var(--success-subtle); color: var(--success); border: 1px solid var(--success-subtle); }
+  &-warning { background-color: var(--warning-subtle); color: var(--warning); border: 1px solid var(--warning-subtle); }
+  &-error { background-color: var(--error-subtle); color: var(--error); border: 1px solid var(--error-subtle); }
+  &-info { background-color: var(--info-subtle); color: var(--info); border: 1px solid var(--info-subtle); }
+  
+  svg { width: 14px; height: 14px; }
+}

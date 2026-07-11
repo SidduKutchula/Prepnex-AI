@@ -1,0 +1,129 @@
+.button {
+  border: none;
+  outline: none;
+  height: var(--input-height, 58px);
+  padding: 0 32px;
+  border-radius: var(--input-radius, 18px);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    height: 56px;
+    padding: 0 24px;
+  }
+  transition: background-color var(--transition-fast) ease,
+              color var(--transition-fast) ease,
+              border-color var(--transition-fast) ease,
+              box-shadow var(--transition-fast) ease,
+              transform var(--transition-fast) cubic-bezier(0.16, 1, 0.3, 1);
+
+  // ── Primary (Brand Contrast / Auth Style) ──
+  &.primary-button {
+    background: var(--text-heading);
+    color: var(--bg-page);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    &:hover:not(:disabled) {
+      background: var(--text-title);
+      box-shadow: 0 6px 16px var(--bg-page);
+      transform: scale(1.01);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--text-heading);
+    }
+  }
+
+  // ── Secondary (Neutral Surface with Border) ──
+  &.secondary-button {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-heading);
+    box-shadow: var(--shadow-sm);
+
+    &:hover:not(:disabled) {
+      border-color: var(--text-muted);
+      background: var(--bg-card-hover);
+    }
+    
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--border);
+    }
+  }
+
+  // ── Ghost (Transparent, Brand Colored Text) ──
+  &.ghost-button {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--accent); // Brand colored text
+    padding: var(--space-1-5) var(--space-3);
+
+    &:hover:not(:disabled) {
+      color: var(--accent-hover);
+      background: var(--accent-subtle);
+      border-color: transparent;
+    }
+  }
+
+  // ── Success (Emerald) ──
+  &.success-button {
+    background: var(--success);
+    color: var(--on-success);
+    box-shadow: var(--shadow-sm);
+
+    &:hover:not(:disabled) {
+      background: var(--success-hover);
+      box-shadow: 0 4px 16px var(--success-subtle);
+      transform: translateY(-1px);
+    }
+    
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--success);
+    }
+  }
+
+  // ── Danger (Red) ──
+  &.danger-button {
+    background: var(--error);
+    color: var(--on-error);
+    box-shadow: var(--shadow-sm);
+
+    &:hover:not(:disabled) {
+      background: var(--error-hover);
+      box-shadow: 0 4px 16px var(--error-subtle);
+      transform: translateY(-1px);
+    }
+    
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--error);
+    }
+  }
+
+  // ── Disabled State (Neutral) ──
+  &:disabled {
+    opacity: 0.6;
+    background: var(--bg-card-hover) !important;
+    color: var(--text-disabled) !important;
+    border-color: var(--border-subtle) !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .btn-icon {
+    flex-shrink: 0;
+  }
+}

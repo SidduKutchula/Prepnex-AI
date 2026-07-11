@@ -5,6 +5,14 @@ const api = axios.create({
     withCredentials: true
 })
 
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('interview_ai_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // Global interceptor — surfaces real server error messages, never hides them
 api.interceptors.response.use(
     (response) => response,
@@ -41,14 +49,19 @@ api.interceptors.response.use(
 export async function googleLogin({ credential }) {
     // Send as both 'credential' and 'token' — controller accepts either
     const response = await api.post("/api/auth/google", { credential, token: credential })
+    if (response.data?.token) {
+        localStorage.setItem('interview_ai_token', response.data.token);
+    }
     return response.data
 }
 
 export async function logout() {
     try {
         const response = await api.get("/api/auth/logout")
+        localStorage.removeItem('interview_ai_token');
         return response.data
     } catch {
+        localStorage.removeItem('interview_ai_token');
         return null;
     }
 }

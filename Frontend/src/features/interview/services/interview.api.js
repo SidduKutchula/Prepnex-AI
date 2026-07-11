@@ -5,6 +5,14 @@ const api = axios.create({
     withCredentials: true,
 })
 
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('interview_ai_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // Global interceptor for standardizing errors
 api.interceptors.response.use(
     (response) => response,

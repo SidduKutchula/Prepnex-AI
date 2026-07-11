@@ -69,6 +69,7 @@ const googleLoginController = asyncHandler(async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Authentication successful',
+            token: jwtToken,
             user: { id: user._id, email: user.email, username: user.username, name: user.name }
         });
     } catch (err) {
@@ -82,7 +83,8 @@ const googleLoginController = asyncHandler(async (req, res) => {
  * @access Public
  */
 const logoutUserController = asyncHandler(async (req, res) => {
-    const token = req.cookies?.token;
+    const authHeader = req.headers.authorization;
+    const token = req.cookies?.token || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
 
     if (token) {
         await tokenBlacklistModel.create({ token });
@@ -99,7 +101,8 @@ const logoutUserController = asyncHandler(async (req, res) => {
  */
 const getMeController = asyncHandler(async (req, res) => {
     try {
-        const token = req.cookies?.token;
+        const authHeader = req.headers.authorization;
+        const token = req.cookies?.token || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
         if (!token) {
             return res.status(401).json({ success: false, error: 'Not authenticated', code: 'NO_TOKEN' });
         }

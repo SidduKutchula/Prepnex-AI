@@ -6,7 +6,7 @@ const helmet = require("helmet")
 const app = express()
 
 app.use(helmet({
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+    crossOriginOpenerPolicy: false
 }))
 
 app.use((req, res, next) => {
@@ -17,15 +17,21 @@ app.use((req, res, next) => {
 app.use(express.json())
 app.use(cookieParser())
 
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? (process.env.CLIENT_URL || "http://localhost:5173") 
-    : [ "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176" ];
+let allowedOrigins = [];
+if (process.env.NODE_ENV === 'production') {
+    const clientUrlString = process.env.CLIENT_URL || "http://localhost:5173";
+    // Support multiple comma-separated URLs and remove trailing slashes
+    allowedOrigins = clientUrlString.split(',').map(url => url.trim().replace(/\/$/, ''));
+} else {
+    allowedOrigins = [ "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176" ];
+}
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || (Array.isArray(allowedOrigins) ? allowedOrigins.includes(origin) : allowedOrigins === origin)) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true)
         } else {
+            console.error(`[CORS Error] Origin blocked: ${origin}. Allowed:`, allowedOrigins);
             callback(new Error('Not allowed by CORS'))
         }
     },

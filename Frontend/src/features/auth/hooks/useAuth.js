@@ -27,7 +27,7 @@ export const useAuth = () => {
             // Aggressively clear all draft keys from localStorage
             for (let i = localStorage.length - 1; i >= 0; i--) {
                 const key = localStorage.key(i);
-                if (key && key.startsWith('autosave_')) {
+                if (key && (key.startsWith('autosave_') || key.startsWith('syncQueue_') || key.includes('job'))) {
                     localStorage.removeItem(key);
                 }
             }

@@ -202,8 +202,8 @@ const Intro = () => {
 
                         {user ? (
                             <button onClick={() => navigate('/interview')} className="button primary-button">
-                                <LayoutDashboard size={16} className="btn-icon" />
-                                <span>Dashboard</span>
+                                <span>Go to App</span>
+                                <ArrowRight size={16} className="btn-icon" />
                             </button>
                         ) : (
                             <div className="auth-links">

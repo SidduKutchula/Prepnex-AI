@@ -13,6 +13,7 @@ const InterviewLanding = lazy(() => import("./features/interview/pages/Interview
 const Interview = lazy(() => import("./features/interview/pages/Interview"));
 const Resume = lazy(() => import("./features/interview/pages/Resume"));
 const History = lazy(() => import("./features/history/pages/History"));
+const CompareAnalyses = lazy(() => import("./features/history/pages/CompareAnalyses"));
 const NotFound = lazy(() => import("./components/NotFound"));
 
 import PageLoader from "./components/PageLoader";
@@ -57,7 +58,10 @@ export const router = createBrowserRouter([
                 path: "/history",
                 element: <History />
             },
-
+            {
+                path: "/history/compare",
+                element: <CompareAnalyses />
+            },
             {
                 path: "/interview/:interviewId",
                 element: <Interview />

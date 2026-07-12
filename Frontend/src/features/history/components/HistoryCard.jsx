@@ -86,7 +86,7 @@ const HistoryCard = ({ data }) => {
                     </button>
                     {isMenuOpen && (
                         <div className="action-dropdown">
-                            <button onClick={() => navigate(`/report/${data._id}`)}>
+                            <button onClick={() => navigate(`/interview/${data._id}`)}>
                                 <BarChart2 size={16} /> View Report
                             </button>
                             <button onClick={() => navigate(`/preparation?id=${data._id}`)}>

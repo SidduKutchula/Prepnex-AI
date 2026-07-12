@@ -32,7 +32,7 @@ export const useAuth = () => {
                 }
             }
             try {
-                const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '', withCredentials: true });
+                const { api } = await import('../services/auth.api');
                 await api.delete('/api/autosave');
             } catch (e) { } // ignore if delete fails
 

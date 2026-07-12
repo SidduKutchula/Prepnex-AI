@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -110,7 +110,7 @@ const Login = () => {
 
             <div className="auth-layout-grid">
                 
-                {/* ── LEFT SIDE: Story & Features ── */}
+                {/* â”€â”€ LEFT SIDE: Story & Features â”€â”€ */}
                 <div className="auth-left">
                     <motion.div 
                         className="left-content"
@@ -146,7 +146,7 @@ const Login = () => {
                     </motion.div>
                 </div>
 
-                {/* ── RIGHT SIDE: Authentication ── */}
+                {/* â”€â”€ RIGHT SIDE: Authentication â”€â”€ */}
                 <div className="auth-right">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
@@ -157,13 +157,13 @@ const Login = () => {
                         <Link to="/" style={{ textDecoration: 'none' }}>
                             <div className="brand-logo-center">
                                 <BrainCircuit size={28} />
-                                <span>Interview AI</span>
+                                <span>Prepnex AI</span>
                             </div>
                         </Link>
 
                         <h2>Welcome Back</h2>
                         <p className="auth-desc">
-                            Continue with your Google account to access your personalized Interview AI workspace.
+                            Continue with your Google account to access your personalized Prepnex AI workspace.
                         </p>
 
                         {error && (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth.js'
 import { useTheme } from '../hooks/useTheme.js'
@@ -44,7 +44,7 @@ const Sidebar = () => {
             <div className="sidebar-header">
                 <div className="brand-logo" onClick={() => navigate('/dashboard')}>
                     <BrainCircuit size={24} className="logo-icon" />
-                    <span>Interview AI</span>
+                    <span>Prepnex AI</span>
                 </div>
             </div>
 

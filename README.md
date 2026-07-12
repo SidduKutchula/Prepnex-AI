@@ -1,12 +1,12 @@
-# Interview AI - Advanced Career & Interview Preparation Workspace
+﻿# Prepnex AI - Advanced Career & Interview Preparation Workspace
 
-Interview AI is a modern, full-stack web application designed to act as a comprehensive career preparation workspace. By deeply analyzing a target **Job Description** and the candidate's **Profile** (via PDF resume upload or text), the platform uses the **Google Gemini AI API** to generate a highly personalized, interactive preparation experience.
+Prepnex AI is a modern, full-stack web application designed to act as a comprehensive career preparation workspace. By deeply analyzing a target **Job Description** and the candidate's **Profile** (via PDF resume upload or text), the platform uses the **Google Gemini AI API** to generate a highly personalized, interactive preparation experience.
 
 The application has been completely redesigned to provide a professional workspace experience akin to top-tier productivity tools (Notion, Linear, Cursor), featuring ultra-fast concurrent AI generation, a cinematic loading experience, and Google OAuth integration.
 
 ---
 
-## 🚀 Key Features
+## ðŸš€ Key Features
 
 ### 1. Ultra-Fast Concurrent AI Generation
 - **Parallel Processing**: Uses advanced Node.js orchestration (`Promise.allSettled`) to generate ATS analysis, Interview Questions, Roadmaps, and Resume Rewrites simultaneously.
@@ -34,7 +34,7 @@ The application has been completely redesigned to provide a professional workspa
 
 ---
 
-## 🛠️ Technology Stack
+## ðŸ› ï¸ Technology Stack
 
 ### Frontend Architecture
 - **React.js 19**: Modern functional components, hooks, and Context API.
@@ -54,40 +54,40 @@ The application has been completely redesigned to provide a professional workspa
 
 ---
 
-## 📂 Project Structure
+## ðŸ“‚ Project Structure
 
 ```text
-Interview AI/
-├── Backend/
-│   ├── src/
-│   │   ├── config/          # Database configuration and environment setups
-│   │   ├── controllers/     # Core business logic (Auth, Interview API, Reports)
-│   │   ├── middlewares/     # Multer file handler, JWT authentication guards
-│   │   ├── models/          # Mongoose schemas (User, Report, Notes, Resumes)
-│   │   ├── routes/          # Express API route definitions
-│   │   └── services/        # AI Service (Gemini prompting, Concurrency Workers, Puppeteer)
-│   ├── .env                 # Environment variables (API Keys, DB URI)
-│   ├── server.js            # Express server entry point
-│   └── package.json
-│
-└── Frontend/
-    ├── src/
-    │   ├── components/      # Reusable UI components (WorkspaceLayout, Sidebars)
-    │   ├── features/        # Feature-based module organization
-    │   │   ├── auth/        # Context, hooks, Google login pages
-    │   │   └── interview/   # Dashboard, timeline, question cards, analytics, loading UI
-    │   ├── hooks/           # Custom React hooks (e.g., useTheme)
-    │   ├── style/           # Global design system (tokens, resets, layout)
-    │   ├── App.jsx          # Application root and router provider
-    │   └── main.jsx         # ReactDOM render entry point
-    ├── index.html
-    ├── vite.config.js       # Vite configuration (port enforcement, proxy)
-    └── package.json
+Prepnex AI/
+â”œâ”€â”€ Backend/
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ config/          # Database configuration and environment setups
+â”‚   â”‚   â”œâ”€â”€ controllers/     # Core business logic (Auth, Interview API, Reports)
+â”‚   â”‚   â”œâ”€â”€ middlewares/     # Multer file handler, JWT authentication guards
+â”‚   â”‚   â”œâ”€â”€ models/          # Mongoose schemas (User, Report, Notes, Resumes)
+â”‚   â”‚   â”œâ”€â”€ routes/          # Express API route definitions
+â”‚   â”‚   â””â”€â”€ services/        # AI Service (Gemini prompting, Concurrency Workers, Puppeteer)
+â”‚   â”œâ”€â”€ .env                 # Environment variables (API Keys, DB URI)
+â”‚   â”œâ”€â”€ server.js            # Express server entry point
+â”‚   â””â”€â”€ package.json
+â”‚
+â””â”€â”€ Frontend/
+    â”œâ”€â”€ src/
+    â”‚   â”œâ”€â”€ components/      # Reusable UI components (WorkspaceLayout, Sidebars)
+    â”‚   â”œâ”€â”€ features/        # Feature-based module organization
+    â”‚   â”‚   â”œâ”€â”€ auth/        # Context, hooks, Google login pages
+    â”‚   â”‚   â””â”€â”€ interview/   # Dashboard, timeline, question cards, analytics, loading UI
+    â”‚   â”œâ”€â”€ hooks/           # Custom React hooks (e.g., useTheme)
+    â”‚   â”œâ”€â”€ style/           # Global design system (tokens, resets, layout)
+    â”‚   â”œâ”€â”€ App.jsx          # Application root and router provider
+    â”‚   â””â”€â”€ main.jsx         # ReactDOM render entry point
+    â”œâ”€â”€ index.html
+    â”œâ”€â”€ vite.config.js       # Vite configuration (port enforcement, proxy)
+    â””â”€â”€ package.json
 ```
 
 ---
 
-## ⚙️ Prerequisites & Installation
+## âš™ï¸ Prerequisites & Installation
 
 Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended) and a running instance of [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or MongoDB Local.
 
@@ -139,7 +139,7 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 
 ---
 
-## 🏃 Running the Application
+## ðŸƒ Running the Application
 
 To run the application locally, you will need to start both the backend and frontend development servers concurrently.
 
@@ -161,7 +161,7 @@ npm run dev
 
 ---
 
-## 🎨 Design System & UX Principles
+## ðŸŽ¨ Design System & UX Principles
 The recent workspace overhaul strictly adheres to modern UX principles:
 - **Cinematic Transitions**: Immersive full-page loading screens with dynamic micro-animations keep users engaged during heavy AI processing.
 - **Compact & Balanced**: Information density is high but remains highly readable through excellent spacing and typography.

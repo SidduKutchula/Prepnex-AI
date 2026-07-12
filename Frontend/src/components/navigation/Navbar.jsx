@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+﻿import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../../features/auth/hooks/useAuth.js'
 import { useTheme } from '../../hooks/useTheme.js'
@@ -83,7 +83,7 @@ const Navbar = ({ onSearchOpen }) => {
                 <div className="navbar-left">
                     <div className="brand-logo" onClick={() => navigate('/interview')}>
                         <BrainCircuit size={18} className="logo-icon" />
-                        <span className="brand-name">Interview AI</span>
+                        <span className="brand-name">Prepnex AI</span>
                     </div>
                 </div>
 

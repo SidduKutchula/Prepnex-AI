@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth.js'
 import { useTheme } from '../hooks/useTheme.js'
@@ -61,7 +61,7 @@ const Header = ({ onTabChange, activeTab }) => {
             <div className="header-container">
                 <div className="brand-logo" onClick={handleDashboardClick}>
                     <BrainCircuit size={22} className="logo-icon" />
-                    <span>Interview AI</span>
+                    <span>Prepnex AI</span>
                 </div>
 
                 <nav className="header-nav">

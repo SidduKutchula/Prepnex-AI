@@ -1,101 +1,79 @@
-﻿# Prepnex AI - Advanced Career & Interview Preparation Workspace
+# Prepnex AI
 
-Prepnex AI is a modern, full-stack web application designed to act as a comprehensive career preparation workspace. By deeply analyzing a target **Job Description** and the candidate's **Profile** (via PDF resume upload or text), the platform uses the **Google Gemini AI API** to generate a highly personalized, interactive preparation experience.
-
-The application has been completely redesigned to provide a professional workspace experience akin to top-tier productivity tools (Notion, Linear, Cursor), featuring ultra-fast concurrent AI generation, a cinematic loading experience, and Google OAuth integration.
+<div align="center">
+  <img src="Frontend/public/favicon.ico" alt="Prepnex AI Logo" width="100"/>
+  <h3>AI-Powered Interview & Career Preparation Workspace</h3>
+  <p>Crack your next tech interview with a deeply personalized roadmap, ATS analysis, and AI mock questions.</p>
+</div>
 
 ---
+
+## âœ¨ Overview
+
+Prepnex AI is a sophisticated, full-stack career preparation workspace. By deeply analyzing a target **Job Description** and the candidate's **Resume** (via PDF parsing), the platform leverages the **Google Gemini AI** engine to generate a highly personalized, interactive preparation experience. 
+
+Designed with modern workspace tools in mind (like Notion, Linear, or Cursor), Prepnex AI features a cinematic loading experience, an intuitive 3-column layout, and secure Google OAuth integration.
 
 ## ðŸš€ Key Features
 
-### 1. Ultra-Fast Concurrent AI Generation
-- **Parallel Processing**: Uses advanced Node.js orchestration (`Promise.allSettled`) to generate ATS analysis, Interview Questions, Roadmaps, and Resume Rewrites simultaneously.
-- **Cinematic Loading Screen**: A full-page, premium glassmorphic overlay with dynamic staggered checklists, glowing gradients, and animated AI visual cores to keep users engaged during generation.
+### 1. Ultra-Fast AI Generation & Streaming
+- **Server-Sent Events (SSE)**: Streams AI-generated reports (ATS Analysis, Interview Questions, Day-by-day Roadmaps, Resume Rewrites) in real-time.
+- **Cinematic Loading Experience**: A beautiful glassmorphic overlay with dynamic staggered checklists and glowing gradients keeps users engaged during generation.
 
 ### 2. Workspace Layout & Analytics Dashboard
-- **3-Column Architecture**: A sophisticated layout featuring a navigation/progress left sidebar, a rich interactive main content area, and a deep analytics right sidebar.
-- **Stacked Analytics Widgets**: Real-time insights including Match Score, ATS Compatibility, Interview Readiness, Skill Gaps, Recommended Skills, and Preparation Progress.
-- **Goal Tracking & Streaks**: Gamified preparation with daily/weekly goals, streak tracking, and estimated time to completion.
+- **3-Column Architecture**: Features a navigation left sidebar, a rich interactive main content area, and a deep analytics right sidebar.
+- **Real-Time Insights**: View your ATS Match Score, Interview Readiness, Skill Gaps, and Preparation Progress at a glance.
+- **Gamified Tracking**: Daily goals, streak tracking, and estimated time-to-completion metrics.
 
 ### 3. Interactive Interview Report
-- **Day-by-Day Roadmap**: A visually structured roadmap breaking down preparation tasks day-by-day, complete with difficulty badges and interactive checkboxes.
-- **Personalized Questions**: Custom technical, behavioral, HR, and system design questions tailored to bridge the gap between your resume and the job description.
-- **Workspace Actions**: Users can bookmark questions, mark them as complete, practice again, and securely save inline personal notes synchronized directly with the question.
+- **Day-by-Day Roadmap**: A structured timeline breaking down preparation tasks day-by-day, complete with difficulty badges and interactive checklists.
+- **Targeted Mock Questions**: Custom technical, behavioral, and system design questions tailored to bridge the exact gap between your resume and the job description.
+- **AI Coach Feedback**: Reveal the "hidden intentions" behind questions and structure your answers using the STAR method.
 
-### 4. Resume Generation & Job Tracking
-- **Tailored Resume Generator**: Dynamically generates an ATS-friendly HTML resume optimized for specific job requirements.
-- **Version Control**: Stores multiple tailored resume versions allowing users to compare, restore, or download them as PDFs (rendered server-side via Puppeteer).
-- **JD History**: Keeps a historical record of all analyzed job descriptions and keyword match scores.
+### 4. Resume Generation & PDF Export
+- **PDF Resume Parsing**: Upload your current PDF resume; the backend uses `pdf-parse` to extract and structure the content.
+- **Server-Side PDF Export**: Uses headless **Puppeteer** to generate perfectly formatted, ATS-friendly PDF versions of your customized preparation plan.
 
-### 5. Secure Infrastructure
-- **Google OAuth Integration**: Seamless and secure one-tap login using `@react-oauth/google` and Google Identity Services.
-- **JWT Authentication**: Secure user session persistence utilizing JSON Web Tokens and HTTP-only cookies.
-- **State Management**: Robust frontend context structures for auth and interview data handling.
+### 5. Secure & Modern Infrastructure
+- **Google OAuth**: One-tap, passwordless login using `@react-oauth/google` and Google Identity Services.
+- **Strict Session Management**: JWT tokens, secure frontend context, and strict tab-level isolation ensure privacy.
+- **Production SPA Routing**: Built-in rules for Vercel, Netlify, and Cloudflare to handle client-side React routing smoothly.
 
 ---
 
-## ðŸ› ï¸ Technology Stack
+## ðŸ› ï¸  Technology Stack
 
 ### Frontend Architecture
-- **React.js 19**: Modern functional components, hooks, and Context API.
-- **Vite**: Next-generation, lightning-fast frontend build tool (strictly mapped to port 5173).
-- **Sass (SCSS)**: Scalable, modular styling system utilizing CSS variables, theming tokens, and modern layout techniques (Grid/Flexbox).
-- **Lucide React**: Clean, consistent, and beautiful iconography.
-- **React Router Dom**: Client-side routing for seamless workspace navigation.
-- **Google Identity Services**: OAuth 2.0 integration for seamless login.
+- **React 19**: Modern functional components, hooks, and Context API.
+- **Vite**: Lightning-fast build tool and development server.
+- **Sass (SCSS)**: Scalable, modular styling system utilizing CSS variables and modern layout techniques (Grid/Flexbox).
+- **Framer Motion**: Smooth, high-performance UI animations and page transitions.
+- **React Router Dom**: Client-side routing.
+- **Lucide React**: Clean, consistent typography and iconography.
 
 ### Backend Infrastructure
-- **Node.js & Express.js**: Robust server-side framework.
-- **MongoDB & Mongoose**: Flexible, schema-based NoSQL database for structured data storage (Users, Interviews, Resumes, Notes).
-- **Google GenAI SDK (`@google/genai`)**: Integration with Gemini's advanced LLMs (`gemini-1.5-flash`) for deep semantic analysis and content generation.
-- **Puppeteer**: Headless browser automation for perfect server-side HTML-to-PDF rendering.
-- **pdf-parse**: Reliable server-side extraction of text from uploaded candidate resumes.
-- **JWT & BcryptJS**: Industry-standard token signing and secure password hashing.
+- **Node.js & Express.js**: Robust, scalable server-side framework.
+- **MongoDB & Mongoose**: Flexible NoSQL database for storing Users, Interviews, and Notes.
+- **Google GenAI SDK**: Deep semantic analysis powered by Gemini 1.5 Flash.
+- **Puppeteer**: Headless browser automation for HTML-to-PDF rendering.
+- **pdf-parse**: Reliable server-side text extraction.
 
 ---
 
-## ðŸ“‚ Project Structure
+## âš™ï¸  Local Development Setup
 
-```text
-Prepnex AI/
-â”œâ”€â”€ Backend/
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ config/          # Database configuration and environment setups
-â”‚   â”‚   â”œâ”€â”€ controllers/     # Core business logic (Auth, Interview API, Reports)
-â”‚   â”‚   â”œâ”€â”€ middlewares/     # Multer file handler, JWT authentication guards
-â”‚   â”‚   â”œâ”€â”€ models/          # Mongoose schemas (User, Report, Notes, Resumes)
-â”‚   â”‚   â”œâ”€â”€ routes/          # Express API route definitions
-â”‚   â”‚   â””â”€â”€ services/        # AI Service (Gemini prompting, Concurrency Workers, Puppeteer)
-â”‚   â”œâ”€â”€ .env                 # Environment variables (API Keys, DB URI)
-â”‚   â”œâ”€â”€ server.js            # Express server entry point
-â”‚   â””â”€â”€ package.json
-â”‚
-â””â”€â”€ Frontend/
-    â”œâ”€â”€ src/
-    â”‚   â”œâ”€â”€ components/      # Reusable UI components (WorkspaceLayout, Sidebars)
-    â”‚   â”œâ”€â”€ features/        # Feature-based module organization
-    â”‚   â”‚   â”œâ”€â”€ auth/        # Context, hooks, Google login pages
-    â”‚   â”‚   â””â”€â”€ interview/   # Dashboard, timeline, question cards, analytics, loading UI
-    â”‚   â”œâ”€â”€ hooks/           # Custom React hooks (e.g., useTheme)
-    â”‚   â”œâ”€â”€ style/           # Global design system (tokens, resets, layout)
-    â”‚   â”œâ”€â”€ App.jsx          # Application root and router provider
-    â”‚   â””â”€â”€ main.jsx         # ReactDOM render entry point
-    â”œâ”€â”€ index.html
-    â”œâ”€â”€ vite.config.js       # Vite configuration (port enforcement, proxy)
-    â””â”€â”€ package.json
-```
-
----
-
-## âš™ï¸ Prerequisites & Installation
-
-Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended) and a running instance of [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or MongoDB Local.
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- A running instance of [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or MongoDB Local.
+- A Google Gemini API Key from [Google AI Studio](https://aistudio.google.com/).
 
 ### 1. Clone & Install Dependencies
 
-Open your terminal in the project directory:
-
 ```bash
+# Clone the repository
+git clone https://github.com/SidduKutchula/Prepnex-AI.git
+cd Prepnex-AI
+
 # Install backend dependencies
 cd Backend
 npm install
@@ -107,63 +85,53 @@ npm install
 
 ### 2. Configure Environment Variables
 
-#### Backend (`Backend/.env`)
-Create a file named `.env` in the `Backend/` directory and populate it with the following:
-
+**Backend (`Backend/.env`)**:
 ```env
-# Google Gemini API Key (Obtain from Google AI Studio)
 GOOGLE_GENAI_API_KEY=your_gemini_api_key_here
-
-# MongoDB Atlas or Local Connection String
 MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname
-
-# Secret key for signing JSON Web Tokens
 JWT_SECRET=your_super_secret_key_string
-
-# Google OAuth Client ID
 GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-
-# Server Config
 NODE_ENV=development
 PORT=5000
 CLIENT_URL=http://localhost:5173
 ```
 
-#### Frontend (`Frontend/.env`)
-Create a file named `.env` in the `Frontend/` directory:
-
+**Frontend (`Frontend/.env`)**:
 ```env
-# Google OAuth Client ID
 VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+VITE_API_URL=http://localhost:5000
 ```
 
----
+### 3. Run the Servers
 
-## ðŸƒ Running the Application
-
-To run the application locally, you will need to start both the backend and frontend development servers concurrently.
-
-### Start the Backend Server
-
+Start the backend (Terminal 1):
 ```bash
 cd Backend
 npm run dev
 ```
-*The Express server will start on `http://localhost:5000` (nodemon will watch for changes).*
 
-### Start the Frontend Dev Server
-
+Start the frontend (Terminal 2):
 ```bash
 cd Frontend
 npm run dev
 ```
-*The Vite dev server will launch the React app at `http://localhost:5173`. Port 5173 is strictly enforced to match CORS requirements.*
+Open your browser to `http://localhost:5173` to view the application.
 
 ---
 
-## ðŸŽ¨ Design System & UX Principles
-The recent workspace overhaul strictly adheres to modern UX principles:
-- **Cinematic Transitions**: Immersive full-page loading screens with dynamic micro-animations keep users engaged during heavy AI processing.
-- **Compact & Balanced**: Information density is high but remains highly readable through excellent spacing and typography.
-- **Accessibility (A11y)**: Text contrast tokens dynamically adjust across both light and dark modes to ensure optimal readability.
-- **No Wasted Space**: The 3-column layout ensures all available viewport space provides meaningful insights or actionable tools, minimizing scrolling and contextual switching.
+## ðŸŒ  Production Deployment
+
+### Frontend (Vercel / Netlify / Cloudflare / Render)
+The frontend is built as a Single Page Application (SPA).
+- **Build Command**: `npm run build`
+- **Publish Directory**: `dist`
+- **Routing**: The repository includes a `vercel.json` and a `public/_redirects` file to automatically fix "404 Not Found" refresh errors on Vercel, Netlify, and Cloudflare by rewriting all requests to `index.html`.
+  > **Note for Render Users**: Add a Rewrite rule in your dashboard: Source: `/*`, Destination: `/index.html`, Action: `Rewrite`.
+
+### Backend (Render / Heroku)
+Ensure your production environment variables include the correct `CLIENT_URL` (e.g., `https://sidmonai.app`) to prevent CORS issues. Set `NODE_ENV=production`.
+
+---
+
+## ðŸ“„ License
+This project is proprietary and confidential. All rights reserved.

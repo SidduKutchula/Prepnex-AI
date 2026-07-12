@@ -36,6 +36,7 @@ async function authUser(req, res, next) {
             message: "Invalid token."
         })
     }
+}
 
 async function checkUser(req, res, next) {
     const authHeader = req.headers.authorization;

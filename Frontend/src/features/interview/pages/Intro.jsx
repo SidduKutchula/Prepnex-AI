@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 import { useTheme } from '../../../hooks/useTheme.js'
@@ -164,9 +164,16 @@ const testimonials = [
 
 // â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const Intro = () => {
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
     const { toggleTheme } = useTheme()
     const navigate = useNavigate()
+
+    // Automatically redirect logged-in users to the app so they don't see the landing page
+    React.useEffect(() => {
+        if (!loading && user) {
+            navigate('/interview', { replace: true })
+        }
+    }, [user, loading, navigate])
 
     const handleCtaClick = () => {
         if (user) {

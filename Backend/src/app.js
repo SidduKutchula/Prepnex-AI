@@ -22,7 +22,9 @@ let allowedOrigins = [
     "http://localhost:5174", 
     "http://localhost:5175", 
     "http://localhost:5176",
-    "https://interview-aiml.onrender.com" // Always allow the deployed frontend
+    "https://interview-aiml.onrender.com",
+    "https://sidmonai.app",
+    "https://www.sidmonai.app"
 ];
 
 if (process.env.CLIENT_URL) {

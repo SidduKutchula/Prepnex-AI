@@ -27,48 +27,7 @@ import {
 } from 'lucide-react'
 
 
-// Stagger variants for widgets
-const widgetContainer = {
-    hidden: {},
-    visible: {
-        transition: {
-            staggerChildren: 0.08
-        }
-    }
-}
 
-const widgetItem = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            duration: 0.3,
-            ease: 'easeOut'
-        }
-    }
-}
-
-
-
-const gridStagger = {
-    hidden: {},
-    visible: {
-        transition: {
-            staggerChildren: 0.08
-        }
-    }
-}
-
-const itemReveal = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            duration: 0.25,
-            ease: 'easeOut'
-        }
-    }
-}
 
 const buttonHoverTap = {
     whileHover: { scale: 1.01, transition: { type: 'spring', stiffness: 300, damping: 20 } },
@@ -84,7 +43,7 @@ const getTimeOfDay = () => {
 
 
 const InterviewLanding = () => {
-    const { loading, startGeneration, reports } = useInterview()
+    const { loading, startGeneration } = useInterview()
     const { user } = useAuth()
     const [jobDescription, setJobDescription] = useState("")
     const [selfDescription, setSelfDescription] = useState("")
@@ -95,7 +54,7 @@ const InterviewLanding = () => {
     const [isLoaded, setIsLoaded] = useState(false)
     const resumeInputRef = useRef()
 
-    const { status: autoSaveStatus, lastSavedTime, triggerSave, loadDraft } = useAutoSave(user?.id)
+    const { triggerSave, loadDraft } = useAutoSave(user?.id)
 
     const navigate = useNavigate()
 
@@ -196,26 +155,6 @@ const InterviewLanding = () => {
     }, [resumeFile, selfDescription, jobDescription, remainingDays, startGeneration, navigate, isGenerating])
 
 
-    const renderLoader = () => (
-        <div className='loading-screen inline-loader animate-fade-in'>
-            <div className="loader-container glass-card">
-                <div className="scanner-box">
-                    <FileText size={38} className="document-icon" />
-                    <motion.div 
-                        animate={{ top: ['0%', '100%', '0%'] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-                        className="scanner-beam"
-                    />
-                </div>
-                <div className="loading-info">
-                    <Sparkles size={20} className="ai-pulse" />
-                    <h1>Initializing AI Engine...</h1>
-                    <p>Securing strategy processing slot...</p>
-                </div>
-            </div>
-        </div>
-    )
-
     return (
         <div className='home-page animate-fade-in'>
             <div className="dashboard-container">
@@ -225,10 +164,6 @@ const InterviewLanding = () => {
                 </header>
 
 
-                {loading ? (
-                    renderLoader()
-                ) : (
-                    <>
                         <motion.div 
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -373,8 +308,7 @@ const InterviewLanding = () => {
                                 </div>
                             </div>
                         </motion.div>
-                    </>
-                )}
+
             </div>
         </div>
     )

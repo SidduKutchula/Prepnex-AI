@@ -140,7 +140,7 @@ export const useInterview = () => {
         } catch (error) {
             return { success: false, error: error.message || 'Failed to toggle task completion' }
         }
-    }, [])
+    }, [setReport])
 
     useEffect(() => {
         if (interviewId) {

@@ -41,62 +41,53 @@ class AIWorkerService extends EventEmitter {
         };
 
         try {
-            console.log("[START] Bootstrapping Questions and Rewrite (Concurrent with ATS)");
-            const questionsPromise = runQuestions();
-            const rewritePromise = runRewrite();
+            console.log("[START] Bootstrapping All Stages Concurrently");
 
-            // Stage 1: ATS Analysis
-            console.log("[START] Stage 1 - ATS Generation");
-            emitProgress('ats', { status: 'processing' });
-            
-            const atsTimer = setInterval(() => {
-                console.log("STAGE TIME: Stage 1 (ATS Analysis) is taking more than 5 seconds...");
-            }, 5000);
-            
-            let atsData = {};
-            const atsStart = Date.now();
-            try {
-                atsData = await aiService.generateAtsAndGaps({ resume, jobDescription });
-                timings.ats = ((Date.now() - atsStart) / 1000).toFixed(1);
-                console.log(`[OK] Stage 1 - ATS Generation complete in ${timings.ats} sec`);
-
-                console.log("[START] Saving ATS to Mongo");
-                const updateRes = await interviewReportModel.updateOne(
-                    { _id: reportId },
-                    {
-                        $set: {
-                            atsScore: atsData.atsScore || 0,
-                            improvementSummary: atsData.improvementSummary || "",
-                            recruiterFeedback: atsData.recruiterFeedback || "",
-                            addedKeywords: atsData.addedKeywords || [],
-                            missingKeywords: atsData.missingKeywords || [],
-                            skillGaps: atsData.skillGaps || [],
-                            matchScore: atsData.matchScore || 0,
-                            'progress.atsGenerated': true
-                        }
-                    },
-                    { runValidators: true }
-                );
-                console.log("[OK] Mongo Saved (ATS)");
-                emitProgress('ats', { status: 'completed', data: atsData });
-            } catch (err) {
-                console.error(`[FAILED] Stage 1 - ATS Generation failed for ${reportId}:`, err);
-                if (err.name === 'ValidationError') {
-                    console.error("[MONGO VALIDATION ERROR] Collection: InterviewReport");
-                    for (const field in err.errors) {
-                        const error = err.errors[field];
-                        console.error(`  - Field: ${field}, Expected: ${error.properties?.type || 'valid type'}, Received: ${error.value}`);
-                    }
-                }
+            async function runAts() {
+                console.log("[START] Stage 1 - ATS Generation");
+                emitProgress('ats', { status: 'processing' });
                 
-                await interviewReportModel.updateOne(
-                    { _id: reportId },
-                    { $set: { 'errorDetails.ats': err.message } }
-                );
-                emitProgress('ats', { status: 'failed', error: err.message });
-            } finally {
-                clearInterval(atsTimer);
+                const atsTimer = setInterval(() => {
+                    console.log("STAGE TIME: Stage 1 (ATS Analysis) is taking more than 5 seconds...");
+                }, 5000);
+                
+                const atsStart = Date.now();
+                try {
+                    const atsData = await aiService.generateAtsAndGaps({ resume, jobDescription });
+                    timings.ats = ((Date.now() - atsStart) / 1000).toFixed(1);
+                    console.log(`[OK] Stage 1 - ATS Generation complete in ${timings.ats} sec`);
+
+                    console.log("[START] Saving ATS to Mongo");
+                    await interviewReportModel.updateOne(
+                        { _id: reportId },
+                        {
+                            $set: {
+                                atsScore: atsData.atsScore || 0,
+                                improvementSummary: atsData.improvementSummary || "",
+                                recruiterFeedback: atsData.recruiterFeedback || "",
+                                addedKeywords: atsData.addedKeywords || [],
+                                missingKeywords: atsData.missingKeywords || [],
+                                skillGaps: atsData.skillGaps || [],
+                                matchScore: atsData.matchScore || 0,
+                                'progress.atsGenerated': true
+                            }
+                        },
+                        { runValidators: true }
+                    );
+                    console.log("[OK] Mongo Saved (ATS)");
+                    emitProgress('ats', { status: 'completed', data: atsData });
+                } catch (err) {
+                    console.error(`[FAILED] Stage 1 - ATS Generation failed for ${reportId}:`, err);
+                    await interviewReportModel.updateOne(
+                        { _id: reportId },
+                        { $set: { 'errorDetails.ats': err.message } }
+                    );
+                    emitProgress('ats', { status: 'failed', error: err.message });
+                } finally {
+                    clearInterval(atsTimer);
+                }
             }
+
 
             // Stage 2, 3, and 4 run independently (Module Independence)
             async function runQuestions() {
@@ -160,9 +151,7 @@ class AIWorkerService extends EventEmitter {
                     const roadmapData = await aiService.generateRoadmap({ 
                         resume, 
                         jobDescription, 
-                        remainingDays, 
-                        atsScore: atsData.atsScore, 
-                        skillGaps: atsData.skillGaps 
+                        remainingDays
                     });
                     timings.roadmap = ((Date.now() - roadmapStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 3 - Roadmap Generation complete in ${timings.roadmap} sec`);
@@ -267,12 +256,14 @@ class AIWorkerService extends EventEmitter {
                 }
             };
 
-            console.log("[START] Executing Stage 3 (Roadmap) since ATS is complete");
+            const atsPromise = runAts();
+            const questionsPromise = runQuestions();
+            const rewritePromise = runRewrite();
             const roadmapPromise = runRoadmap();
 
-            console.log("[WAITING] Waiting for Questions, Roadmap, and Rewrite to finish");
-            await Promise.allSettled([questionsPromise, roadmapPromise, rewritePromise]);
-            console.log("[OK] Stages 2, 3, and 4 Concurrent execution complete");
+            console.log("[WAITING] Waiting for all concurrent stages to finish");
+            await Promise.allSettled([atsPromise, questionsPromise, roadmapPromise, rewritePromise]);
+            console.log("[OK] All 4 concurrent stages complete");
 
             // Finalize status
             const report = await interviewReportModel.findById(reportId);

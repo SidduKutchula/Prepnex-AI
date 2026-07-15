@@ -4,7 +4,29 @@ import { toggleTaskCompletionApi, syncProgressApi } from '../services/interview.
 export const useProgressSync = (interviewId, initialTasks = []) => {
     const [completedTasks, setCompletedTasks] = useState(new Set(initialTasks));
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
-    const [syncQueue, setSyncQueue] = useState([]);
+    const [syncQueue, setSyncQueue] = useState(() => {
+        const savedQueue = localStorage.getItem(`syncQueue_${interviewId}`);
+        if (savedQueue) {
+            try {
+                return JSON.parse(savedQueue);
+            } catch (e) {
+                console.error("Failed to parse offline sync queue");
+            }
+        }
+        return [];
+    });
+
+    const flushQueue = useCallback(async () => {
+        if (syncQueue.length === 0 || isOffline) return;
+
+        try {
+            await syncProgressApi(syncQueue);
+            setSyncQueue([]);
+            localStorage.removeItem(`syncQueue_${interviewId}`);
+        } catch (error) {
+            console.error("Failed to sync progress batch", error);
+        }
+    }, [syncQueue, isOffline, interviewId]);
 
     useEffect(() => {
         const handleOnline = () => {
@@ -20,31 +42,10 @@ export const useProgressSync = (interviewId, initialTasks = []) => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [syncQueue]);
+    }, [flushQueue]);
 
-    // Load offline queue from localStorage
-    useEffect(() => {
-        const savedQueue = localStorage.getItem(`syncQueue_${interviewId}`);
-        if (savedQueue) {
-            try {
-                setSyncQueue(JSON.parse(savedQueue));
-            } catch (e) {
-                console.error("Failed to parse offline sync queue");
-            }
-        }
-    }, [interviewId]);
 
-    const flushQueue = useCallback(async () => {
-        if (syncQueue.length === 0 || isOffline) return;
 
-        try {
-            await syncProgressApi(syncQueue);
-            setSyncQueue([]);
-            localStorage.removeItem(`syncQueue_${interviewId}`);
-        } catch (error) {
-            console.error("Failed to sync progress batch", error);
-        }
-    }, [syncQueue, isOffline, interviewId]);
 
     // Attempt to flush queue periodically if online
     useEffect(() => {

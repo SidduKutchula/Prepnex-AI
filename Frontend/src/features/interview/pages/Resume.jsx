@@ -1,12 +1,11 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { CheckCircle2, AlertTriangle, FileText, ChevronRight, UploadCloud } from 'lucide-react'
 import '../style/home.scss'
 
 const Resume = () => {
     // Mock Data for the ATS display
     const atsScore = 91;
-    const statusText = "Excellent ATS Compatibility";
+    
     
     return (
         <div className="home-dashboard">

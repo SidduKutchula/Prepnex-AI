@@ -21,7 +21,7 @@ api.interceptors.response.use(
             try {
                 const text = await error.response.data.text();
                 error.response.data = JSON.parse(text);
-            } catch (e) {
+            } catch {
                 // Ignore parse error
             }
         }

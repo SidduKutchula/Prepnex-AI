@@ -14,10 +14,11 @@ export function useRoadmapProgress(reportId) {
     const fetchController = useRef(null);
 
     useEffect(() => {
+        const controllers = abortControllers.current;
         return () => {
             isMounted.current = false;
             if (fetchController.current) fetchController.current.abort();
-            Object.values(abortControllers.current).forEach(controller => controller.abort());
+            Object.values(controllers).forEach(controller => controller.abort());
         };
     }, []);
 

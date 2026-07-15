@@ -12,10 +12,14 @@ export const useAutoSave = (userId) => {
     const [status, setStatus] = useState('idle'); // idle, saving, saved, error
     const [lastSavedTime, setLastSavedTime] = useState(null);
 
+    const userIdRef = useRef(userId);
+
     // Create a stable debounced save function for the cloud
+    // eslint-disable-next-line react-hooks/refs
     const debouncedSave = useRef(
         debounce(async (data) => {
-            if (!userId) return; // Wait until authenticated
+            const currentUserId = userIdRef.current;
+            if (!currentUserId) return; // Wait until authenticated
             setStatus('saving');
             try {
                 // Sync to cloud
@@ -28,6 +32,13 @@ export const useAutoSave = (userId) => {
             }
         }, 1500)
     ).current;
+
+    useEffect(() => {
+        userIdRef.current = userId;
+        if (!userId) {
+            debouncedSave.cancel();
+        }
+    }, [userId, debouncedSave]);
 
     const triggerSave = useCallback((data) => {
         if (!userId) return;
@@ -46,7 +57,7 @@ export const useAutoSave = (userId) => {
         const localData = localStorage.getItem(`autosave_${userId}`);
         let parsedLocal = null;
         if (localData) {
-            try { parsedLocal = JSON.parse(localData); } catch (e) {}
+            try { parsedLocal = JSON.parse(localData); } catch { /* ignore */ }
         }
 
         try {
@@ -56,7 +67,7 @@ export const useAutoSave = (userId) => {
                 // If local exists, it usually takes precedence on this device, but we can return cloud if local is empty
                 return parsedLocal || response.data.data;
             }
-        } catch (error) {}
+        } catch { /* ignore */ }
 
         return parsedLocal;
     }, [userId]);
@@ -66,7 +77,7 @@ export const useAutoSave = (userId) => {
         localStorage.removeItem(`autosave_${userId}`);
         try {
             await api.delete('/api/autosave');
-        } catch (error) {
+        } catch {
             console.error("Failed to clear cloud autosave");
         }
     }, [userId]);

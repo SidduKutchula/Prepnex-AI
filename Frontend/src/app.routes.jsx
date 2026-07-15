@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+ 
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router";
 import Protected from "./features/auth/components/Protected";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo, useCallback } from 'react'
+import React, { useState, useEffect, useRef, memo } from 'react'
 
 import { useInterview, useInterviewStream } from '../hooks/useInterview.js'
 import { useNavigate, useParams, useOutletContext } from 'react-router'
@@ -204,7 +204,7 @@ const RoadMapDay = memo(({ day, isCompleted, isActive, onToggleCompleted, comple
                 </div>
                 
                 <div className='roadmap-day__tasks-detailed'>
-                    {day.tasks.map((task, i) => {
+                    {day.tasks.map((task) => {
                         const taskId = task._id || task.title;
                         const isTaskCompleted = completedTaskIds.includes(taskId);
                         
@@ -671,7 +671,7 @@ import { useRoadmapProgress } from '../hooks/useRoadmapProgress';
 const Interview = () => {
     const [activeNav, setActiveNav] = useState('technical')
     const { setActiveTab } = useOutletContext()
-    const { report: baseReport, getReportById, loading, toggleTaskCompletion } = useInterview()
+    const { report: baseReport, getReportById, loading } = useInterview()
     const { interviewId } = useParams()
     const navigate = useNavigate()
     const { report: streamedReport } = useInterviewStream(interviewId)
@@ -683,7 +683,7 @@ const Interview = () => {
         }
     }, [activeNav, setActiveTab])
 
-    const { completedTaskIds, toggleTask, loading: progressLoading, refetch } = useRoadmapProgress(interviewId);
+    const { completedTaskIds, toggleTask } = useRoadmapProgress(interviewId);
 
     useEffect(() => {
         if (interviewId) {

@@ -53,7 +53,7 @@ class AIWorkerService extends EventEmitter {
                 
                 const atsStart = Date.now();
                 try {
-                    const atsData = await aiService.generateAtsAndGaps({ resume, jobDescription });
+                    const atsData = await aiService.generateAtsAndGaps({ resume, selfDescription, jobDescription });
                     timings.ats = ((Date.now() - atsStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 1 - ATS Generation complete in ${timings.ats} sec`);
 
@@ -100,7 +100,7 @@ class AIWorkerService extends EventEmitter {
 
                 const questionsStart = Date.now();
                 try {
-                    const questionsData = await aiService.generateQuestions({ resume, jobDescription });
+                    const questionsData = await aiService.generateQuestions({ resume, selfDescription, jobDescription });
                     timings.questions = ((Date.now() - questionsStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 2 - Questions Generation complete in ${timings.questions} sec`);
 
@@ -150,6 +150,7 @@ class AIWorkerService extends EventEmitter {
                 try {
                     const roadmapData = await aiService.generateRoadmap({ 
                         resume, 
+                        selfDescription,
                         jobDescription, 
                         remainingDays
                     });
@@ -218,7 +219,7 @@ class AIWorkerService extends EventEmitter {
 
                 const rewriteStart = Date.now();
                 try {
-                    const rewriteData = await aiService.generateResumeRewrite({ resume, jobDescription });
+                    const rewriteData = await aiService.generateResumeRewrite({ resume, selfDescription, jobDescription });
                     timings.rewrite = ((Date.now() - rewriteStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 4 - Resume Rewrite complete in ${timings.rewrite} sec`);
 
@@ -227,8 +228,7 @@ class AIWorkerService extends EventEmitter {
                         { _id: reportId },
                         {
                             $set: {
-                                tailoredResume: rewriteData.tailoredResume || "",
-                                coverLetter: rewriteData.coverLetter || "",
+                                rewrittenResumeHtml: rewriteData.rewrittenResumeHtml || "",
                                 'progress.rewriteGenerated': true
                             }
                         },

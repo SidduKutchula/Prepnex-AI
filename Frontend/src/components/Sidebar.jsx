@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth.js'
 import { useTheme } from '../hooks/useTheme.js'
@@ -42,7 +42,7 @@ const Sidebar = () => {
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
-                <div className="brand-logo" onClick={() => navigate('/dashboard')}>
+                <div className="brand-logo" onClick={() => navigate('/interview')}>
                     <BrainCircuit size={24} className="logo-icon" />
                     <span>Prepnex AI</span>
                 </div>
@@ -50,66 +50,42 @@ const Sidebar = () => {
 
             <nav className="sidebar-nav">
                 <button 
-                    className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}
-                    onClick={() => navigate('/dashboard')}
+                    className={`nav-item ${location.pathname === '/interview' || location.pathname === '/' ? 'active' : ''}`}
+                    onClick={() => navigate('/interview')}
                 >
                     <LayoutDashboard size={20} className="nav-icon" />
-                    <span>Career Command Center</span>
+                    <span>Interview Workspace</span>
                 </button>
 
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
+                <button 
+                    className={`nav-item ${location.pathname === '/resume' ? 'active' : ''}`}
+                    onClick={() => navigate('/resume')}
+                >
                     <FileCheck size={20} className="nav-icon" />
                     <span>Resume Intelligence</span>
                 </button>
 
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
-                    <Briefcase size={20} className="nav-icon" />
-                    <span>Job Intelligence</span>
-                </button>
-
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
-                    <PlayCircle size={20} className="nav-icon" />
-                    <span>AI Interview Workspace</span>
-                </button>
-
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
-                    <BrainCircuit size={20} className="nav-icon" />
-                    <span>AI Career Coach</span>
-                </button>
-
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
+                <button 
+                    className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
+                    onClick={() => navigate('/history')}
+                >
                     <FileBarChart size={20} className="nav-icon" />
-                    <span>Progress & Analytics</span>
+                    <span>Activity & Analytics</span>
                 </button>
 
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
+                <button 
+                    className={`nav-item ${location.pathname === '/history/compare' ? 'active' : ''}`}
+                    onClick={() => navigate('/history/compare')}
+                >
                     <History size={20} className="nav-icon" />
-                    <span>Resume Timeline</span>
-                </button>
-
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
-                    <History size={20} className="nav-icon" />
-                    <span>Interview Timeline</span>
-                </button>
-
-                <button className="nav-item" onClick={() => navigate('/dashboard')}>
-                    <Map size={20} className="nav-icon" />
-                    <span>Career History</span>
+                    <span>Compare Analyses</span>
                 </button>
             </nav>
 
             <div className="sidebar-footer">
-                <button className="nav-item" onClick={() => {}}>
-                    <Search size={20} className="nav-icon" />
-                    <span>Search</span>
-                </button>
-                <button className="nav-item" onClick={() => {}}>
-                    <Bell size={20} className="nav-icon" />
-                    <span>Notifications</span>
-                </button>
                 <button className="nav-item" onClick={toggleTheme}>
                     <SunMoon size={20} className="nav-icon" />
-                    <span>Theme Toggle</span>
+                    <span>Toggle {theme === 'dark' ? 'Light' : 'Dark'} Mode</span>
                 </button>
 
                 <div className="user-profile-section">
@@ -117,7 +93,7 @@ const Sidebar = () => {
                         <div className="user-avatar">
                             {initials}
                         </div>
-                        <span className="user-name">{user?.username || 'User'}</span>
+                        <span className="user-name">{user?.username || 'Candidate'}</span>
                     </div>
                     <button className="logout-btn" onClick={handleLogout} title="Sign Out">
                         <LogOut size={18} />

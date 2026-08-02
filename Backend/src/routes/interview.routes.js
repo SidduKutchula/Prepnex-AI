@@ -48,5 +48,6 @@ interviewRouter.put("/:interviewId/task/:taskId/toggle", authMiddleware.authUser
 interviewRouter.post("/sync-progress", authMiddleware.authUser, interviewController.syncProgressController)
 interviewRouter.get("/analytics/dashboard", authMiddleware.authUser, interviewController.getDashboardAnalyticsController)
 interviewRouter.delete("/:interviewId/roadmap/reset", authMiddleware.authUser, interviewController.resetRoadmapProgressController)
+interviewRouter.post("/:interviewId/enhance-resume", authMiddleware.authUser, interviewController.enhanceResumeController)
 
 module.exports = interviewRouter

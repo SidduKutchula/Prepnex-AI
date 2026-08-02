@@ -1,12 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
 import { debounce } from 'lodash';
-
-// Using the same axios instance config pattern
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '',
-    withCredentials: true,
-});
+import { api } from '../../auth/services/auth.api';
 
 export const useAutoSave = (userId) => {
     const [status, setStatus] = useState('idle'); // idle, saving, saved, error

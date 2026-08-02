@@ -2,11 +2,14 @@ import React from 'react';
 import { MoreVertical, Download, Play, BarChart2, Star, Trash2 } from 'lucide-react';
 import { useHistory } from '../hooks/useHistory';
 import { useNavigate } from 'react-router';
+import { useResumePdf } from '../../resume/hooks/useResumePdf';
+import { parseResumeHtml } from '../../resume/utils/parseResumeHtml';
 import '../style/history.scss';
 
 const HistoryCard = ({ data }) => {
     const { toggleFavorite, deleteHistory } = useHistory();
     const navigate = useNavigate();
+    const { generatePdf, isGenerating } = useResumePdf();
 
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -92,8 +95,11 @@ const HistoryCard = ({ data }) => {
                             <button onClick={() => navigate(`/preparation?id=${data._id}`)}>
                                 <Play size={16} /> Continue Prep
                             </button>
-                            <button onClick={() => {}}>
-                                <Download size={16} /> Download PDF
+                            <button onClick={async () => {
+                                const parsed = parseResumeHtml(data.rewrittenResumeHtml, data);
+                                await generatePdf(parsed, 'classic');
+                            }}>
+                                <Download size={16} /> {isGenerating ? "Generating..." : "Download ATS Resume"}
                             </button>
                             <button className="delete-action" onClick={() => deleteHistory(data._id)}>
                                 <Trash2 size={16} /> Delete

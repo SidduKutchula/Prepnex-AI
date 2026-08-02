@@ -220,13 +220,14 @@ FINAL GOAL
 ====================================================
 The user should receive interview guidance comparable to what an experienced engineering manager, senior recruiter, and technical mentor would provide.`;
 
-async function generateAtsAndGaps({ resume, jobDescription }) {
-    console.log(`[2] Starting ATS Analysis: resumeLength=${resume ? resume.length : 0}, jobDescriptionLength=${jobDescription ? jobDescription.length : 0}`);
-    if (!resume || !jobDescription) throw new Error("Missing resume or jobDescription for generateAtsAndGaps");
-    const prompt = `${MASTER_PROMPT}\n\nTask: Analyze the candidate's resume against the Target Job Description to calculate the ATS Score, Match Score, identify Skill Gaps, and provide Recruiter Feedback.
+async function generateAtsAndGaps({ resume, selfDescription, jobDescription }) {
+    const candidateProfile = (resume || selfDescription || "").trim();
+    console.log(`[2] Starting ATS Analysis: profileLength=${candidateProfile.length}, jobDescriptionLength=${jobDescription ? jobDescription.length : 0}`);
+    if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateAtsAndGaps");
+    const prompt = `${MASTER_PROMPT}\n\nTask: Analyze the candidate's profile against the Target Job Description to calculate the ATS Score, Match Score, identify Skill Gaps, and provide Recruiter Feedback.
 CRITICAL FOR SPEED: Limit the Skill Gaps array to a MAXIMUM of 4 gaps. Keep feedback very concise.
 
-Original Resume: ${resume}
+Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
 
 Perform a rigorous JOB DESCRIPTION ANALYSIS and RESUME ANALYSIS.
@@ -248,12 +249,13 @@ Perform a rigorous JOB DESCRIPTION ANALYSIS and RESUME ANALYSIS.
     return res;
 }
 
-async function generateQuestions({ resume, jobDescription }) {
-    if (!resume || !jobDescription) throw new Error("Missing resume or jobDescription for generateQuestions");
-    const prompt = `${MASTER_PROMPT}\n\nTask: Generate interview questions tailored specifically for this candidate based on their resume and the Target Job Description.
+async function generateQuestions({ resume, selfDescription, jobDescription }) {
+    const candidateProfile = (resume || selfDescription || "").trim();
+    if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateQuestions");
+    const prompt = `${MASTER_PROMPT}\n\nTask: Generate interview questions tailored specifically for this candidate based on their profile and the Target Job Description.
 CRITICAL FOR SPEED: Generate EXACTLY 3 technical questions and EXACTLY 2 behavioral questions. Keep the answers extremely concise.
 
-Original Resume: ${resume}
+Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
 
 1. Generate high-quality, highly specific technical questions that bridge the gap between the candidate's actual experience and the company's stated requirements.
@@ -271,11 +273,12 @@ Target Job Description: ${jobDescription}
     }), 8, "Questions");
 }
 
-async function generateRoadmap({ resume, jobDescription, remainingDays, atsScore, skillGaps }) {
-    if (!resume || !jobDescription) throw new Error("Missing resume or jobDescription for generateRoadmap");
+async function generateRoadmap({ resume, selfDescription, jobDescription, remainingDays, atsScore, skillGaps }) {
+    const candidateProfile = (resume || selfDescription || "").trim();
+    if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateRoadmap");
     const prompt = `You are an Expert Technical Mentor. Generate a personalized interview preparation strategy.
 
-Original Resume: ${resume}
+Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
 Days Remaining Until Interview: ${remainingDays || 7}
 Current ATS Score: ${atsScore || "Unknown"}
@@ -298,11 +301,11 @@ CRITICAL RULES FOR SPEED AND ACCURACY:
 }
 
 async function generateResumeRewrite({ resume, selfDescription, jobDescription }) {
-    if (!resume || !jobDescription) throw new Error("Missing resume or jobDescription for generateResumeRewrite");
+    const candidateProfile = (resume || selfDescription || "").trim();
+    if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateResumeRewrite");
     const prompt = `${MASTER_PROMPT}\n\nTask: Completely rewrite the candidate's resume to maximize ATS compatibility (Target: 95+) for the specific Job Description, while strictly adhering to a ONE PAGE limit.
 
-Original Resume: ${resume}
-Candidate's Self Description: ${selfDescription || ""}
+Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
 
 For the 'rewrittenResumeHtml' field, follow these STRICT RULES:

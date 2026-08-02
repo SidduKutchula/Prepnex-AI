@@ -8,6 +8,7 @@
 @use "./features/interview/style/intro.scss";
 @use "./features/interview/style/home.scss";
 @use "./features/interview/style/interview.scss";
+@use "./features/resume/style/resume.scss";
 
 :root {
   --bg-base: var(--bg-page);

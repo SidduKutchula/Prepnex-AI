@@ -160,13 +160,14 @@ export const useInterviewStream = (reportId) => {
         throw new Error("useInterviewStream must be used within an InterviewProvider")
     }
 
-    const { setReport, report } = context
+    const { setReport, report, getReportById } = context
 
     useEffect(() => {
         if (!reportId) return;
         
+        const token = sessionStorage.getItem('interview_ai_token') || '';
         const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const eventSource = new EventSource(`${baseURL}/api/interview/stream/${reportId}?t=${Date.now()}`, { withCredentials: true })
+        const eventSource = new EventSource(`${baseURL}/api/interview/stream/${reportId}?token=${encodeURIComponent(token)}&t=${Date.now()}`, { withCredentials: true })
 
         eventSource.addEventListener("initial", (e) => {
             const payload = JSON.parse(e.data)
@@ -191,9 +192,6 @@ export const useInterviewStream = (reportId) => {
                     updated.progress = { ...updated.progress, atsGenerated: payload.status === 'completed' };
                 } else if (payload.stage === 'questions') {
                     updated.progress = { ...updated.progress, questionsGenerated: payload.status === 'completed' };
-                    // We must refetch the report completely if questions/roadmap completed because the stream payload only says 'completed'
-                    // For now, this is enough to update the UI progress ticks. The data itself will be fetched if they reload, 
-                    // or we could dispatch a GET /report/:id when questions complete to grab the latest content cleanly.
                 } else if (payload.stage === 'roadmap') {
                     updated.progress = { ...updated.progress, roadmapGenerated: payload.status === 'completed' };
                 } else if (payload.stage === 'rewrite') {
@@ -202,26 +200,27 @@ export const useInterviewStream = (reportId) => {
                 
                 if (payload.stage === 'complete') {
                     updated.status = payload.status;
-                    // Trigger a clean refetch to get all the data
-                    setTimeout(async () => {
-                        try {
-                            const res = await getInterviewReportById(reportId);
-                            setReport(res.interviewReport);
-                        } catch (e) {
-                            console.error(e);
-                        }
-                    }, 500);
                 }
                 return updated;
             });
+
+            if (payload.stage === 'complete') {
+                setTimeout(async () => {
+                    try {
+                        const res = await getReportById(reportId);
+                        if (res.success) setReport(res.data);
+                    } catch (err) {
+                        console.error("Refetch error after SSE complete:", err);
+                    }
+                }, 400);
+            }
         })
 
         eventSource.addEventListener("error", (e) => {
-            // Prevent spamming the console on normal disconnects or stream ends
             if (e.eventPhase === EventSource.CLOSED || eventSource.readyState === EventSource.CLOSED) {
                 eventSource.close()
             } else {
-                console.warn("SSE Stream disconnected, attempting to reconnect...")
+                console.warn("SSE Stream disconnected, closing stream")
                 eventSource.close()
             }
         })

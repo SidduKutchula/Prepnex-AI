@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef, memo } from 'react'
 
 import { useInterview, useInterviewStream } from '../hooks/useInterview.js'
 import { useNavigate, useParams, useOutletContext } from 'react-router'
+import { ResumeProvider } from '../../resume/resume.context'
+import { ResumeToolbar } from '../../resume/components/ResumeToolbar'
+import { ResumePreview } from '../../resume/components/ResumePreview'
+import { useResumePdf } from '../../resume/hooks/useResumePdf'
+import { parseResumeHtml } from '../../resume/utils/parseResumeHtml'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 import { AnimatedCounter } from '../../../components/AnimatedCounter.jsx'
@@ -334,12 +339,8 @@ const SkillMasteryCard = memo(({ skill, isCompleted, onToggleCompleted }) => {
 
 const ResumePreviewSection = ({ report }) => {
     return (
-        <div className="resume-preview-panel animate-fade-in">
-            <div className="preview-header">
-                <h2>Tailored ATS Resume</h2>
-            </div>
-            
-            <div className="ats-dashboard">
+        <div className="resume-preview-panel animate-fade-in" style={{ width: '100%' }}>
+            <div className="ats-dashboard" style={{ marginBottom: '24px' }}>
                 <div className="ats-metrics-row">
                     <div className="ats-score-card">
                         <div className="ats-score-circle">
@@ -395,17 +396,14 @@ const ResumePreviewSection = ({ report }) => {
                 </div>
             </div>
 
-            {report?.rewrittenResumeHtml && (
-                <div className="resume-sheet-container mt-4">
-                    <div className="resume-sheet">
-                        <div 
-                            className="resume-html-preview" 
-                            style={{ background: '#fff', padding: '40px', borderRadius: '12px', color: '#333' }}
-                            dangerouslySetInnerHTML={{ __html: report.rewrittenResumeHtml }}
-                        />
+            <ResumeProvider initialHtml={report?.rewrittenResumeHtml} reportData={report}>
+                <div className="resume-builder-workspace">
+                    <ResumeToolbar atsScore={report?.atsScore || 95} reportId={report?._id} />
+                    <div className="builder-single-preview" style={{ display: 'flex', justifyContent: 'center', margin: '24px auto', maxWidth: '850px' }}>
+                        <ResumePreview />
                     </div>
                 </div>
-            )}
+            </ResumeProvider>
         </div>
     )
 }
@@ -691,50 +689,12 @@ const Interview = () => {
         }
     }, [interviewId, getReportById])
 
-    const handleDownloadReport = () => {
+    const { generatePdf, isGenerating: isDownloadingPdf } = useResumePdf()
+
+    const handleDownloadReport = async () => {
         if (!report) return;
-
-        let content = `TAILORED ATS RESUME REPORT\n`;
-        content += `==========================\n\n`;
-
-        content += `ATS Match Score: ${report.atsScore || 0}%\n`;
-        content += `Based on keyword & skill alignment\n\n`;
-
-        content += `--- Improvement Summary ---\n`;
-        content += `${report.improvementSummary || "Optimized structural layout and semantics."}\n\n`;
-
-        content += `--- Recruiter Feedback ---\n`;
-        content += `${report.recruiterFeedback || "Resume rewritten for optimal ATS parsing."}\n\n`;
-
-        content += `--- Keywords Added ---\n`;
-        if (report.addedKeywords && report.addedKeywords.length > 0) {
-            report.addedKeywords.forEach(kw => {
-                content += `- ${kw}\n`;
-            });
-        } else {
-            content += `No specific keywords added.\n`;
-        }
-        content += `\n`;
-
-        content += `--- Missing Keywords ---\n`;
-        if (report.missingKeywords && report.missingKeywords.length > 0) {
-            report.missingKeywords.forEach(kw => {
-                content += `- ${kw}\n`;
-            });
-        } else {
-            content += `No missing keywords!\n`;
-        }
-        content += `\n`;
-
-        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `ATS_Resume_Report.txt`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        const parsedData = parseResumeHtml(report.rewrittenResumeHtml, report);
+        await generatePdf(parsedData, 'classic');
     }
 
     if (loading && !report) {
@@ -836,6 +796,21 @@ const Interview = () => {
                 
 
 
+                {report.status === 'failed' && (
+                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--error)', padding: '16px', borderRadius: '12px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <AlertTriangle size={24} color="var(--error)" style={{ flexShrink: 0 }} />
+                            <div>
+                                <h4 style={{ margin: '0 0 4px 0', color: 'var(--error)', fontSize: '1rem' }}>Strategy Generation Failed</h4>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{report.failureReason || 'An error occurred during AI report generation. Please try starting a new analysis.'}</p>
+                            </div>
+                        </div>
+                        <button className="primary-btn" onClick={() => navigate('/interview')} style={{ margin: 0 }}>
+                            New Analysis
+                        </button>
+                    </div>
+                )}
+
                 {report.status === 'partial' && (
                     <div style={{ background: 'rgba(255, 170, 0, 0.1)', border: '1px solid var(--warning)', padding: '8px 12px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <AlertTriangle size={18} color="var(--warning)" style={{ flexShrink: 0 }} />
@@ -871,11 +846,21 @@ const Interview = () => {
                             <motion.button
                                 {...buttonHoverTap}
                                 onClick={handleDownloadReport}
-                                className='button primary-button download-btn'
-                                style={{ width: '100%', justifyContent: 'center' }}
+                                disabled={isDownloadingPdf}
+                                className='button primary-button download-btn pulse-glow'
+                                style={{ width: '100%', justifyContent: 'center', gap: '8px' }}
                             >
-                                <Download size={18} />
-                                <span>Download Report</span>
+                                {isDownloadingPdf ? (
+                                    <>
+                                        <LoaderCircle size={18} className="animate-spin" />
+                                        <span>Generating PDF...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download size={18} />
+                                        <span>Download ATS Resume</span>
+                                    </>
+                                )}
                             </motion.button>
                         </div>
                     </nav>

@@ -6,7 +6,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('interview_ai_token');
+    const token = sessionStorage.getItem('interview_ai_token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

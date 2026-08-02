@@ -24,24 +24,29 @@ export const useAuth = () => {
     const handleLogout = async () => {
         setLoading(true)
         try {
-            // Aggressively clear all draft keys from localStorage
-            for (let i = localStorage.length - 1; i >= 0; i--) {
-                const key = localStorage.key(i);
-                if (key && (key.startsWith('autosave_') || key.startsWith('syncQueue_') || key.includes('job'))) {
-                    localStorage.removeItem(key);
-                }
-            }
+            // Delete cloud autosave draft while token is still active
             try {
                 const { api } = await import('../services/auth.api');
                 await api.delete('/api/autosave');
-            } catch (e) { } // ignore if delete fails
+            } catch (e) {
+                // Ignore failure if network error
+            }
 
+            // Perform backend token invalidation/logout
             await logout()
-            setUser(null)
         } catch {
-            // Ignore error on logout
+            // Ignore error on logout call
         } finally {
-            setLoading(false)
+            // Clear all local & session storage, preserving only user UI theme preference
+            const savedTheme = localStorage.getItem('theme');
+            localStorage.clear();
+            if (savedTheme) {
+                localStorage.setItem('theme', savedTheme);
+            }
+            sessionStorage.clear();
+
+            setUser(null);
+            setLoading(false);
         }
     }
 

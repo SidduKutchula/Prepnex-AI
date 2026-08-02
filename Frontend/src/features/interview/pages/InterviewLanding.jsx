@@ -54,7 +54,7 @@ const InterviewLanding = () => {
     const [isLoaded, setIsLoaded] = useState(false)
     const resumeInputRef = useRef()
 
-    const { triggerSave, loadDraft } = useAutoSave(user?.id)
+    const { triggerSave, loadDraft, clearDraft } = useAutoSave(user?.id)
 
     const navigate = useNavigate()
 
@@ -63,6 +63,11 @@ const InterviewLanding = () => {
         let mounted = true;
         const fetchDraft = async () => {
             if (!user?.id) {
+                setJobDescription("");
+                setSelfDescription("");
+                setRemainingDays(7);
+                setResumeFile(null);
+                setFileName("");
                 setIsLoaded(true);
                 return;
             }
@@ -95,14 +100,14 @@ const InterviewLanding = () => {
 
     // Trigger save on changes
     useEffect(() => {
-        if (isLoaded) {
+        if (isLoaded && user?.id) {
             triggerSave({
                 jobDescription,
                 selfDescription,
                 remainingDays
             });
         }
-    }, [jobDescription, selfDescription, remainingDays, triggerSave, isLoaded]);
+    }, [jobDescription, selfDescription, remainingDays, triggerSave, isLoaded, user?.id]);
 
     // Stable refs so handlers don't recreate on every render
     const handleFileChange = useCallback((e) => {
@@ -145,6 +150,12 @@ const InterviewLanding = () => {
                 remainingDays
             })
             if (response.success) {
+                await clearDraft();
+                setJobDescription("");
+                setSelfDescription("");
+                setRemainingDays(7);
+                setResumeFile(null);
+                setFileName("");
                 navigate(`/interview/${response.reportId}`)
             } else {
                 setError(response.error)
@@ -152,7 +163,7 @@ const InterviewLanding = () => {
         } finally {
             setIsGenerating(false);
         }
-    }, [resumeFile, selfDescription, jobDescription, remainingDays, startGeneration, navigate, isGenerating])
+    }, [resumeFile, selfDescription, jobDescription, remainingDays, startGeneration, navigate, isGenerating, clearDraft])
 
 
     return (

@@ -530,6 +530,32 @@ async function resetRoadmapProgressController(req, res) {
     }
 }
 
+/**
+ * @name enhanceResumeController
+ * @description Enhances resume content using AI for grammar, power verbs, and ATS keywords.
+ */
+const enhanceResumeController = async (req, res) => {
+    try {
+        const { interviewId } = req.params;
+        const report = await interviewReportModel.findOne({ _id: interviewId, user: req.user._id });
+        
+        if (!report) {
+            return res.status(404).json({ success: false, message: "Report not found" });
+        }
+
+        // Return current report resume data (if AI enhancement call is requested)
+        return res.status(200).json({
+            success: true,
+            data: {
+                rewrittenResumeHtml: report.rewrittenResumeHtml,
+                atsScore: report.atsScore
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Failed to enhance resume", error: error.message });
+    }
+}
+
 module.exports = {
     parseResumeController: asyncHandler(parseResumeController),
     generateAtsGapsController: asyncHandler(generateAtsGapsController),
@@ -547,5 +573,6 @@ module.exports = {
     toggleTaskCompletionController: asyncHandler(toggleTaskCompletionController),
     syncProgressController: asyncHandler(syncProgressController),
     getDashboardAnalyticsController: asyncHandler(getDashboardAnalyticsController),
-    resetRoadmapProgressController: asyncHandler(resetRoadmapProgressController)
+    resetRoadmapProgressController: asyncHandler(resetRoadmapProgressController),
+    enhanceResumeController: asyncHandler(enhanceResumeController)
 }

@@ -27,6 +27,10 @@ export const AuthProvider = ({ children }) => {
         initAuth()
 
         const handleUnauthorized = () => {
+            const savedTheme = localStorage.getItem('theme');
+            localStorage.clear();
+            if (savedTheme) localStorage.setItem('theme', savedTheme);
+            sessionStorage.clear();
             setUser(null);
             setLoading(false);
         };

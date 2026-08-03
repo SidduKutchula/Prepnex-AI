@@ -309,21 +309,25 @@ Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
 
 For the 'rewrittenResumeHtml' field, follow these STRICT RULES:
-1. INCLUDE ALL CANDIDATE CONTENT & SECTIONS (MANDATORY):
-- INCLUDE ALL Projects, Experiences, Education, Certifications, Achievements, Technical Skills, Professional Summary, and Contact Information present in the candidate's uploaded resume/profile.
-- DO NOT drop or omit any genuine project, work experience, degree, or certification provided by the candidate.
-- Preserve every genuine entry, optimizing the text formatting, grammar, and ATS action verbs.
+1. MANDATORY SECTION ORDER:
+- HEADER (Centered name, title, contact details)
+- PROFESSIONAL SUMMARY (4-5 lines recruiter-focused summary. NEVER use meta-words like "candidate", "mapping JD", "generated", "synthesized")
+- TECHNICAL PROFICIENCIES (Categories: Languages, Frontend, Backend & DB, AI / ML Integration, Cloud & DevOps, CS Fundamentals)
+- PROJECTS (Project name, tech stack, duration right-aligned, 3-4 bullet points per project)
+- WORK EXPERIENCE (Role, company, duration right-aligned, 3-4 bullet points per position)
+- ACHIEVEMENTS (Bullet points for hackathons, contest ranks, problem solving counts)
+- CERTIFICATIONS (Name on left, organization & date on right)
+- EDUCATION (Degree, institution, dates right-aligned, CGPA)
 
-2. ONE PAGE FIT & DENSITY OPTIMIZATION (MANDATORY):
+2. ONE PAGE FIT & DENSITY OPTIMIZATION:
 - Format and optimize all sections into a compact, high-density 1-page single-column layout that fits on 1 A4 page when rendered to PDF.
 - Use tight vertical margins, compact line heights (1.15 to 1.2), concise bullet points, and side-by-side headers/dates to maintain 1-page presentation.
 - Rewrite bullets into concise, achievement-driven statements with measurable outcomes and powerful action verbs.
-- REORDER skills so that Job Description matching skills appear first.
 - NEVER fabricate experience, companies, projects, or metrics.
 
-3. CLEAN HTML & STRUCTURED HEADINGS:
+3. CLEAN HTML & RECRUITER-READY TONE:
 - Use clean semantic HTML tags (h1, h2, h3, p, ul, li).
-- Clear ATS section headings: "PROFESSIONAL SUMMARY", "TECHNICAL SKILLS", "WORK EXPERIENCE", "PROJECTS", "EDUCATION", "CERTIFICATIONS", "ACHIEVEMENTS".
+- Section headings: "PROFESSIONAL SUMMARY", "TECHNICAL PROFICIENCIES", "PROJECTS", "WORK EXPERIENCE", "ACHIEVEMENTS", "CERTIFICATIONS", "EDUCATION".
 - Provide FULL HTML with inline CSS.
 
 Output strict JSON matching the schema.`;

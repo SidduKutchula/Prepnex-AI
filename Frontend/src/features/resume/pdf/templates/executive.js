@@ -115,6 +115,49 @@ export function renderExecutiveTemplate(resumeData, pdfDoc = null) {
         y += sectionGap;
     }
 
+    // --- PROJECTS ---
+    if (resumeData.projects && resumeData.projects.length > 0) {
+        drawSectionHeader('Key Initiatives & Projects');
+
+        resumeData.projects.forEach(proj => {
+            checkNewPage(28);
+
+            doc.setFont('times', 'bold');
+            doc.setFontSize(fontSize + 0.5);
+            doc.setTextColor(15, 23, 42);
+            doc.text(proj.name || '', margin, y);
+
+            if (proj.tech) {
+                doc.setFont('times', 'italic');
+                doc.setFontSize(fontSize - 0.5);
+                doc.setTextColor(100, 116, 139);
+                doc.text(proj.tech, margin + contentWidth, y, { align: 'right' });
+            }
+
+            y += fontSize * 1.2;
+
+            if (proj.bullets && proj.bullets.length > 0) {
+                doc.setFont('times', 'normal');
+                doc.setFontSize(fontSize);
+                doc.setTextColor(51, 65, 85);
+
+                proj.bullets.forEach(bullet => {
+                    const splitBullet = doc.splitTextToSize(`◆  ${bullet}`, contentWidth - 12);
+                    splitBullet.forEach((bLine, i) => {
+                        checkNewPage(fontSize * lineHeight);
+                        const xOffset = i === 0 ? margin : margin + 12;
+                        doc.text(bLine, xOffset, y);
+                        y += fontSize * lineHeight;
+                    });
+                });
+            }
+
+            y += itemGap;
+        });
+
+        y += sectionGap;
+    }
+
     // --- PROFESSIONAL EXPERIENCE ---
     if (resumeData.experience && resumeData.experience.length > 0) {
         drawSectionHeader('Professional Experience');
@@ -150,49 +193,6 @@ export function renderExecutiveTemplate(resumeData, pdfDoc = null) {
                 doc.setTextColor(51, 65, 85);
 
                 exp.bullets.forEach(bullet => {
-                    const splitBullet = doc.splitTextToSize(`◆  ${bullet}`, contentWidth - 12);
-                    splitBullet.forEach((bLine, i) => {
-                        checkNewPage(fontSize * lineHeight);
-                        const xOffset = i === 0 ? margin : margin + 12;
-                        doc.text(bLine, xOffset, y);
-                        y += fontSize * lineHeight;
-                    });
-                });
-            }
-
-            y += itemGap;
-        });
-
-        y += sectionGap;
-    }
-
-    // --- PROJECTS ---
-    if (resumeData.projects && resumeData.projects.length > 0) {
-        drawSectionHeader('Key Initiatives & Projects');
-
-        resumeData.projects.forEach(proj => {
-            checkNewPage(28);
-
-            doc.setFont('times', 'bold');
-            doc.setFontSize(fontSize + 0.5);
-            doc.setTextColor(15, 23, 42);
-            doc.text(proj.name || '', margin, y);
-
-            if (proj.tech) {
-                doc.setFont('times', 'italic');
-                doc.setFontSize(fontSize - 0.5);
-                doc.setTextColor(100, 116, 139);
-                doc.text(proj.tech, margin + contentWidth, y, { align: 'right' });
-            }
-
-            y += fontSize * 1.2;
-
-            if (proj.bullets && proj.bullets.length > 0) {
-                doc.setFont('times', 'normal');
-                doc.setFontSize(fontSize);
-                doc.setTextColor(51, 65, 85);
-
-                proj.bullets.forEach(bullet => {
                     const splitBullet = doc.splitTextToSize(`◆  ${bullet}`, contentWidth - 12);
                     splitBullet.forEach((bLine, i) => {
                         checkNewPage(fontSize * lineHeight);

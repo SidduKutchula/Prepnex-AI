@@ -117,60 +117,7 @@ export function renderModernTemplate(resumeData, pdfDoc = null) {
             y += fontSize * lineHeight;
         });
         y += sectionGap;
-    }
-
-    // --- WORK EXPERIENCE ---
-    if (resumeData.experience && resumeData.experience.length > 0) {
-        drawSectionHeader('Professional Experience');
-
-        resumeData.experience.forEach(exp => {
-            checkNewPage(35);
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(fontSize + 0.5);
-            doc.setTextColor(15, 23, 42);
-            doc.text(exp.role || '', margin, y);
-
-            if (exp.dates) {
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(fontSize - 0.5);
-                doc.setTextColor(37, 99, 235);
-                doc.text(exp.dates, margin + contentWidth, y, { align: 'right' });
-            }
-
-            y += fontSize * 1.2;
-
-            if (exp.company) {
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(fontSize);
-                doc.setTextColor(71, 85, 105);
-                doc.text(exp.company + (exp.location ? ` — ${exp.location}` : ''), margin, y);
-                y += fontSize * 1.2;
-            }
-
-            if (exp.bullets && exp.bullets.length > 0) {
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(fontSize);
-                doc.setTextColor(51, 65, 85);
-
-                exp.bullets.forEach(bullet => {
-                    const splitBullet = doc.splitTextToSize(`▪  ${bullet}`, contentWidth - 12);
-                    splitBullet.forEach((bLine, i) => {
-                        checkNewPage(fontSize * lineHeight);
-                        const xOffset = i === 0 ? margin : margin + 12;
-                        doc.text(bLine, xOffset, y);
-                        y += fontSize * lineHeight;
-                    });
-                });
-            }
-
-            y += itemGap;
-        });
-
-        y += sectionGap;
-    }
-
-    // --- PROJECTS ---
+    }    // --- PROJECTS ---
     if (resumeData.projects && resumeData.projects.length > 0) {
         drawSectionHeader('Featured Projects');
 
@@ -225,33 +172,49 @@ export function renderModernTemplate(resumeData, pdfDoc = null) {
         y += sectionGap;
     }
 
-    // --- EDUCATION ---
-    if (resumeData.education && resumeData.education.length > 0) {
-        drawSectionHeader('Education & Qualifications');
+    // --- WORK EXPERIENCE ---
+    if (resumeData.experience && resumeData.experience.length > 0) {
+        drawSectionHeader('Professional Experience');
 
-        resumeData.education.forEach(edu => {
-            checkNewPage(25);
+        resumeData.experience.forEach(exp => {
+            checkNewPage(35);
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(fontSize + 0.5);
             doc.setTextColor(15, 23, 42);
-            doc.text(edu.degree || '', margin, y);
+            doc.text(exp.role || '', margin, y);
 
-            if (edu.dates) {
-                doc.setFont('helvetica', 'normal');
+            if (exp.dates) {
+                doc.setFont('helvetica', 'bold');
                 doc.setFontSize(fontSize - 0.5);
-                doc.setTextColor(100, 116, 139);
-                doc.text(edu.dates, margin + contentWidth, y, { align: 'right' });
+                doc.setTextColor(37, 99, 235);
+                doc.text(exp.dates, margin + contentWidth, y, { align: 'right' });
             }
 
             y += fontSize * 1.2;
 
-            if (edu.institution) {
+            if (exp.company) {
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(fontSize);
                 doc.setTextColor(71, 85, 105);
-                doc.text(edu.institution + (edu.gpa ? ` (GPA: ${edu.gpa})` : ''), margin, y);
+                doc.text(exp.company + (exp.location ? ` — ${exp.location}` : ''), margin, y);
                 y += fontSize * 1.2;
+            }
+
+            if (exp.bullets && exp.bullets.length > 0) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(fontSize);
+                doc.setTextColor(51, 65, 85);
+
+                exp.bullets.forEach(bullet => {
+                    const splitBullet = doc.splitTextToSize(`▪  ${bullet}`, contentWidth - 12);
+                    splitBullet.forEach((bLine, i) => {
+                        checkNewPage(fontSize * lineHeight);
+                        const xOffset = i === 0 ? margin : margin + 12;
+                        doc.text(bLine, xOffset, y);
+                        y += fontSize * lineHeight;
+                    });
+                });
             }
 
             y += itemGap;
@@ -295,6 +258,41 @@ export function renderModernTemplate(resumeData, pdfDoc = null) {
                 y += fontSize * lineHeight;
             });
         });
+        y += sectionGap;
+    }
+
+    // --- EDUCATION ---
+    if (resumeData.education && resumeData.education.length > 0) {
+        drawSectionHeader('Education & Qualifications');
+
+        resumeData.education.forEach(edu => {
+            checkNewPage(25);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(fontSize + 0.5);
+            doc.setTextColor(15, 23, 42);
+            doc.text(edu.degree || '', margin, y);
+
+            if (edu.dates) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(fontSize - 0.5);
+                doc.setTextColor(100, 116, 139);
+                doc.text(edu.dates, margin + contentWidth, y, { align: 'right' });
+            }
+
+            y += fontSize * 1.2;
+
+            if (edu.institution) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(fontSize);
+                doc.setTextColor(71, 85, 105);
+                doc.text(edu.institution + (edu.gpa ? ` (GPA: ${edu.gpa})` : ''), margin, y);
+                y += fontSize * 1.2;
+            }
+
+            y += itemGap;
+        });
+
         y += sectionGap;
     }
 

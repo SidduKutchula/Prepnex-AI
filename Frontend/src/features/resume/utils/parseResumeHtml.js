@@ -22,22 +22,120 @@
  * @property {string[]} achievements
  */
 
-const EMPTY_RESUME = {
-    name: 'Candidate Name',
-    title: 'Target Job Role',
-    phone: '',
-    email: '',
-    linkedin: '',
-    github: '',
-    portfolio: '',
-    summary: '',
-    skills: [],
-    projects: [],
-    experience: [],
-    achievements: [],
-    certifications: [],
-    education: []
+export const DEFAULT_RESUME = {
+    name: 'SIDDU KUTCHULA',
+    title: 'Software Engineer',
+    phone: '+91 6305198912',
+    email: 'Siddukuchula62@gmail.com',
+    linkedin: 'linkedin.com/in/siddu-kutchula',
+    github: 'github.com/SidduKutchula',
+    portfolio: 'sidmonai.app',
+    summary: 'Full Stack Developer specializing in MERN Stack and AI-powered applications with hands-on experience building scalable web platforms, RESTful APIs, authentication systems, and modern responsive interfaces. Strong understanding of software engineering principles, cloud deployment, database design, and performance optimization. Passionate about solving real-world problems through clean architecture, efficient code, and user-centric product development.',
+    skills: [
+        'Languages: JavaScript (ES6+), TypeScript, Python, Java, SQL',
+        'Frontend: React.js, HTML5, CSS3, Tailwind CSS, Bootstrap, Redux, Responsive Design',
+        'Backend & DB: Node.js, Express.js, REST APIs, JWT Authentication, MongoDB, PostgreSQL, Firebase',
+        'AI / ML Integration: Python, Scikit-learn, Pandas, NumPy, TensorFlow, Gemini API, OpenAI API',
+        'Cloud & DevOps: Git, GitHub, Docker, AWS, Postman, VS Code, Figma',
+        'CS Fundamentals: DSA, OOP, DBMS, Operating Systems, Computer Networks, SDLC, Agile, System Design'
+    ],
+    projects: [
+        {
+            name: 'Prepnex AI — AI Interview & Career Preparation Platform',
+            dates: 'Mar 2026 – Present',
+            tech: 'React.js, Node.js, Express.js, MongoDB, Gemini API, JWT, Tailwind CSS',
+            sourceUrl: 'https://github.com/SidduKutchula/Prepnex-AI',
+            demoUrl: 'https://sidmonai.app',
+            bullets: [
+                'Built an AI-powered interview preparation platform that analyzes resumes and job descriptions to generate ATS scores, interview questions, and personalized improvement suggestions.',
+                'Developed secure JWT authentication with Google OAuth integration and role-based access control.',
+                'Implemented responsive dashboards, resume parsing, AI resume rewriting, progress tracking, and interview analytics.',
+                'Optimized application performance through reusable React components, API caching strategies, and clean backend architecture.'
+            ]
+        },
+        {
+            name: 'AI-Based Project Review Automation System',
+            dates: 'Jul 2025 – Nov 2025',
+            tech: 'MongoDB, Express.js, React.js, Node.js, JWT, Chart.js',
+            sourceUrl: 'https://github.com/SidduKutchula',
+            demoUrl: 'https://sidmonai.app',
+            bullets: [
+                'Developed a comprehensive AI-based project evaluation platform supporting students, mentors, and administrators.',
+                'Built secure authentication and role-based dashboards with project review workflows.',
+                'Integrated Chart.js analytics dashboards to visualize project performance and review statistics.',
+                'Reduced manual evaluation effort by automating report generation and project assessment workflows.'
+            ]
+        },
+        {
+            name: 'Student Project Management Platform',
+            dates: 'Jan 2025 – Apr 2025',
+            tech: 'React.js, Node.js, Express.js, MongoDB',
+            sourceUrl: 'https://github.com/SidduKutchula',
+            demoUrl: 'https://sidmonai.app',
+            bullets: [
+                'Designed a centralized platform for project allocation, mentor assignment, and team management.',
+                'Implemented admin dashboards with Excel student import and automated team generation.',
+                'Built secure authentication, notification workflows, and progress monitoring.',
+                'Improved collaboration between students, mentors, and administrators.'
+            ]
+        }
+    ],
+    experience: [
+        {
+            company: 'Technical Hub Pvt Ltd',
+            role: 'Full Stack Developer Intern',
+            dates: 'May 2025 – Jul 2025',
+            bullets: [
+                'Developed responsive web applications using React, Python, and Java while following Agile methodologies.',
+                'Collaborated with a team of developers to build reusable components and scalable backend APIs.',
+                'Improved application performance through code optimization, Git workflows, and modular architecture.',
+                'Participated in sprint planning, debugging, testing, and deployment activities.'
+            ]
+        },
+        {
+            company: 'CODEXINTERN',
+            role: 'Frontend Developer Intern',
+            dates: 'Nov 2025 – Jan 2026',
+            bullets: [
+                'Developed modern React interfaces using reusable UI components.',
+                'Implemented Redux-based state management for scalable applications.',
+                'Improved application responsiveness and reduced rendering overhead.',
+                'Participated in code reviews, bug fixing, and feature implementation.'
+            ]
+        }
+    ],
+    achievements: [
+        'Smart India Hackathon 2025 Team Leader – INNOVATORS-I nominated by institute.',
+        'Oracle Hackathon Finalist among 200+ participating teams.',
+        'Technical Quiz Champion securing 1st place among 100+ participants.',
+        'Solved 850+ coding problems across LeetCode, CodeChef, HackerRank, and GeeksforGeeks.',
+        'Built multiple production-ready full-stack applications with AI integration.'
+    ],
+    certifications: [
+        'Oracle Cloud Infrastructure 2025 — Generative AI Professional (Oracle University)',
+        'MongoDB Certified Associate Developer (MongoDB, Inc.)',
+        'GitHub Foundations (Microsoft)',
+        'Postman API Fundamentals Student Expert (Postman)',
+        'Cisco JavaScript Essentials 1 & 2 (Cisco Networking Academy)',
+        'Cisco HTML Essentials (Cisco Networking Academy)',
+        'Cisco CSS Essentials (Cisco Networking Academy)',
+        'Cisco Python Essentials (Cisco Networking Academy)',
+        'Cisco Java Essentials (Cisco Networking Academy)',
+        'HackerRank Problem Solving (5★)',
+        'HackerRank Java (5★)',
+        'HackerRank SQL (5★)'
+    ],
+    education: [
+        {
+            institution: 'Aditya College of Engineering and Technology, Surampalem',
+            degree: 'Bachelor of Technology (B.Tech) - Artificial Intelligence & Machine Learning',
+            dates: '2023 – 2027',
+            gpa: 'CGPA: 8.1 / 10'
+        }
+    ]
 };
+
+const EMPTY_RESUME = { ...DEFAULT_RESUME };
 
 /**
  * Creates a temporary DOM element from HTML string and extracts text content.
@@ -444,16 +542,40 @@ export function parseResumeHtml(html, reportData = {}) {
     
     // 3. Supplement with report metadata dynamically based on actual candidate data
     if (!result.name || result.name.trim() === '' || result.name === 'Candidate Name') {
-        result.name = reportData.candidateName || reportData.user?.name || reportData.user?.displayName || 'Candidate Name';
+        result.name = reportData.candidateName || reportData.user?.name || reportData.user?.displayName || DEFAULT_RESUME.name;
     }
-    if (reportData.title && (!result.title || result.title === 'Target Job Role')) {
-        result.title = reportData.title;
+    if (!result.title || result.title === 'Target Job Role') {
+        result.title = reportData.title || DEFAULT_RESUME.title;
     }
-    if (!result.summary && (reportData.selfDescription || reportData.improvementSummary)) {
-        result.summary = reportData.selfDescription || reportData.improvementSummary;
+    if (!result.phone) result.phone = DEFAULT_RESUME.phone;
+    if (!result.email) result.email = DEFAULT_RESUME.email;
+    if (!result.linkedin) result.linkedin = DEFAULT_RESUME.linkedin;
+    if (!result.github) result.github = DEFAULT_RESUME.github;
+
+    // Clean AI meta text from summary if generated by AI
+    if (result.summary && (result.summary.toLowerCase().includes('candidate') || result.summary.toLowerCase().includes('mapping jd') || result.summary.toLowerCase().includes('synthesized'))) {
+        result.summary = DEFAULT_RESUME.summary;
     }
-    if ((!result.skills || result.skills.length === 0) && (reportData.addedKeywords || reportData.missingKeywords)) {
-        result.skills = [...(reportData.addedKeywords || []), ...(reportData.missingKeywords || [])];
+    if (!result.summary) {
+        result.summary = DEFAULT_RESUME.summary;
+    }
+    if (!result.skills || result.skills.length === 0) {
+        result.skills = DEFAULT_RESUME.skills;
+    }
+    if (!result.projects || result.projects.length === 0) {
+        result.projects = DEFAULT_RESUME.projects;
+    }
+    if (!result.experience || result.experience.length === 0) {
+        result.experience = DEFAULT_RESUME.experience;
+    }
+    if (!result.achievements || result.achievements.length === 0) {
+        result.achievements = DEFAULT_RESUME.achievements;
+    }
+    if (!result.certifications || result.certifications.length === 0) {
+        result.certifications = DEFAULT_RESUME.certifications;
+    }
+    if (!result.education || result.education.length === 0) {
+        result.education = DEFAULT_RESUME.education;
     }
 
     return result;

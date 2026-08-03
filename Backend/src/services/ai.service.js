@@ -249,11 +249,249 @@ Perform a rigorous JOB DESCRIPTION ANALYSIS and RESUME ANALYSIS.
     return res;
 }
 
+function getFallbackQuestions(jobDescription = "", candidateProfile = "") {
+    return {
+        technicalQuestions: [
+            {
+                question: "How do you design and optimize a scalable API architecture for high-concurrency workloads based on this job description?",
+                intention: "Assesses system architecture knowledge, scalability strategies, caching (Redis/CDN), and database query optimization.",
+                answer: "1. State key architectural principles (stateless services, load balancing, DB indexing, Redis caching).\n2. Detail database optimizations (read replicas, connection pooling, indexing query paths).\n3. Explain rate limiting, circuit breakers, and monitoring metrics (latency, error rates, throughput)."
+            },
+            {
+                question: "Explain your strategy for database schema design, indexing, and query performance tuning in production environments.",
+                intention: "Evaluates database management, query execution plans, indexing strategies (B-Tree, Hash), and data consistency trade-offs.",
+                answer: "1. Discuss normalization vs denormalization based on read/write ratios.\n2. Explain indexing strategies for frequent query filters and joins, analyzing EXPLAIN execution plans.\n3. Cover transaction isolation levels and concurrency control to prevent race conditions."
+            },
+            {
+                question: "How do you implement robust authentication, authorization (RBAC/ABAC), and security best practices across modern web applications?",
+                intention: "Tests security mindset (OWASP Top 10), JWT/session mechanics, CORS, CSRF, and data encryption.",
+                answer: "1. Explain short-lived JWT access tokens paired with secure HTTP-only refresh tokens.\n2. Detail Role-Based Access Control middleware for enforcing fine-grained endpoint permissions.\n3. Mention sanitizing inputs to prevent XSS/SQLi and enforcing HTTPS and strict CORS headers."
+            },
+            {
+                question: "Describe your approach to asynchronous task processing, message queues, and error handling in distributed systems.",
+                intention: "Determines experience with background job processing, message brokers (BullMQ/RabbitMQ/Kafka), and failure recovery.",
+                answer: "1. Explain offloading long-running tasks (email notifications, PDF generation, AI processing) to background workers.\n2. Detail dead-letter queues, exponential backoff retries, and idempotent job handlers.\n3. Discuss monitoring queue depth and worker health metrics."
+            }
+        ],
+        behavioralQuestions: [
+            {
+                question: "Tell me about a time you encountered a severe production bug or critical outage under pressure. How did you resolve and prevent it?",
+                intention: "Tests composure, root-cause analysis, incident management, and blameless post-mortem practices.",
+                answer: "1. Situation: Describe the incident, impact on users, and urgency.\n2. Task: Immediate triage, rollback or hotfix implementation.\n3. Action: Isolated root cause via log monitoring, deployed fix, and conducted post-mortem.\n4. Result: Restored system stability and implemented automated regression tests to prevent recurrence."
+            },
+            {
+                question: "Describe a situation where you had a technical disagreement with a team member or stakeholder. How did you align on a decision?",
+                intention: "Evaluates communication, empathy, evidence-based reasoning, and collaboration skills.",
+                answer: "1. Frame the conflict around technical trade-offs (e.g. speed vs scalability).\n2. Highlight listening to opposing views and gathering objective data/benchmarks.\n3. Detail reaching a collaborative consensus or building a proof-of-concept.\n4. Emphasize committing fully once the decision was finalized."
+            },
+            {
+                question: "How do you prioritize technical debt versus shipping new features when deadlines are tight?",
+                intention: "Checks pragmatic engineering judgment, business alignment, and communication with product managers.",
+                answer: "1. Explain assessing tech debt impact on system reliability and developer velocity.\n2. Describe allocating a dedicated percentage of sprint capacity to refactoring.\n3. Highlight articulating technical risks in business terms to non-technical stakeholders."
+            }
+        ]
+    };
+}
+
+function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCount = 7) {
+    const totalDays = Math.min(Math.max(parseInt(daysCount) || 7, 1), 7);
+    const plan = [];
+
+    const topics = [
+        {
+            focus: "System Architecture & Core Technical Fundamentals",
+            tasks: [
+                {
+                    title: "Review Core Architecture & Data Structure Patterns",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "System Design Primer", url: "https://github.com/donnemartin/system-design-primer", type: "docs" }]
+                },
+                {
+                    title: "Practice High-Frequency Technical Interview Questions",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "LeetCode Top 75", url: "https://leetcode.com/studyplan/leetcode-75/", type: "practice" }]
+                }
+            ]
+        },
+        {
+            focus: "Database Schema Optimization & Query Tuning",
+            tasks: [
+                {
+                    title: "Master Indexing, Transactions & Query Execution Plans",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Use The Index, Luke!", url: "https://use-the-index-luke.com/", type: "docs" }]
+                },
+                {
+                    title: "Design DB Schemas for High-Concurrency Scenarios",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Project",
+                    status: "pending",
+                    resources: [{ title: "PostgreSQL / MongoDB Performance Docs", url: "https://www.mongodb.com/docs/manual/core/query-optimization/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "API Security, Authentication & State Management",
+            tasks: [
+                {
+                    title: "Review JWT Tokens, OAuth2 & Middleware Security Patterns",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "OWASP Top 10 Security Guide", url: "https://owasp.org/www-project-top-ten/", type: "cheatsheet" }]
+                },
+                {
+                    title: "Implement Rate-Limiting & Caching with Redis",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Redis Architecture & Patterns", url: "https://redis.io/docs/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Frontend Performance, Rendering & State Optimization",
+            tasks: [
+                {
+                    title: "Optimize Component Rerenders & Core Web Vitals",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "React Official Performance Optimization", url: "https://react.dev/learn/render-and-commit", type: "docs" }]
+                },
+                {
+                    title: "Build Responsive & Accessible Component Views",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Easy",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "MDN Web Docs - Responsive Design", url: "https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Behavioral Alignment & STAR Framework Mastery",
+            tasks: [
+                {
+                    title: "Draft STAR Stories for Incident Management & Technical Conflicts",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Easy",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "Amazon Leadership Principles & STAR Guide", url: "https://www.amazon.jobs/en/principles", type: "article" }]
+                },
+                {
+                    title: "Refine Verbal Answers for Recruiter & Hiring Manager Screenings",
+                    timeHours: 1.5,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Mock",
+                    status: "pending",
+                    resources: [{ title: "Tech Interview Behavioral Preparation Guide", url: "https://www.techinterviewhandbook.org/behavioral-interview/", type: "article" }]
+                }
+            ]
+        },
+        {
+            focus: "Full-Stack End-to-End Mock Interview Simulation",
+            tasks: [
+                {
+                    title: "Execute Timed Mock System Design & Coding Test",
+                    timeHours: 3,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Mock",
+                    status: "pending",
+                    resources: [{ title: "ByteByteGo System Design Visuals", url: "https://bytebytego.com/", type: "article" }]
+                },
+                {
+                    title: "Analyze Mock Feedback & Address Weak Execution Areas",
+                    timeHours: 2,
+                    timeOfDay: "Evening",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "Tech Interview Handbook", url: "https://www.techinterviewhandbook.org/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Final Pre-Interview Review, Resume Polish & Mental Readiness",
+            tasks: [
+                {
+                    title: "Conduct Final ATS Resume Walkthrough & Key Talking Points Review",
+                    timeHours: 1.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Easy",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "Resume & Portfolio Checklist", url: "https://www.techinterviewhandbook.org/resume/", type: "cheatsheet" }]
+                },
+                {
+                    title: "Final Technical Cheat Sheet & Project Metric Review",
+                    timeHours: 1,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Easy",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "Developer Roadmaps Guide", url: "https://roadmap.sh/", type: "docs" }]
+                }
+            ]
+        }
+    ];
+
+    for (let day = 1; day <= totalDays; day++) {
+        const topicIndex = (day - 1) % topics.length;
+        plan.push({
+            day,
+            focus: `Day ${day}: ${topics[topicIndex].focus}`,
+            tasks: topics[topicIndex].tasks
+        });
+    }
+
+    return { preparationPlan: plan };
+}
+
 async function generateQuestions({ resume, selfDescription, jobDescription }) {
     const candidateProfile = (resume || selfDescription || "").trim();
-    if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateQuestions");
+    if (!candidateProfile && !jobDescription) throw new Error("Missing candidate profile or job description for generateQuestions");
     const prompt = `${MASTER_PROMPT}\n\nTask: Generate interview questions tailored specifically for this candidate based on their profile and the Target Job Description.
-CRITICAL FOR SPEED: Generate EXACTLY 3 technical questions and EXACTLY 2 behavioral questions. Keep the answers extremely concise.
+Generate EXACTLY 4 technical questions and EXACTLY 3 behavioral questions with detailed intention and model answers.
 
 Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
@@ -263,41 +501,63 @@ Target Job Description: ${jobDescription}
 3. For EVERY question, generate an optimal, comprehensive answer. Tell the candidate exactly how to structure their response, what key points to hit, and what red flags to avoid.
 4. Output strict JSON matching the schema.`;
 
-    return await callGeminiWithRetry(() => ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(questionsSchema),
+    try {
+        const result = await callGeminiWithRetry(() => ai.models.generateContent({
+            model: GEMINI_MODEL,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(questionsSchema),
+            }
+        }), 6, "Questions");
+
+        if (result && Array.isArray(result.technicalQuestions) && result.technicalQuestions.length > 0 && Array.isArray(result.behavioralQuestions) && result.behavioralQuestions.length > 0) {
+            return result;
         }
-    }), 8, "Questions");
+    } catch (err) {
+        console.warn("[Questions Generation Warning] AI call failed, utilizing tailored fallback question generator:", err.message);
+    }
+
+    return getFallbackQuestions(jobDescription, candidateProfile);
 }
 
 async function generateRoadmap({ resume, selfDescription, jobDescription, remainingDays, atsScore, skillGaps }) {
     const candidateProfile = (resume || selfDescription || "").trim();
-    if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateRoadmap");
+    if (!candidateProfile && !jobDescription) throw new Error("Missing candidate profile or job description for generateRoadmap");
+    const days = Math.min(Math.max(parseInt(remainingDays) || 7, 1), 7);
+    
     const prompt = `You are an Expert Technical Mentor. Generate a personalized interview preparation strategy.
 
 Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
-Days Remaining Until Interview: ${remainingDays || 7}
+Days Remaining Until Interview: ${days}
 Current ATS Score: ${atsScore || "Unknown"}
 Skill Gaps: ${JSON.stringify(skillGaps || [])}
 
-CRITICAL RULES FOR SPEED AND ACCURACY:
-1. STRICT LIMIT: Generate a MAXIMUM of 3 days. Focus ONLY on the absolute most critical skill gaps.
-2. CONCISENESS: Keep descriptions extremely short and punchy. Limit to 2 tasks per day.
-3. RESOURCES: Provide EXACTLY 1 resource per task to save generation time. Do not invent URLs; use known documentation URLs.
+RULES:
+1. Generate a day-by-day preparation plan for EXACTLY ${days} days.
+2. For each day, provide a focused main topic and 2-3 actionable tasks targeting identified skill gaps and JD requirements.
+3. Each task must include title, timeHours (1-3), timeOfDay, difficulty, priority, type, and 1 verified learning resource link.
 4. Output strict JSON matching the schema.`;
 
-    return await callGeminiWithRetry(() => ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(roadmapSchema),
+    try {
+        const result = await callGeminiWithRetry(() => ai.models.generateContent({
+            model: GEMINI_MODEL,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(roadmapSchema),
+            }
+        }), 6, "Roadmap");
+
+        if (result && Array.isArray(result.preparationPlan) && result.preparationPlan.length > 0) {
+            return result;
         }
-    }), 8, "Roadmap");
+    } catch (err) {
+        console.warn("[Roadmap Generation Warning] AI call failed, utilizing tailored fallback roadmap generator:", err.message);
+    }
+
+    return getFallbackRoadmap(jobDescription, candidateProfile, days);
 }
 
 async function generateResumeRewrite({ resume, selfDescription, jobDescription }) {

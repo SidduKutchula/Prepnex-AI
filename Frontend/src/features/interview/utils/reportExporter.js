@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { parseResumeHtml } from '../../resume/utils/parseResumeHtml';
 import { renderClassicTemplate } from '../../resume/pdf/templates/classic';
 
@@ -135,7 +135,7 @@ export function exportFullMasterReportPDF(report) {
             gap.impact || 'Recommended for resume & interview focus'
         ]);
 
-        doc.autoTable({
+        autoTable(doc, {
             head: [tableColumn],
             body: tableRows,
             startY: y,
@@ -145,7 +145,7 @@ export function exportFullMasterReportPDF(report) {
             styles: { fontSize: 9, cellPadding: 5 }
         });
 
-        y = doc.lastAutoTable.finalY + 25;
+        y = (doc.lastAutoTable ? doc.lastAutoTable.finalY : y + 60) + 25;
     }
 
     // ── TECHNICAL QUESTIONS & MODEL ANSWERS ─────────────────────────────

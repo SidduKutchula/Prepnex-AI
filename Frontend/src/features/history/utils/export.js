@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const exportHistoryToCSV = (history) => {
     if (!history || history.length === 0) return;
@@ -78,7 +78,7 @@ export const exportHistoryToPDF = (history, analytics) => {
         tableRows.push(reportData);
     });
 
-    doc.autoTable({
+    autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 50,

@@ -217,8 +217,8 @@ export const useInterviewStream = (reportId) => {
             if (payload.stage === 'complete') {
                 setTimeout(async () => {
                     try {
-                        const res = await getReportById(reportId);
-                        if (res.success) setReport(res.data);
+                        const res = await getInterviewReportById(reportId);
+                        if (res && res.interviewReport) setReport(res.interviewReport);
                     } catch (err) {
                         console.error("Refetch error after SSE complete:", err);
                     }

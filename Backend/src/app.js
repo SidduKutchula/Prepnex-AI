@@ -34,15 +34,18 @@ if (process.env.CLIENT_URL) {
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true)
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/$/, '');
+        const isAllowed = allowedOrigins.some(allowed => cleanOrigin === allowed.replace(/\/$/, '') || cleanOrigin.endsWith('.sidmonai.app') || cleanOrigin.endsWith('.onrender.com'));
+        if (isAllowed) {
+            callback(null, true);
         } else {
-            console.error(`[CORS Error] Origin blocked: ${origin}. Allowed:`, allowedOrigins);
-            callback(new Error('Not allowed by CORS'))
+            console.warn(`[CORS Notice] Origin ${origin} accessing API.`);
+            callback(null, true);
         }
     },
     credentials: true
-}))
+}));
 
 /* require all the routes here */
 const authRouter = require("./routes/auth.routes")

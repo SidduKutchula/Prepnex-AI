@@ -780,3 +780,166 @@
     }
   }
 }
+
+/* ── COMPREHENSIVE RESPONSIVE DESIGN (MOBILE, TABLET, DESKTOP) ── */
+@media (max-width: 1024px) {
+  .resume-builder-workspace {
+    gap: 16px;
+    padding-bottom: 24px;
+  }
+
+  .resume-toolbar-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+
+    .toolbar-left {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .toolbar-center {
+      width: 100%;
+    }
+  }
+
+  .template-switcher-container {
+    width: 100%;
+
+    .template-cards-grid {
+      width: 100%;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+
+      &::-webkit-scrollbar {
+        height: 4px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      .template-card {
+        scroll-snap-align: start;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .resume-paper-preview {
+    padding: 16px 12px;
+    max-height: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 768px) {
+  .preview-controls-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 8px 12px;
+
+    .controls-label {
+      font-size: 11px;
+    }
+
+    .zoom-buttons {
+      button {
+        width: 30px;
+        height: 30px;
+      }
+      .zoom-text {
+        font-size: 11px;
+        min-width: 32px;
+      }
+    }
+  }
+
+  .resume-paper-preview {
+    padding: 12px 8px;
+
+    .resume-sheet {
+      padding: 24px 18px;
+      min-height: auto;
+      font-size: 11px;
+    }
+
+    .resume-header {
+      .name {
+        font-size: 18px;
+      }
+      .title {
+        font-size: 11px;
+      }
+      .contact-row {
+        gap: 4px 8px;
+        font-size: 10px;
+
+        .contact-item:not(:last-child)::after {
+          margin-left: 6px;
+        }
+      }
+    }
+
+    .technical-grid {
+      .tech-row {
+        grid-template-columns: 110px 1fr;
+        font-size: 10px;
+      }
+    }
+
+    .resume-entry {
+      .entry-header {
+        flex-wrap: wrap;
+        gap: 2px 8px;
+
+        .entry-role {
+          font-size: 10.5px;
+        }
+        .entry-dates {
+          font-size: 9.5px;
+        }
+      }
+      .entry-sub-header {
+        flex-wrap: wrap;
+        gap: 2px 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .resume-toolbar-container {
+    padding: 10px;
+    
+    .ats-score-pill {
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+  }
+
+  .resume-paper-preview {
+    padding: 8px 4px;
+
+    .technical-grid {
+      .tech-row {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        margin-bottom: 4px;
+
+        .tech-label {
+          font-size: 10px;
+          color: var(--accent, #2563eb);
+        }
+        .tech-value {
+          font-size: 9.5px;
+        }
+      }
+    }
+  }
+}

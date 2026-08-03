@@ -115,18 +115,43 @@ export function estimateContentHeight(resumeData, styleConfig = {}) {
  * @returns {Object} Optimized layout parameters
  */
 export function calculateSmartLayout(resumeData) {
-    const tightA4Params = {
-        margin: 20,        // 20pt margin top/bottom (~7mm) - minimal white space!
-        fontSize: 10,      // 10pt body text
-        headingSize: 11.5, // 11.5pt section headings
-        nameSize: 21,      // 21pt candidate name
-        lineHeight: 1.26,  // 1.26 line height for smooth page filling
-        sectionGap: 11,    // 11pt gap between sections
-        itemGap: 5,        // 5pt gap between items
+    const estHeight = estimateContentHeight(resumeData);
+    
+    // ISO A4 available height is ~800pt. Dynamically scale parameters to fit 1 page!
+    if (estHeight > 950) {
+        return {
+            margin: 16,
+            fontSize: 9.0,
+            headingSize: 10.5,
+            nameSize: 18,
+            lineHeight: 1.18,
+            sectionGap: 6,
+            itemGap: 3,
+            targetPages: 1
+        };
+    } else if (estHeight > 820) {
+        return {
+            margin: 18,
+            fontSize: 9.5,
+            headingSize: 11.0,
+            nameSize: 19.5,
+            lineHeight: 1.20,
+            sectionGap: 8,
+            itemGap: 4,
+            targetPages: 1
+        };
+    }
+
+    return {
+        margin: 20,
+        fontSize: 10,
+        headingSize: 11.5,
+        nameSize: 21,
+        lineHeight: 1.24,
+        sectionGap: 10,
+        itemGap: 5,
         targetPages: 1
     };
-
-    return tightA4Params;
 }
 
 export default calculateSmartLayout;

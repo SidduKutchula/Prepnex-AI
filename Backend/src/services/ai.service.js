@@ -303,31 +303,28 @@ CRITICAL RULES FOR SPEED AND ACCURACY:
 async function generateResumeRewrite({ resume, selfDescription, jobDescription }) {
     const candidateProfile = (resume || selfDescription || "").trim();
     if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateResumeRewrite");
-    const prompt = `${MASTER_PROMPT}\n\nTask: Completely rewrite the candidate's resume to maximize ATS compatibility (Target: 95+) for the specific Job Description, while strictly adhering to a ONE PAGE limit.
+    const prompt = `${MASTER_PROMPT}\n\nTask: Optimize and rewrite the candidate's resume to maximize ATS compatibility (Target: 95+) for the specific Job Description, ensuring ALL sections and entries (Projects, Experiences, Education, Certifications, Achievements, Technical Skills, Summary, Contact Info) provided by the candidate are included and formatted to fit cleanly on EXACTLY 1 PAGE.
 
 Candidate Profile / Resume: ${candidateProfile}
 Target Job Description: ${jobDescription}
 
 For the 'rewrittenResumeHtml' field, follow these STRICT RULES:
-1. ONE PAGE REQUIREMENT (MANDATORY):
-- The generated HTML MUST cleanly fit on a single A4 page when rendered to PDF.
-- Aggressively compress information. Merge similar skills. Shorten verbose bullet points.
-- Omit outdated roles or projects if the candidate has too much experience. Prioritize relevance over completeness.
-- Only allow a second page if the candidate has 10+ years of CRUCIAL experience that cannot be removed.
+1. INCLUDE ALL CANDIDATE CONTENT & SECTIONS (MANDATORY):
+- INCLUDE ALL Projects, Experiences, Education, Certifications, Achievements, Technical Skills, Professional Summary, and Contact Information present in the candidate's uploaded resume/profile.
+- DO NOT drop or omit any genuine project, work experience, degree, or certification provided by the candidate.
+- Preserve every genuine entry, optimizing the text formatting, grammar, and ATS action verbs.
 
-2. ATS & CONTENT OPTIMIZATION:
-- Target an ATS Score of 95+. Naturally inject keywords from the Job Description. DO NOT keyword stuff.
-- Prioritize Contact Info, Prof Summary, Tech Skills, Experience, Projects, Education.
+2. ONE PAGE FIT & DENSITY OPTIMIZATION (MANDATORY):
+- Format and optimize all sections into a compact, high-density 1-page single-column layout that fits on 1 A4 page when rendered to PDF.
+- Use tight vertical margins, compact line heights (1.15 to 1.2), concise bullet points, and side-by-side headers/dates to maintain 1-page presentation.
+- Rewrite bullets into concise, achievement-driven statements with measurable outcomes and powerful action verbs.
 - REORDER skills so that Job Description matching skills appear first.
-- Rewrite bullets into concise, achievement-focused statements with measurable outcomes and powerful action verbs.
 - NEVER fabricate experience, companies, projects, or metrics.
 
-3. HTML/CSS STYLING:
-- Use standard readable fonts (Arial, Helvetica, sans-serif).
-- Use a single-column, highly compact layout.
-- Use tight margins and line-heights (e.g., line-height: 1.2, small margins).
-- Keep the design simple, ATS-parsable, with NO tables or graphics.
-- Provide FULL HTML with inline or internal CSS.
+3. CLEAN HTML & STRUCTURED HEADINGS:
+- Use clean semantic HTML tags (h1, h2, h3, p, ul, li).
+- Clear ATS section headings: "PROFESSIONAL SUMMARY", "TECHNICAL SKILLS", "WORK EXPERIENCE", "PROJECTS", "EDUCATION", "CERTIFICATIONS", "ACHIEVEMENTS".
+- Provide FULL HTML with inline CSS.
 
 Output strict JSON matching the schema.`;
 

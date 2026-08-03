@@ -542,7 +542,7 @@ export function parseResumeHtml(html, reportData = {}) {
     
     // 3. Supplement contact info if missing
     if (!result.name || result.name.trim() === '' || result.name === 'Candidate Name') {
-        result.name = reportData.candidateName || reportData.user?.name || reportData.user?.displayName || DEFAULT_RESUME.name;
+        result.name = reportData.candidateName || reportData.user?.name || reportData.user?.displayName || 'CANDIDATE NAME';
     }
     if (!result.title || result.title === 'Target Job Role') {
         result.title = reportData.title || '';

@@ -103,6 +103,59 @@
   }
 }
 
+// ── Mobile & Tablet Horizontal Tab Navigation ──
+.mobile-tab-nav {
+  display: none;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px 0;
+  margin-bottom: 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--border);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    transition: all 0.2s ease;
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: var(--bg-card);
+      color: var(--text-heading);
+    }
+
+    &.active {
+      background: var(--accent-subtle);
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    display: flex;
+  }
+}
+
 // ── Left Navigation ──
 .interview-nav {
   display: flex;

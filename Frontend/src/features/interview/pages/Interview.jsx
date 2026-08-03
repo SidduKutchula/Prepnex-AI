@@ -61,6 +61,11 @@ const NAV_ITEMS = [
         id: 'resume', 
         label: 'Tailored resume', 
         icon: (<FileText size={22} />) 
+    },
+    {
+        id: 'overview',
+        label: 'Match & Gaps',
+        icon: (<Target size={22} />)
     }
 ]
 
@@ -832,6 +837,20 @@ const Interview = () => {
                     </div>
                 )}
 
+                {/* ── Mobile & Tablet Horizontal Section Tab Navigation ── */}
+                <div className="mobile-tab-nav">
+                    {NAV_ITEMS.map(item => (
+                        <button
+                            key={item.id}
+                            className={`mobile-tab-btn ${activeNav === item.id || (activeNav === 'analytics' && item.id === 'overview') ? 'active' : ''}`}
+                            onClick={() => setActiveNav(item.id)}
+                        >
+                            {item.icon}
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </div>
+
                 <div className='interview-layout'>
                     {/* ── Left Nav Column ── */}
                     <nav className='interview-nav'>
@@ -887,9 +906,9 @@ const Interview = () => {
 
                     <main className='interview-content'>
                         <AnimatePresence mode="wait" initial={false}>
-                            {activeNav === 'analytics' && (
+                            {(activeNav === 'overview' || activeNav === 'analytics') && (
                                 <motion.section
-                                    key="analytics"
+                                    key="overview"
                                     variants={sectionFade}
                                     initial="hidden"
                                     animate="visible"
@@ -897,16 +916,110 @@ const Interview = () => {
                                     className="section-content"
                                 >
                                     <div className='content-header'>
-                                        <h2>Dashboard Analytics</h2>
+                                        <h2>Match Analysis & Skill Gaps</h2>
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                        <div className="glass-card premium-dark" style={{ padding: '2rem', textAlign: 'center' }}>
-                                            <h3 style={{ fontSize: '24px', marginBottom: '1rem', color: 'var(--text-heading)' }}>Overall Roadmap Progress</h3>
-                                            <div className="progress-bar-container" style={{ height: '24px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                                                <div className="progress-bar-fill" style={{ width: `${percentage}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.5s ease' }} />
-                                            </div>
-                                            <p style={{ marginTop: '1rem', fontSize: '18px', color: 'var(--text-body)' }}>{percentage}% Completed ({completedCount}/{totalCount} tasks)</p>
+
+                                    {/* Overall Match Score */}
+                                    <div className='match-score glass-card' style={{ padding: '20px' }}>
+                                        <div className="title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                            <Target size={20} className="score-icon" style={{ color: 'var(--accent)' }} />
+                                            <p className='match-score__label' style={{ margin: 0, fontWeight: 600, fontSize: '15px' }}>Job Match Score</p>
                                         </div>
+                                        <div className="match-score__number" style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '12px' }}>
+                                            <span className='score-value' style={{ fontSize: '36px', fontWeight: 800, color: 'var(--accent)' }}>
+                                                <AnimatedCounter value={report.matchScore || 0} />
+                                            </span>
+                                            <span className='score-total' style={{ color: 'var(--text-muted)', fontSize: '16px' }}>/ 100</span>
+                                        </div>
+                                        <div className="match-score__bar-container" style={{ height: '8px', borderRadius: '4px', background: 'var(--bg-card)', overflow: 'hidden', marginBottom: '8px' }}>
+                                            <motion.div 
+                                                initial={{ scaleX: 0 }}
+                                                animate={{ scaleX: (report.matchScore || 0) / 100 }}
+                                                style={{ transformOrigin: 'left', width: '100%', height: '100%', background: 'var(--accent)' }}
+                                                transition={{ duration: 1.2, ease: 'easeOut' }}
+                                                className="match-score__bar-fill"
+                                            />
+                                        </div>
+                                        <p className="match-score__status" style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                                            {report.matchScore >= 80 ? 'Excellent match for target position' : report.matchScore >= 60 ? 'Strong match with key skills' : 'Potential match with skill gaps'}
+                                        </p>
+                                    </div>
+
+                                    {/* Roadmap Progress */}
+                                    <div className='match-score glass-card' style={{ padding: '20px' }}>
+                                        <div className="title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                            <CheckCircle2 size={20} className="score-icon" style={{ color: 'var(--success)' }} />
+                                            <p className='match-score__label' style={{ margin: 0, fontWeight: 600, fontSize: '15px' }}>Roadmap Progress</p>
+                                        </div>
+                                        <div className="match-score__number" style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '12px' }}>
+                                            <span className='score-value' style={{ fontSize: '36px', fontWeight: 800, color: 'var(--success)' }}>
+                                                <AnimatedCounter value={percentage} />
+                                            </span>
+                                            <span className='score-total' style={{ color: 'var(--text-muted)', fontSize: '16px' }}>%</span>
+                                        </div>
+                                        <div className="match-score__bar-container" style={{ height: '8px', borderRadius: '4px', background: 'var(--bg-card)', overflow: 'hidden', marginBottom: '8px' }}>
+                                            <motion.div 
+                                                initial={{ scaleX: 0 }}
+                                                animate={{ scaleX: percentage / 100 }}
+                                                style={{ transformOrigin: 'left', width: '100%', height: '100%', background: 'var(--success)' }}
+                                                transition={{ duration: 1.2, ease: 'easeOut' }}
+                                                className="match-score__bar-fill"
+                                            />
+                                        </div>
+                                        <p className="match-score__status" style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                                            {completedCount} of {totalCount} tasks completed
+                                        </p>
+                                    </div>
+
+                                    {/* Skill Gaps List */}
+                                    <div className='skill-gaps glass-card' style={{ padding: '20px' }}>
+                                        <div className="title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                                            <ScanSearch size={20} className="gaps-icon" style={{ color: 'var(--warning)' }} />
+                                            <p className='skill-gaps__label' style={{ margin: 0, fontWeight: 600, fontSize: '15px' }}>Skill Gaps Identified</p>
+                                        </div>
+                                        <div className='skill-gaps__list' style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            {report.skillGaps && report.skillGaps.length > 0 ? (
+                                                report.skillGaps.map((gap, i) => (
+                                                    <div key={gap.skill || `gap-full-${i}`} className="skill-tag" style={{ padding: '6px 12px', borderRadius: '20px', background: 'var(--bg-surface)', border: '1px solid var(--border)', fontSize: '13px' }}>
+                                                        <span className="skill-name">{gap.skill}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No critical skill gaps found for this job description.</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Mobile Download Buttons */}
+                                    <div className="mobile-download-actions" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+                                        <motion.button
+                                            {...buttonHoverTap}
+                                            onClick={handleDownloadReport}
+                                            disabled={isDownloadingPdf}
+                                            className='button primary-button download-btn pulse-glow'
+                                            style={{ width: '100%', justifyContent: 'center', gap: '8px', padding: '12px' }}
+                                        >
+                                            {isDownloadingPdf ? (
+                                                <>
+                                                    <LoaderCircle size={18} className="animate-spin" />
+                                                    <span>Generating PDF...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Download size={18} />
+                                                    <span>Download ATS Resume</span>
+                                                </>
+                                            )}
+                                        </motion.button>
+                                        <motion.button
+                                            {...buttonHoverTap}
+                                            onClick={handleDownloadMasterReport}
+                                            className='button secondary-button'
+                                            style={{ width: '100%', justifyContent: 'center', gap: '8px', padding: '12px', fontSize: '13px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-heading)', cursor: 'pointer' }}
+                                        >
+                                            <FileText size={16} />
+                                            <span>Download Master Report (PDF)</span>
+                                        </motion.button>
                                     </div>
                                 </motion.section>
                             )}

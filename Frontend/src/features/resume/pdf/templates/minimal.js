@@ -238,6 +238,45 @@ export function renderMinimalTemplate(resumeData, pdfDoc = null) {
 
             y += itemGap;
         });
+        y += sectionGap;
+    }
+
+    // --- ACHIEVEMENTS ---
+    if (resumeData.achievements && resumeData.achievements.length > 0) {
+        drawSectionHeader('Achievements');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(fontSize - 0.5);
+        doc.setTextColor(51, 65, 85);
+
+        resumeData.achievements.forEach(ach => {
+            const splitAch = doc.splitTextToSize(`-  ${ach}`, contentWidth - 10);
+            splitAch.forEach((aLine, i) => {
+                checkNewPage(fontSize * lineHeight);
+                const xOffset = i === 0 ? margin : margin + 10;
+                doc.text(aLine, xOffset, y);
+                y += fontSize * lineHeight;
+            });
+        });
+        y += sectionGap;
+    }
+
+    // --- CERTIFICATIONS ---
+    if (resumeData.certifications && resumeData.certifications.length > 0) {
+        drawSectionHeader('Certifications');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(fontSize - 0.5);
+        doc.setTextColor(51, 65, 85);
+
+        resumeData.certifications.forEach(cert => {
+            const splitCert = doc.splitTextToSize(`-  ${cert}`, contentWidth - 10);
+            splitCert.forEach((cLine, i) => {
+                checkNewPage(fontSize * lineHeight);
+                const xOffset = i === 0 ? margin : margin + 10;
+                doc.text(cLine, xOffset, y);
+                y += fontSize * lineHeight;
+            });
+        });
+        y += sectionGap;
     }
 
     doc.setProperties({

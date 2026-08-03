@@ -238,6 +238,45 @@ export function renderAcademicTemplate(resumeData, pdfDoc = null) {
             doc.text(line, margin, y);
             y += fontSize * lineHeight;
         });
+        y += sectionGap;
+    }
+
+    // --- ACHIEVEMENTS ---
+    if (resumeData.achievements && resumeData.achievements.length > 0) {
+        drawSectionHeader('Honors & Achievements');
+        doc.setFont('times', 'normal');
+        doc.setFontSize(fontSize);
+        doc.setTextColor(51, 65, 85);
+
+        resumeData.achievements.forEach(ach => {
+            const splitAch = doc.splitTextToSize(`•  ${ach}`, contentWidth - 10);
+            splitAch.forEach((aLine, i) => {
+                checkNewPage(fontSize * lineHeight);
+                const xOffset = i === 0 ? margin : margin + 10;
+                doc.text(aLine, xOffset, y);
+                y += fontSize * lineHeight;
+            });
+        });
+        y += sectionGap;
+    }
+
+    // --- CERTIFICATIONS ---
+    if (resumeData.certifications && resumeData.certifications.length > 0) {
+        drawSectionHeader('Certifications & Licenses');
+        doc.setFont('times', 'normal');
+        doc.setFontSize(fontSize);
+        doc.setTextColor(51, 65, 85);
+
+        resumeData.certifications.forEach(cert => {
+            const splitCert = doc.splitTextToSize(`•  ${cert}`, contentWidth - 10);
+            splitCert.forEach((cLine, i) => {
+                checkNewPage(fontSize * lineHeight);
+                const xOffset = i === 0 ? margin : margin + 10;
+                doc.text(cLine, xOffset, y);
+                y += fontSize * lineHeight;
+            });
+        });
+        y += sectionGap;
     }
 
     doc.setProperties({

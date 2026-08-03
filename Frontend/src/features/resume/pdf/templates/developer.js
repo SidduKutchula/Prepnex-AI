@@ -239,6 +239,45 @@ export function renderDeveloperTemplate(resumeData, pdfDoc = null) {
 
             y += itemGap;
         });
+        y += sectionGap;
+    }
+
+    // --- ACHIEVEMENTS ---
+    if (resumeData.achievements && resumeData.achievements.length > 0) {
+        drawSectionHeader('Achievements');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(fontSize);
+        doc.setTextColor(51, 65, 85);
+
+        resumeData.achievements.forEach(ach => {
+            const splitAch = doc.splitTextToSize(`>  ${ach}`, contentWidth - 12);
+            splitAch.forEach((aLine, i) => {
+                checkNewPage(fontSize * lineHeight);
+                const xOffset = i === 0 ? margin : margin + 12;
+                doc.text(aLine, xOffset, y);
+                y += fontSize * lineHeight;
+            });
+        });
+        y += sectionGap;
+    }
+
+    // --- CERTIFICATIONS ---
+    if (resumeData.certifications && resumeData.certifications.length > 0) {
+        drawSectionHeader('Certifications');
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(fontSize);
+        doc.setTextColor(30, 41, 59);
+
+        resumeData.certifications.forEach(cert => {
+            const splitCert = doc.splitTextToSize(`>  ${cert}`, contentWidth - 12);
+            splitCert.forEach((cLine, i) => {
+                checkNewPage(fontSize * lineHeight);
+                const xOffset = i === 0 ? margin : margin + 12;
+                doc.text(cLine, xOffset, y);
+                y += fontSize * lineHeight;
+            });
+        });
+        y += sectionGap;
     }
 
     doc.setProperties({

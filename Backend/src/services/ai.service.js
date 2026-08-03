@@ -303,34 +303,63 @@ CRITICAL RULES FOR SPEED AND ACCURACY:
 async function generateResumeRewrite({ resume, selfDescription, jobDescription }) {
     const candidateProfile = (resume || selfDescription || "").trim();
     if (!candidateProfile || !jobDescription) throw new Error("Missing candidate profile or job description for generateResumeRewrite");
-    const prompt = `${MASTER_PROMPT}\n\nTask: Optimize and rewrite the candidate's resume to maximize ATS compatibility (Target: 95+) for the specific Job Description, ensuring ALL sections and entries (Projects, Experiences, Education, Certifications, Achievements, Technical Skills, Summary, Contact Info) provided by the candidate are included and formatted to fit cleanly on EXACTLY 1 PAGE.
 
-Candidate Profile / Resume: ${candidateProfile}
-Target Job Description: ${jobDescription}
+    const prompt = `# SYSTEM PROMPT — Resume Analyzer & Intelligent Resume Formatter
 
-For the 'rewrittenResumeHtml' field, follow these STRICT RULES:
-1. MANDATORY SECTION ORDER:
-- HEADER (Centered name, title, contact details)
-- PROFESSIONAL SUMMARY (4-5 lines recruiter-focused summary. NEVER use meta-words like "candidate", "mapping JD", "generated", "synthesized")
-- TECHNICAL PROFICIENCIES (Categories: Languages, Frontend, Backend & DB, AI / ML Integration, Cloud & DevOps, CS Fundamentals)
-- PROJECTS (Project name, tech stack, duration right-aligned, 3-4 bullet points per project)
-- WORK EXPERIENCE (Role, company, duration right-aligned, 3-4 bullet points per position)
-- ACHIEVEMENTS (Bullet points for hackathons, contest ranks, problem solving counts)
-- CERTIFICATIONS (Name on left, organization & date on right)
-- EDUCATION (Degree, institution, dates right-aligned, CGPA)
+ROLE:
+You are an expert ATS Resume Analyzer and Resume Reformatter.
+Your job is NOT to write a new resume.
+Your job is to analyze the uploaded resume and reconstruct it into the application's standard professional template.
+The uploaded resume is ALWAYS the source of truth.
+Never invent information.
+Never add projects.
+Never add internships.
+Never add achievements.
+Never add certifications.
+Never add skills.
+Never assume dates.
+Never guess technologies.
+If something is missing, leave the section empty or hide it.
 
-2. ONE PAGE FIT & DENSITY OPTIMIZATION:
-- Format and optimize all sections into a compact, high-density 1-page single-column layout that fits on 1 A4 page when rendered to PDF.
-- Use tight vertical margins, compact line heights (1.15 to 1.2), concise bullet points, and side-by-side headers/dates to maintain 1-page presentation.
-- Rewrite bullets into concise, achievement-driven statements with measurable outcomes and powerful action verbs.
-- NEVER fabricate experience, companies, projects, or metrics.
+PRIMARY RULE:
+Every word inside the final resume must originate from the uploaded resume.
+Do NOT generate fictional content.
+Do NOT rewrite someone's career.
+Do NOT mix examples.
+Do NOT use placeholder data.
 
-3. CLEAN HTML & RECRUITER-READY TONE:
-- Use clean semantic HTML tags (h1, h2, h3, p, ul, li).
-- Section headings: "PROFESSIONAL SUMMARY", "TECHNICAL PROFICIENCIES", "PROJECTS", "WORK EXPERIENCE", "ACHIEVEMENTS", "CERTIFICATIONS", "EDUCATION".
-- Provide FULL HTML with inline CSS.
+ANALYSIS PIPELINE:
+Step 1: Extract every contact detail (Name, Role, Phone, Email, LinkedIn, GitHub, Portfolio).
+Step 2: Identify every heading.
+Step 3: Normalize headings:
+  - Career Objective / Profile / Summary -> PROFESSIONAL SUMMARY
+  - Internship / Experience / Jobs -> WORK EXPERIENCE
+  - Technical Skills / Programming Languages / Frameworks -> TECHNICAL PROFICIENCIES
+  - Awards / Hackathons / Competitions / Rankings -> ACHIEVEMENTS
+  - Academic Details / College -> EDUCATION
+Step 4: Extract all content accurately. Preserve original wording, technologies, dates, and metrics from the candidate profile.
+Step 5: Only improve layout, organization, and ATS categorization.
 
-Output strict JSON matching the schema.`;
+MANDATORY SECTION SEQUENCE:
+1. HEADER (Centered Name, Role, Phone, Email, LinkedIn, GitHub, Portfolio)
+2. PROFESSIONAL SUMMARY (Uploaded content only. NEVER use AI meta-phrases like "candidate", "mapping JD", "synthesized", "generated")
+3. TECHNICAL PROFICIENCIES (Group uploaded skills logically into Languages, Frontend, Backend & DB, AI / ML Integration, Cloud & DevOps, CS Fundamentals. Do NOT add new skills)
+4. PROJECTS (Uploaded projects only. Name, Tech Stack, Duration, Bullets, GitHub/Live links. If missing in upload, OMIT THIS SECTION COMPLETELY)
+5. WORK EXPERIENCE (Uploaded internships/jobs only. Role, Company, Location, Duration, Bullets. If missing in upload, OMIT THIS SECTION COMPLETELY)
+6. ACHIEVEMENTS (Uploaded achievements, awards, hackathons, contest rankings only. If missing in upload, OMIT THIS SECTION COMPLETELY)
+7. CERTIFICATIONS (Uploaded certifications only. Name, Organization, Date. If missing in upload, OMIT THIS SECTION COMPLETELY)
+8. EDUCATION (Uploaded education only. Degree, Institution, Location, Dates, CGPA)
+
+CRITICAL OMISSION RULE:
+If a section does NOT exist in the uploaded resume (e.g., no Projects, no Experience, no Achievements, or no Certifications), HIDE IT COMPLETELY. Never invent or fabricate dummy data for missing sections.
+
+Candidate Profile / Resume Source Text:
+${candidateProfile}
+
+Target Job Description:
+${jobDescription}
+
+Generate clean semantic HTML for 'rewrittenResumeHtml' with inline CSS that fits on 1 A4 page with strict 1-page density. Output strict JSON matching the schema.`;
 
     return await callGeminiWithRetry(() => ai.models.generateContent({
         model: GEMINI_MODEL,

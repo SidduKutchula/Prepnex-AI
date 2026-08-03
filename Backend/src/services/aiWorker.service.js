@@ -117,7 +117,13 @@ class AIWorkerService extends EventEmitter {
                         { runValidators: true }
                     );
                     console.log("[OK] Mongo Saved (Questions)");
-                    emitProgress('questions', { status: 'completed' });
+                    emitProgress('questions', { 
+                        status: 'completed',
+                        data: {
+                            technicalQuestions: questionsData.technicalQuestions || [],
+                            behavioralQuestions: questionsData.behavioralQuestions || []
+                        }
+                    });
                 } catch (err) {
                     console.error(`[FAILED] Stage 2 - Questions failed for ${reportId}:`, err);
                     if (err.name === 'ValidationError') {
@@ -203,7 +209,10 @@ class AIWorkerService extends EventEmitter {
                         { runValidators: true }
                     );
                     console.log("[OK] Mongo Saved (Roadmap)");
-                    emitProgress('roadmap', { status: 'completed' });
+                    emitProgress('roadmap', { 
+                        status: 'completed',
+                        data: { preparationPlan: prepPlan }
+                    });
                 } catch (err) {
                     console.error(`[FAILED] Stage 3 - Roadmap failed for ${reportId}:`, err);
                     if (err.name === 'ValidationError') {
@@ -250,7 +259,10 @@ class AIWorkerService extends EventEmitter {
                         { runValidators: true }
                     );
                     console.log("[OK] Mongo Saved (Resume Rewrite)");
-                    emitProgress('rewrite', { status: 'completed' });
+                    emitProgress('rewrite', { 
+                        status: 'completed',
+                        data: { rewrittenResumeHtml: rewriteData.rewrittenResumeHtml || "" }
+                    });
                 } catch (err) {
                     console.error(`[FAILED] Stage 4 - Resume Rewrite failed for ${reportId}:`, err);
                     if (err.name === 'ValidationError') {

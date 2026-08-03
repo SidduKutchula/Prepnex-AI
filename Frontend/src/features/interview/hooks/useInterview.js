@@ -191,10 +191,20 @@ export const useInterviewStream = (reportId) => {
                     updated.matchScore = payload.data.matchScore;
                     updated.progress = { ...updated.progress, atsGenerated: payload.status === 'completed' };
                 } else if (payload.stage === 'questions') {
+                    if (payload.data) {
+                        if (payload.data.technicalQuestions) updated.technicalQuestions = payload.data.technicalQuestions;
+                        if (payload.data.behavioralQuestions) updated.behavioralQuestions = payload.data.behavioralQuestions;
+                    }
                     updated.progress = { ...updated.progress, questionsGenerated: payload.status === 'completed' };
                 } else if (payload.stage === 'roadmap') {
+                    if (payload.data && payload.data.preparationPlan) {
+                        updated.preparationPlan = payload.data.preparationPlan;
+                    }
                     updated.progress = { ...updated.progress, roadmapGenerated: payload.status === 'completed' };
                 } else if (payload.stage === 'rewrite') {
+                    if (payload.data && payload.data.rewrittenResumeHtml) {
+                        updated.rewrittenResumeHtml = payload.data.rewrittenResumeHtml;
+                    }
                     updated.progress = { ...updated.progress, rewriteGenerated: payload.status === 'completed' };
                 }
                 

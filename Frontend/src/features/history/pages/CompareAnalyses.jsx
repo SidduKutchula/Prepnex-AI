@@ -36,11 +36,11 @@ const CompareAnalyses = () => {
                 </div>
             </header>
 
-            <div className="comparison-controls animate-fade-in" style={{ animationDelay: '0.1s', display: 'flex', gap: '16px', marginBottom: '32px' }}>
+            <div className="comparison-controls animate-fade-in">
                 <select 
                     value={selectedId1} 
                     onChange={(e) => setSelectedId1(e.target.value)}
-                    style={{ padding: '12px', borderRadius: '8px', background: '#1e1e2d', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', flex: 1 }}
+                    className="comparison-select"
                 >
                     <option value="">Select First Analysis...</option>
                     {history.map(item => (
@@ -53,7 +53,7 @@ const CompareAnalyses = () => {
                 <select 
                     value={selectedId2} 
                     onChange={(e) => setSelectedId2(e.target.value)}
-                    style={{ padding: '12px', borderRadius: '8px', background: '#1e1e2d', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', flex: 1 }}
+                    className="comparison-select"
                 >
                     <option value="">Select Second Analysis...</option>
                     {history.map(item => (
@@ -66,47 +66,47 @@ const CompareAnalyses = () => {
                 <button 
                     onClick={handleCompare}
                     disabled={!selectedId1 || !selectedId2 || selectedId1 === selectedId2 || loading}
-                    style={{ padding: '12px 24px', borderRadius: '8px', background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                    className="comparison-btn"
                 >
                     {loading ? 'Comparing...' : 'Compare'}
                 </button>
             </div>
 
             {comparisonData && (
-                <div className="comparison-results animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                    <div className="result-column" style={{ background: '#1e1e2d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="comparison-results animate-fade-in">
+                    <div className="result-column">
                         <h3>{comparisonData.report1.company || 'Analysis 1'}</h3>
-                        <p style={{ color: '#94a3b8', fontSize: '14px' }}>{new Date(comparisonData.report1.createdAt).toLocaleDateString()}</p>
+                        <p className="result-date">{new Date(comparisonData.report1.createdAt).toLocaleDateString()}</p>
                         
-                        <div style={{ marginTop: '24px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <div className="result-scores">
+                            <div className="score-row">
                                 <span>ATS Score:</span>
-                                <span style={{ fontWeight: 'bold' }}>{comparisonData.report1.atsScore}</span>
+                                <span className="score-val">{comparisonData.report1.atsScore}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                            <div className="score-row">
                                 <span>Match Score:</span>
-                                <span style={{ fontWeight: 'bold' }}>{comparisonData.report1.matchScore}%</span>
+                                <span className="score-val">{comparisonData.report1.matchScore}%</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="result-column" style={{ background: '#1e1e2d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="result-column">
                         <h3>{comparisonData.report2.company || 'Analysis 2'}</h3>
-                        <p style={{ color: '#94a3b8', fontSize: '14px' }}>{new Date(comparisonData.report2.createdAt).toLocaleDateString()}</p>
+                        <p className="result-date">{new Date(comparisonData.report2.createdAt).toLocaleDateString()}</p>
                         
-                        <div style={{ marginTop: '24px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <div className="result-scores">
+                            <div className="score-row">
                                 <span>ATS Score:</span>
-                                <span style={{ fontWeight: 'bold' }}>
+                                <span className="score-val">
                                     {comparisonData.report2.atsScore}
                                     <span style={{ color: comparisonData.comparison.atsDiff >= 0 ? '#4ade80' : '#f87171', marginLeft: '8px', fontSize: '14px' }}>
                                         ({comparisonData.comparison.atsDiff >= 0 ? '+' : ''}{comparisonData.comparison.atsDiff})
                                     </span>
                                 </span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                            <div className="score-row">
                                 <span>Match Score:</span>
-                                <span style={{ fontWeight: 'bold' }}>
+                                <span className="score-val">
                                     {comparisonData.report2.matchScore}%
                                     <span style={{ color: comparisonData.comparison.matchDiff >= 0 ? '#4ade80' : '#f87171', marginLeft: '8px', fontSize: '14px' }}>
                                         ({comparisonData.comparison.matchDiff >= 0 ? '+' : ''}{comparisonData.comparison.matchDiff}%)
@@ -116,10 +116,10 @@ const CompareAnalyses = () => {
                         </div>
                     </div>
 
-                    <div className="result-full-width" style={{ gridColumn: '1 / -1', background: '#1e1e2d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '8px' }}>
+                    <div className="result-full-width">
                         <h3 style={{ marginBottom: '24px' }}>Skill Gap Evolution</h3>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                        <div className="skills-split-grid">
                             <div>
                                 <h4 style={{ color: '#4ade80', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                                     <CheckCircle size={18} /> Resolved Skill Gaps

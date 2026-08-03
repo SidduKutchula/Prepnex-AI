@@ -81,7 +81,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- SUMMARY ---
     if (resumeData.summary) {
-        drawSectionHeader('Professional Summary');
+        drawSectionHeader('PROFESSIONAL SUMMARY');
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(fontSize);
         doc.setTextColor(50, 49, 48);
@@ -97,7 +97,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- SKILLS ---
     if (resumeData.skills && resumeData.skills.length > 0) {
-        drawSectionHeader('Technical Skills & Competencies');
+        drawSectionHeader('TECHNICAL PROFICIENCIES');
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(fontSize);
         doc.setTextColor(50, 49, 48);
@@ -114,7 +114,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- PROJECTS ---
     if (resumeData.projects && resumeData.projects.length > 0) {
-        drawSectionHeader('Projects');
+        drawSectionHeader('PROJECTS');
 
         resumeData.projects.forEach(proj => {
             checkNewPage(28);
@@ -157,7 +157,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- EXPERIENCE ---
     if (resumeData.experience && resumeData.experience.length > 0) {
-        drawSectionHeader('Work History');
+        drawSectionHeader('WORK EXPERIENCE');
 
         resumeData.experience.forEach(exp => {
             checkNewPage(32);
@@ -208,7 +208,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- ACHIEVEMENTS ---
     if (resumeData.achievements && resumeData.achievements.length > 0) {
-        drawSectionHeader('Achievements & Recognition');
+        drawSectionHeader('ACHIEVEMENTS');
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(fontSize);
         doc.setTextColor(50, 49, 48);
@@ -227,7 +227,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- CERTIFICATIONS ---
     if (resumeData.certifications && resumeData.certifications.length > 0) {
-        drawSectionHeader('Certifications & Training');
+        drawSectionHeader('CERTIFICATIONS');
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(fontSize);
         doc.setTextColor(50, 49, 48);
@@ -246,7 +246,7 @@ export function renderMicrosoftTemplate(resumeData, pdfDoc = null) {
 
     // --- EDUCATION ---
     if (resumeData.education && resumeData.education.length > 0) {
-        drawSectionHeader('Education');
+        drawSectionHeader('EDUCATION');
 
         resumeData.education.forEach(edu => {
             checkNewPage(22);

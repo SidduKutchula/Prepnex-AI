@@ -266,6 +266,8 @@
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
   transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  min-width: 0;
+  width: 100%;
 
   &:hover {
     border-color: var(--accent);
@@ -278,19 +280,28 @@
   }
 
   &__header {
-    padding: 20px;
+    padding: 18px 20px;
     display: flex;
     align-items: flex-start;
-    gap: 16px;
+    gap: 14px;
     cursor: pointer;
     user-select: none;
+    min-width: 0;
+    width: 100%;
+
+    @media (max-width: 640px) {
+      padding: 14px 12px;
+      gap: 10px;
+    }
   }
 
   &__title-section {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     flex: 1;
+    min-width: 0;
+    width: 100%;
   }
 
   &__index {
@@ -307,6 +318,11 @@
     justify-content: center;
     flex-shrink: 0;
     margin-top: 2px;
+
+    @media (max-width: 640px) {
+      font-size: 12px;
+      padding: 2px 8px;
+    }
   }
 
   &__question {
@@ -315,19 +331,25 @@
     color: var(--text-heading);
     margin: 0;
     line-height: 1.5;
-    max-width: 90%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+
+    @media (max-width: 640px) {
+      font-size: 14.5px;
+      line-height: 1.45;
+    }
   }
 
   &__meta-pills {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: nowrap; // Place on one row
-    overflow-x: auto;
-    
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    flex-wrap: wrap; // Allow pills to wrap cleanly on mobile
+    min-width: 0;
+    width: 100%;
 
     .pill-badge {
       font-size: 12px;
@@ -337,10 +359,13 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      white-space: nowrap;
+      white-space: normal;
+      word-break: break-word;
+      max-width: 100%;
 
       .pill-icon {
         color: inherit;
+        flex-shrink: 0;
       }
 
       &.accent-badge {
@@ -354,6 +379,11 @@
         background-color: var(--bg-surface);
         border: 1px solid var(--border);
       }
+
+      @media (max-width: 640px) {
+        font-size: 11px;
+        padding: 3px 8px;
+      }
     }
   }
 
@@ -363,6 +393,7 @@
     display: flex;
     align-items: center;
     margin-top: 4px;
+    flex-shrink: 0;
 
     &--open {
       transform: rotate(180deg);
@@ -387,6 +418,13 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+
+    @media (max-width: 640px) {
+      padding: 0 1rem 1rem 1rem;
+      gap: 1rem;
+    }
   }
 
   &__section {

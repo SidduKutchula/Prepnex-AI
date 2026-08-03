@@ -972,7 +972,7 @@ const Interview = () => {
                                     </div>
 
                                     {/* Skill Gaps List */}
-                                    <div className='skill-gaps glass-card' style={{ padding: '20px' }}>
+                                    <div className='skill-gaps glass-card' style={{ padding: '20px', marginBottom: '16px' }}>
                                         <div className="title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                                             <ScanSearch size={20} className="gaps-icon" style={{ color: 'var(--warning)' }} />
                                             <p className='skill-gaps__label' style={{ margin: 0, fontWeight: 600, fontSize: '15px' }}>Skill Gaps Identified</p>
@@ -987,6 +987,39 @@ const Interview = () => {
                                             ) : (
                                                 <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No critical skill gaps found for this job description.</p>
                                             )}
+                                        </div>
+                                    </div>
+
+                                    {/* Keywords Added & Missing Keywords Cards */}
+                                    <div className="keywords-row">
+                                        <div className="keywords-card success glass-card" style={{ padding: '20px' }}>
+                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', color: 'var(--text-heading)', margin: '0 0 12px 0' }}>
+                                                <Check size={18} style={{ color: 'var(--success)' }} /> Keywords Added ({report?.addedKeywords?.length || 0})
+                                            </h3>
+                                            <div className="keyword-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {report?.addedKeywords?.length > 0 ? (
+                                                    report.addedKeywords.map((kw, i) => (
+                                                        <span key={`akw-${i}`} className="badge badge-success" style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '13px', background: 'var(--success-subtle)', color: 'var(--success)', border: '1px solid var(--success-subtle)' }}>{kw}</span>
+                                                    ))
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No specific keywords added.</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="keywords-card warning glass-card" style={{ padding: '20px' }}>
+                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', color: 'var(--text-heading)', margin: '0 0 12px 0' }}>
+                                                <ScanSearch size={18} style={{ color: 'var(--warning)' }} /> Missing Keywords ({report?.missingKeywords?.length || 0})
+                                            </h3>
+                                            <div className="keyword-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {report?.missingKeywords?.length > 0 ? (
+                                                    report.missingKeywords.map((kw, i) => (
+                                                        <span key={`mkw-${i}`} className="badge badge-warning" style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '13px', background: 'var(--warning-subtle)', color: 'var(--warning)', border: '1px solid var(--warning-subtle)' }}>{kw}</span>
+                                                    ))
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No missing keywords! Perfect match.</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
 

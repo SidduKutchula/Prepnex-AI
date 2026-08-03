@@ -18,10 +18,6 @@ export const ResumeToolbar = ({ atsScore = 95, reportId }) => {
             <div className="toolbar-center">
                 <ResumeTemplateSwitcher />
             </div>
-
-            <div className="toolbar-right">
-                <ResumeDownload reportId={reportId} />
-            </div>
         </div>
     );
 };

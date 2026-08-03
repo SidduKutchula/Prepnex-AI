@@ -54,10 +54,9 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
         y += 12;
     };
 
-    // Candidate Name
-    const candidateName = (resumeData.name && resumeData.name.trim() !== '' && !/^(software engineer|full stack|developer)/i.test(resumeData.name))
+    const candidateName = (resumeData.name && resumeData.name.trim() !== '')
         ? resumeData.name
-        : 'SIDDU KUTCHULA';
+        : 'Candidate Name';
 
     // --- 1. HEADER (CENTERED NAME & CONTACT) ---
     doc.setFont('times', 'bold');
@@ -288,9 +287,9 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
         resumeData.education.forEach(edu => {
             checkNewPage(25);
 
-            let degreeText = edu.degree || 'Bachelor of Technology (B.Tech) – Artificial Intelligence & Machine Learning';
+            let degreeText = edu.degree || '';
             degreeText = degreeText.replace(/20\d{2}\s*[\u2013\u2014-]\s*20\d{2}\s*(\(Expected\))?/gi, '').trim();
-            const datesText = edu.dates || '2023 – 2027';
+            const datesText = edu.dates || '';
 
             // Top line: Degree (left) & Dates (right)
             doc.setFont('times', 'bold');
@@ -300,10 +299,12 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
             const splitDegree = doc.splitTextToSize(degreeText, contentWidth - 110);
             doc.text(splitDegree[0] || '', margin, y);
 
-            doc.setFont('times', 'bold');
-            doc.setFontSize(fontSize - 0.5);
-            doc.setTextColor(71, 85, 105);
-            doc.text(datesText, margin + contentWidth, y, { align: 'right' });
+            if (datesText) {
+                doc.setFont('times', 'bold');
+                doc.setFontSize(fontSize - 0.5);
+                doc.setTextColor(71, 85, 105);
+                doc.text(datesText, margin + contentWidth, y, { align: 'right' });
+            }
 
             y += fontSize * lineHeight;
 
@@ -317,8 +318,8 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
             }
 
             // Second line: Institution (left) & GPA (right)
-            let instText = edu.institution || 'Aditya College of Engineering and Technology, Surampalem';
-            let gpaText = edu.gpa || 'CGPA: 8.1 / 10';
+            let instText = edu.institution || '';
+            let gpaText = edu.gpa || '';
 
             if (instText.includes('CGPA:')) {
                 const parts = instText.split('CGPA:');

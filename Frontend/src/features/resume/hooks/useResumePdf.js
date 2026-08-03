@@ -11,13 +11,13 @@ import { renderAcademicTemplate } from '../pdf/templates/academic';
 
 const TEMPLATE_MAP = {
     classic: renderClassicTemplate,
-    modern: renderClassicTemplate,
-    minimal: renderClassicTemplate,
-    developer: renderClassicTemplate,
-    executive: renderClassicTemplate,
-    google: renderClassicTemplate,
-    microsoft: renderClassicTemplate,
-    academic: renderClassicTemplate,
+    modern: renderModernTemplate,
+    minimal: renderMinimalTemplate,
+    developer: renderDeveloperTemplate,
+    executive: renderExecutiveTemplate,
+    google: renderGoogleTemplate,
+    microsoft: renderMicrosoftTemplate,
+    academic: renderAcademicTemplate,
 };
 
 export function useResumePdf() {

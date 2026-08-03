@@ -7,6 +7,7 @@ import { ResumeToolbar } from '../../resume/components/ResumeToolbar'
 import { ResumePreview } from '../../resume/components/ResumePreview'
 import { useResumePdf } from '../../resume/hooks/useResumePdf'
 import { parseResumeHtml } from '../../resume/utils/parseResumeHtml'
+import { exportFullMasterReportPDF, downloadAllReports } from '../utils/reportExporter'
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 import { AnimatedCounter } from '../../../components/AnimatedCounter.jsx'
@@ -697,6 +698,16 @@ const Interview = () => {
         await generatePdf(parsedData, 'classic');
     }
 
+    const handleDownloadMasterReport = () => {
+        if (!report) return;
+        exportFullMasterReportPDF(report);
+    }
+
+    const handleDownloadAll = async () => {
+        if (!report) return;
+        await downloadAllReports(report, generatePdf);
+    }
+
     if (loading && !report) {
         return (
             <main className='loading-screen animate-fade-in' style={{ minHeight: '200px', margin: '40px auto' }}>
@@ -842,7 +853,7 @@ const Interview = () => {
 
                         </div>
                         
-                        <div style={{ padding: '0 12px' }}>
+                        <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <motion.button
                                 {...buttonHoverTap}
                                 onClick={handleDownloadReport}
@@ -861,6 +872,15 @@ const Interview = () => {
                                         <span>Download ATS Resume</span>
                                     </>
                                 )}
+                            </motion.button>
+                            <motion.button
+                                {...buttonHoverTap}
+                                onClick={handleDownloadMasterReport}
+                                className='button secondary-button'
+                                style={{ width: '100%', justifyContent: 'center', gap: '8px', padding: '8px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-heading)', cursor: 'pointer' }}
+                            >
+                                <FileText size={16} />
+                                <span>Download Master Report (PDF)</span>
                             </motion.button>
                         </div>
                     </nav>

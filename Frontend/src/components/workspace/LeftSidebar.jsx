@@ -12,7 +12,7 @@ import {
   Trophy
 } from 'lucide-react'
 
-const LeftSidebar = ({ stats }) => {
+const LeftSidebar = ({ stats, onDownloadReport, onDownloadResume, onBookmark, onShare }) => {
   return (
     <aside className="workspace-left-sidebar">
       
@@ -81,29 +81,21 @@ const LeftSidebar = ({ stats }) => {
             <Play size={16} />
             <span>Continue Interview</span>
           </button>
-          <button className="action-btn">
-            <RefreshCw size={16} />
-            <span>Generate New Questions</span>
-          </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={onDownloadReport}>
             <Download size={16} />
-            <span>Download Report</span>
+            <span>Download Master Report</span>
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={onDownloadResume}>
+            <FileText size={16} />
+            <span>Download ATS Resume</span>
+          </button>
+          <button className="action-btn" onClick={onShare}>
             <Share2 size={16} />
             <span>Share Report</span>
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={onBookmark}>
             <Bookmark size={16} />
             <span>Bookmark Report</span>
-          </button>
-          <button className="action-btn">
-            <FileText size={16} />
-            <span>Generate Tailored Resume</span>
-          </button>
-          <button className="action-btn">
-            <ScanSearch size={16} />
-            <span>Generate ATS Report</span>
           </button>
         </div>
       </div>

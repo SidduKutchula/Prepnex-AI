@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ResumeContext } from '../resume.context';
+import { ResumeContext } from '../context/ResumeContext';
 import { useResumePdf } from '../hooks/useResumePdf';
 import { Download, LoaderCircle, CheckCircle2 } from 'lucide-react';
 

@@ -17,7 +17,9 @@ export const A4_WIDTH_PT = 595.28;  // 210mm ISO 216 Standard Width
  * @param {Object} styleConfig 
  * @returns {number} Estimated height in points
  */
-export function estimateContentHeight(resumeData, styleConfig = {}) {
+export function estimateContentHeight(resumeData = {}, styleConfig = {}) {
+    if (!resumeData) return 400;
+
     const {
         fontSize = 9.75,
         headingSize = 11.5,
@@ -38,24 +40,26 @@ export function estimateContentHeight(resumeData, styleConfig = {}) {
     // 2. Summary
     if (resumeData.summary) {
         totalHeight += headingSize + 2;
-        const lineCount = Math.ceil(resumeData.summary.length / 95);
+        const lineCount = Math.ceil((resumeData.summary || '').length / 95);
         totalHeight += lineCount * baseLineHeight + sectionGap;
     }
 
-    // 3. Skills (6 Category Rows)
-    if (resumeData.skills && resumeData.skills.length > 0) {
+    // 3. Skills
+    if (Array.isArray(resumeData.skills) && resumeData.skills.length > 0) {
         totalHeight += headingSize + 2;
-        const rowsCount = Array.isArray(resumeData.skills) ? Math.max(resumeData.skills.length, 6) : 6;
+        const rowsCount = resumeData.skills.length;
         totalHeight += rowsCount * baseLineHeight + sectionGap;
     }
 
     // 4. Experience
-    if (resumeData.experience && resumeData.experience.length > 0) {
+    if (Array.isArray(resumeData.experience) && resumeData.experience.length > 0) {
         totalHeight += headingSize + 2;
         for (const exp of resumeData.experience) {
+            if (!exp) continue;
             totalHeight += baseLineHeight + 2; // Role & Company line
-            if (exp.bullets && exp.bullets.length > 0) {
+            if (Array.isArray(exp.bullets) && exp.bullets.length > 0) {
                 for (const bullet of exp.bullets) {
+                    if (!bullet) continue;
                     const bulletLines = Math.ceil(bullet.length / 85);
                     totalHeight += bulletLines * baseLineHeight + 1.5;
                 }
@@ -66,15 +70,17 @@ export function estimateContentHeight(resumeData, styleConfig = {}) {
     }
 
     // 5. Projects
-    if (resumeData.projects && resumeData.projects.length > 0) {
+    if (Array.isArray(resumeData.projects) && resumeData.projects.length > 0) {
         totalHeight += headingSize + 2;
         for (const proj of resumeData.projects) {
+            if (!proj) continue;
             totalHeight += baseLineHeight + 2; // Project Name & Tech
             if (proj.description) {
                 totalHeight += Math.ceil(proj.description.length / 85) * baseLineHeight;
             }
-            if (proj.bullets && proj.bullets.length > 0) {
+            if (Array.isArray(proj.bullets) && proj.bullets.length > 0) {
                 for (const bullet of proj.bullets) {
+                    if (!bullet) continue;
                     const bulletLines = Math.ceil(bullet.length / 85);
                     totalHeight += bulletLines * baseLineHeight + 1.5;
                 }
@@ -85,28 +91,30 @@ export function estimateContentHeight(resumeData, styleConfig = {}) {
     }
 
     // 6. Education
-    if (resumeData.education && resumeData.education.length > 0) {
+    if (Array.isArray(resumeData.education) && resumeData.education.length > 0) {
         totalHeight += headingSize + 2;
         for (const edu of resumeData.education) {
+            if (!edu) continue;
             totalHeight += baseLineHeight * 2 + itemGap;
         }
         totalHeight += sectionGap;
     }
 
     // 7. Certifications
-    if (resumeData.certifications && resumeData.certifications.length > 0) {
+    if (Array.isArray(resumeData.certifications) && resumeData.certifications.length > 0) {
         totalHeight += headingSize + 2;
         totalHeight += resumeData.certifications.length * (baseLineHeight + 1) + sectionGap;
     }
 
     // 8. Achievements
-    if (resumeData.achievements && resumeData.achievements.length > 0) {
+    if (Array.isArray(resumeData.achievements) && resumeData.achievements.length > 0) {
         totalHeight += headingSize + 2;
         totalHeight += resumeData.achievements.length * (baseLineHeight + 1) + sectionGap;
     }
 
     return totalHeight;
 }
+
 
 /**
  * Computes layout parameters to fit ISO 216 Standard A4 (210mm x 297mm) on 1 single page.

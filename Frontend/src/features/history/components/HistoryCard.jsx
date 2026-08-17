@@ -92,7 +92,7 @@ const HistoryCard = ({ data }) => {
                             <button onClick={() => navigate(`/interview/${data._id}`)}>
                                 <BarChart2 size={16} /> View Report
                             </button>
-                            <button onClick={() => navigate(`/preparation?id=${data._id}`)}>
+                            <button onClick={() => navigate(`/interview/${data._id}`)}>
                                 <Play size={16} /> Continue Prep
                             </button>
                             <button onClick={async () => {

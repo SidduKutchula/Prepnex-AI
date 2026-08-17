@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ResumeContext } from '../resume.context';
+import { ResumeContext } from '../context/ResumeContext';
 import { ResumeTemplateSwitcher } from './ResumeTemplateSwitcher';
 import { ResumeDownload } from './ResumeDownload';
 import { Edit3, Eye, Sparkles, Target } from 'lucide-react';

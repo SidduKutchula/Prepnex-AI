@@ -26,8 +26,7 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const sideMargin = 28;
-    const contentWidth = pageWidth - (sideMargin * 2);
+    const contentWidth = pageWidth - (margin * 2);
 
     let y = margin + 8;
 
@@ -45,12 +44,12 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
         doc.setFont('times', 'bold');
         doc.setFontSize(headingSize);
         doc.setTextColor(15, 23, 42); // Slate dark
-        doc.text(title.toUpperCase(), sideMargin, y);
+        doc.text(title.toUpperCase(), margin, y);
 
         y += 4;
         doc.setLineWidth(0.75);
         doc.setDrawColor(203, 213, 225); // Slate light line
-        doc.line(sideMargin, y, sideMargin + contentWidth, y);
+        doc.line(margin, y, margin + contentWidth, y);
         y += 12;
     };
 
@@ -102,7 +101,7 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
         const splitSummary = doc.splitTextToSize(resumeData.summary, contentWidth);
         splitSummary.forEach(line => {
             checkNewPage(fontSize * lineHeight);
-            doc.text(line, sideMargin, y);
+            doc.text(line, margin, y);
             y += fontSize * lineHeight;
         });
         y += sectionGap;
@@ -122,22 +121,23 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
 
             doc.setFont('times', 'bold');
             doc.setTextColor(0, 0, 0);
-            doc.text(category, sideMargin, y);
+            doc.text(category, margin, y);
 
             doc.setFont('times', 'normal');
             doc.setTextColor(30, 41, 59);
             const splitVal = doc.splitTextToSize(value, contentWidth - 140);
-            doc.text(splitVal[0] || '', sideMargin + 140, y);
+            doc.text(splitVal[0] || '', margin + 140, y);
             y += fontSize * lineHeight;
 
             for (let i = 1; i < splitVal.length; i++) {
                 checkNewPage(fontSize * lineHeight);
-                doc.text(splitVal[i], sideMargin + 140, y);
+                doc.text(splitVal[i], margin + 140, y);
                 y += fontSize * lineHeight;
             }
         });
         y += sectionGap;
     }
+
 
     // --- 4. PROJECTS ---
     if (resumeData.projects && resumeData.projects.length > 0) {

@@ -42,6 +42,11 @@ export function useRoadmapProgress(reportId) {
         }
     }, [reportId]);
 
+    const completedTaskIdsRef = useRef(completedTaskIds);
+    useEffect(() => {
+        completedTaskIdsRef.current = completedTaskIds;
+    }, [completedTaskIds]);
+
     useEffect(() => {
         fetchProgress();
     }, [fetchProgress]);
@@ -49,17 +54,23 @@ export function useRoadmapProgress(reportId) {
     const toggleQueue = useRef({});
 
     const toggleTask = async (taskId) => {
-        // Compute the expected next state based on the current state.
-        // Because of optimistic UI and rapid clicks, we should rely on the functional state 
-        // update to determine what the actual state will become in React.
-        let nextCompleted = false;
-        let wasCompleted = false;
-        
-        setCompletedTaskIds((prev) => {
-            wasCompleted = prev.includes(taskId);
-            nextCompleted = !wasCompleted;
-            return nextCompleted ? [...prev, taskId] : prev.filter((id) => id !== taskId);
-        });
+        if (!reportId || !taskId) return;
+
+        const wasCompleted = completedTaskIdsRef.current.includes(taskId);
+        const nextCompleted = !wasCompleted;
+
+        // Synchronously update ref for subsequent rapid clicks before re-render
+        const nextList = nextCompleted
+            ? (completedTaskIdsRef.current.includes(taskId) ? completedTaskIdsRef.current : [...completedTaskIdsRef.current, taskId])
+            : completedTaskIdsRef.current.filter((id) => id !== taskId);
+        completedTaskIdsRef.current = nextList;
+
+        // Optimistic UI state update
+        setCompletedTaskIds((prev) =>
+            nextCompleted
+                ? (prev.includes(taskId) ? prev : [...prev, taskId])
+                : prev.filter((id) => id !== taskId)
+        );
 
         // Initialize the queue for this task if it doesn't exist
         if (!toggleQueue.current[taskId]) {
@@ -73,15 +84,17 @@ export function useRoadmapProgress(reportId) {
                     `/api/roadmap/progress/${reportId}/task/${encodeURIComponent(taskId)}`,
                     { completed: nextCompleted }
                 );
-                if (isMounted.current && res.data.success) {
+                if (isMounted.current && res.data?.success && Array.isArray(res.data.completedTaskIds)) {
                     setCompletedTaskIds(res.data.completedTaskIds);
+                    completedTaskIdsRef.current = res.data.completedTaskIds;
                 }
             } catch (err) {
                 console.error('[Roadmap] Toggle failed, reverting:', err.message);
                 if (isMounted.current) {
-                    // Revert to the state before THIS specific action was attempted
                     setCompletedTaskIds((prev) =>
-                        wasCompleted ? [...prev, taskId] : prev.filter((id) => id !== taskId)
+                        wasCompleted
+                            ? (prev.includes(taskId) ? prev : [...prev, taskId])
+                            : prev.filter((id) => id !== taskId)
                     );
                 }
             }
@@ -89,4 +102,5 @@ export function useRoadmapProgress(reportId) {
     };
 
     return { completedTaskIds, toggleTask, loading, refetch: fetchProgress };
+
 }

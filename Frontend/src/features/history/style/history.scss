@@ -1,4 +1,4 @@
-@import "../../auth/auth.form.scss"; // For common vars if needed
+@use "../../auth/auth.form.scss"; // For common vars if needed
 
 .history-dashboard {
   padding: 24px 32px;

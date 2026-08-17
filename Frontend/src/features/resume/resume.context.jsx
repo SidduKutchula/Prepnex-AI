@@ -1,8 +1,9 @@
-import React, { createContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { parseResumeHtml, createEmptyResume } from './utils/parseResumeHtml';
 import { optimizeForAts } from './utils/atsOptimizer';
+import { ResumeContext } from './context/ResumeContext';
 
-export const ResumeContext = createContext(null);
+export { ResumeContext };
 
 export const ResumeProvider = ({ children, initialHtml = '', reportData = null }) => {
     const [resumeData, setResumeData] = useState(() => {

@@ -1,29 +1,15 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth.js'
 import { useTheme } from '../hooks/useTheme.js'
 import { 
     LayoutDashboard, 
-    FileText, 
     FileBarChart, 
-    Map, 
-    Search, 
-    Bell, 
     SunMoon, 
     LogOut,
     BrainCircuit,
-    ChevronDown,
-    ChevronRight,
-    PlayCircle,
-    Code,
-    Users,
-    Briefcase,
-    Server,
-    Cpu,
     FileCheck,
-    History,
-    Settings,
-    User
+    History
 } from 'lucide-react'
 import './sidebar.scss'
 
@@ -32,12 +18,13 @@ const Sidebar = () => {
     const { theme, toggleTheme } = useTheme()
     const navigate = useNavigate()
     const location = useLocation()
-    
 
-
-    const initials = user?.username 
-        ? user.username.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    const rawName = user?.username || user?.name || ''
+    const initials = rawName.trim()
+        ? rawName.trim().split(/\s+/).filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
         : 'U'
+
+    const path = location.pathname
 
     return (
         <aside className="sidebar">
@@ -50,7 +37,7 @@ const Sidebar = () => {
 
             <nav className="sidebar-nav">
                 <button 
-                    className={`nav-item ${location.pathname === '/interview' || location.pathname === '/' ? 'active' : ''}`}
+                    className={`nav-item ${path.startsWith('/interview') || path === '/' ? 'active' : ''}`}
                     onClick={() => navigate('/interview')}
                 >
                     <LayoutDashboard size={20} className="nav-icon" />
@@ -58,7 +45,7 @@ const Sidebar = () => {
                 </button>
 
                 <button 
-                    className={`nav-item ${location.pathname === '/resume' ? 'active' : ''}`}
+                    className={`nav-item ${path.startsWith('/resume') ? 'active' : ''}`}
                     onClick={() => navigate('/resume')}
                 >
                     <FileCheck size={20} className="nav-icon" />
@@ -66,7 +53,7 @@ const Sidebar = () => {
                 </button>
 
                 <button 
-                    className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}
+                    className={`nav-item ${path === '/history' ? 'active' : ''}`}
                     onClick={() => navigate('/history')}
                 >
                     <FileBarChart size={20} className="nav-icon" />
@@ -74,7 +61,7 @@ const Sidebar = () => {
                 </button>
 
                 <button 
-                    className={`nav-item ${location.pathname === '/history/compare' ? 'active' : ''}`}
+                    className={`nav-item ${path.startsWith('/history/compare') ? 'active' : ''}`}
                     onClick={() => navigate('/history/compare')}
                 >
                     <History size={20} className="nav-icon" />
@@ -93,7 +80,7 @@ const Sidebar = () => {
                         <div className="user-avatar">
                             {initials}
                         </div>
-                        <span className="user-name">{user?.username || 'Candidate'}</span>
+                        <span className="user-name">{user?.username || user?.name || 'Candidate'}</span>
                     </div>
                     <button className="logout-btn" onClick={handleLogout} title="Sign Out">
                         <LogOut size={18} />
@@ -103,5 +90,6 @@ const Sidebar = () => {
         </aside>
     )
 }
+
 
 export default Sidebar

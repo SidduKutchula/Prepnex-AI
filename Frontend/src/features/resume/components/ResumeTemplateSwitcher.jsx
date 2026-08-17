@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ResumeContext } from '../resume.context';
+import { ResumeContext } from '../context/ResumeContext';
 import { Layout, Check } from 'lucide-react';
 
 const TEMPLATES = [

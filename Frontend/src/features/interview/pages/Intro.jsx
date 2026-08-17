@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 import { useTheme } from '../../../hooks/useTheme.js'
 
-/* eslint-disable-next-line no-unused-vars */
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
     LayoutDashboard, 

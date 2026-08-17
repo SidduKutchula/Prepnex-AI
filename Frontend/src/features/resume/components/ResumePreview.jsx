@@ -1,10 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { ResumeContext } from '../resume.context';
+import { ResumeContext } from '../context/ResumeContext';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { groupSkillsIntoCategories } from '../utils/atsOptimizer';
+import { useAuth } from '../../auth/hooks/useAuth.js';
 
 export const ResumePreview = () => {
     const context = useContext(ResumeContext);
+    const { user } = useAuth();
     const [zoom, setZoom] = useState(100);
 
     if (!context) return null;
@@ -17,9 +19,9 @@ export const ResumePreview = () => {
     const handleResetZoom = () => setZoom(100);
 
     const formattedSkills = groupSkillsIntoCategories(data.skills || []);
-    const candidateName = data.name && data.name.trim() !== '' && !/^(software engineer|full stack|developer)/i.test(data.name) 
+    const candidateName = (data.name && data.name.trim() !== '')
         ? data.name 
-        : 'SIDDU KUTCHULA';
+        : (user?.username || user?.name || 'CANDIDATE NAME');
 
     return (
         <div className="resume-preview-column">
@@ -81,31 +83,38 @@ export const ResumePreview = () => {
                 {data.projects && data.projects.length > 0 && (
                     <section className="resume-section">
                         <h3 className="section-title">PROJECTS</h3>
-                        {data.projects.map((proj, idx) => (
-                            <div key={idx} className="resume-entry">
-                                <div className="entry-header">
-                                    <span className="entry-role">{proj.name}</span>
-                                    {proj.dates && <span className="entry-dates">{proj.dates}</span>}
+                        {data.projects.map((proj, idx) => {
+                            const hasSource = proj.sourceUrl && proj.sourceUrl !== '#';
+                            const hasDemo = proj.demoUrl && proj.demoUrl !== '#';
+                            return (
+                                <div key={idx} className="resume-entry">
+                                    <div className="entry-header">
+                                        <span className="entry-role">{proj.name}</span>
+                                        {proj.dates && <span className="entry-dates">{proj.dates}</span>}
+                                    </div>
+                                    <div className="entry-sub-header">
+                                        {proj.tech && <span className="entry-tech-italic">{proj.tech}</span>}
+                                        {(hasSource || hasDemo) && (
+                                            <span className="entry-links">
+                                                {hasSource && <a href={proj.sourceUrl} target="_blank" rel="noopener noreferrer">Source Code</a>}
+                                                {hasSource && hasDemo && ' — '}
+                                                {hasDemo && <a href={proj.demoUrl} target="_blank" rel="noopener noreferrer">Live Demo</a>}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {proj.bullets && proj.bullets.length > 0 && (
+                                        <ul className="entry-bullets">
+                                            {proj.bullets.map((b, bIdx) => (
+                                                <li key={bIdx}>{b}</li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
-                                <div className="entry-sub-header">
-                                    {proj.tech && <span className="entry-tech-italic">{proj.tech}</span>}
-                                    <span className="entry-links">
-                                        <a href={proj.sourceUrl || '#'} target="_blank" rel="noreferrer">Source Code</a>
-                                        {' — '}
-                                        <a href={proj.demoUrl || '#'} target="_blank" rel="noreferrer">Live Demo</a>
-                                    </span>
-                                </div>
-                                {proj.bullets && proj.bullets.length > 0 && (
-                                    <ul className="entry-bullets">
-                                        {proj.bullets.map((b, bIdx) => (
-                                            <li key={bIdx}>{b}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </section>
                 )}
+
 
                 {/* --- WORK EXPERIENCE --- */}
                 {data.experience && data.experience.length > 0 && (

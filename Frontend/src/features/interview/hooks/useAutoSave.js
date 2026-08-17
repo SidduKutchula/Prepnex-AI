@@ -9,7 +9,6 @@ export const useAutoSave = (userId) => {
     const userIdRef = useRef(userId);
 
     // Create a stable debounced save function for the cloud
-    // eslint-disable-next-line react-hooks/refs
     const debouncedSave = useRef(
         debounce(async (data) => {
             const currentUserId = userIdRef.current;

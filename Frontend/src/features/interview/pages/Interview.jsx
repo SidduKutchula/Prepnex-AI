@@ -8,7 +8,6 @@ import { ResumePreview } from '../../resume/components/ResumePreview'
 import { useResumePdf } from '../../resume/hooks/useResumePdf'
 import { parseResumeHtml } from '../../resume/utils/parseResumeHtml'
 import { exportFullMasterReportPDF, downloadAllReports } from '../utils/reportExporter'
-// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion'
 import { AnimatedCounter } from '../../../components/AnimatedCounter.jsx'
 import {

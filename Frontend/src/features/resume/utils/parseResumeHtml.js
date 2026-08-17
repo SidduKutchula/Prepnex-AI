@@ -170,7 +170,7 @@ function extractEmail(text) {
  */
 function extractPhone(text) {
     if (!text) return '';
-    const phoneMatch = text.match(/[\+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{6,15}/);
+    const phoneMatch = text.match(/[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{6,15}/);
     return phoneMatch ? phoneMatch[0].trim() : '';
 }
 

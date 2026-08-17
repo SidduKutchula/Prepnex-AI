@@ -51,6 +51,7 @@ const InterviewLanding = () => {
     const [remainingDays, setRemainingDays] = useState(7)
     const [error, setError] = useState("")
     const [isLoaded, setIsLoaded] = useState(false)
+    const [isDragging, setIsDragging] = useState(false)
     const resumeInputRef = useRef()
 
     const { triggerSave, loadDraft, clearDraft } = useAutoSave(user?.id)
@@ -108,17 +109,52 @@ const InterviewLanding = () => {
         }
     }, [jobDescription, selfDescription, remainingDays, triggerSave, isLoaded, user?.id]);
 
-    // Stable refs so handlers don't recreate on every render
-    const handleFileChange = useCallback((e) => {
-        const file = e.target.files[0]
-        if (file) {
-            setResumeFile(file)
-            setFileName(file.name)
-        } else {
+    const validateAndSetFile = useCallback((file) => {
+        if (!file) {
             setResumeFile(null)
             setFileName("")
+            return
         }
+        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+            setError("Only PDF files are supported. Please upload a PDF resume.")
+            return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setError("File size exceeds 5MB limit. Please upload a smaller resume PDF.")
+            return
+        }
+        setError("")
+        setResumeFile(file)
+        setFileName(file.name)
     }, [])
+
+    const handleFileChange = useCallback((e) => {
+        const file = e.target.files[0]
+        validateAndSetFile(file)
+    }, [validateAndSetFile])
+
+    const handleDragOver = useCallback((e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragging(true)
+    }, [])
+
+    const handleDragLeave = useCallback((e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragging(false)
+    }, [])
+
+    const handleDrop = useCallback((e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDragging(false)
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0]
+            validateAndSetFile(file)
+        }
+    }, [validateAndSetFile])
+
 
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -224,8 +260,11 @@ const InterviewLanding = () => {
                                             style={{ display: "none" }}
                                         />
                                         <div 
-                                            className={`premium-dropzone ${fileName ? 'has-file' : ''}`}
+                                            className={`premium-dropzone ${fileName ? 'has-file' : ''} ${isDragging ? 'is-dragging' : ''}`}
                                             onClick={() => { if (!fileName) resumeInputRef.current.click() }}
+                                            onDragOver={handleDragOver}
+                                            onDragLeave={handleDragLeave}
+                                            onDrop={handleDrop}
                                         >
                                             {fileName ? (
                                                 <div className="dropzone-success">

@@ -1,8 +1,7 @@
-import React, { useContext } from 'react';
-import { ResumeContext } from '../context/ResumeContext';
+import React from 'react';
 import { ResumeTemplateSwitcher } from './ResumeTemplateSwitcher';
 import { ResumeDownload } from './ResumeDownload';
-import { Edit3, Eye, Sparkles, Target } from 'lucide-react';
+import { Target } from 'lucide-react';
 
 export const ResumeToolbar = ({ atsScore = 95, reportId }) => {
     return (
@@ -18,8 +17,13 @@ export const ResumeToolbar = ({ atsScore = 95, reportId }) => {
             <div className="toolbar-center">
                 <ResumeTemplateSwitcher />
             </div>
+
+            <div className="toolbar-right">
+                <ResumeDownload />
+            </div>
         </div>
     );
 };
+
 
 export default ResumeToolbar;

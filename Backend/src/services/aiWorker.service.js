@@ -283,14 +283,13 @@ class AIWorkerService extends EventEmitter {
                 }
             };
 
-            const atsPromise = runAts();
-            const questionsPromise = runQuestions();
-            const rewritePromise = runRewrite();
-            const roadmapPromise = runRoadmap();
+            console.log("[WAITING] Executing Stage 1 (ATS) & Stage 2 (Questions)");
+            await Promise.allSettled([runAts(), runQuestions()]);
 
-            console.log("[WAITING] Waiting for all concurrent stages to finish");
-            await Promise.allSettled([atsPromise, questionsPromise, roadmapPromise, rewritePromise]);
-            console.log("[OK] All 4 concurrent stages complete");
+            console.log("[WAITING] Executing Stage 3 (Roadmap) & Stage 4 (Resume Rewrite)");
+            await Promise.allSettled([runRoadmap(), runRewrite()]);
+
+            console.log("[OK] All 4 stages complete");
 
             // Finalize status
             const report = await interviewReportModel.findById(reportId);

@@ -37,7 +37,10 @@ import {
     CheckCircle2,
     Loader2,
     LineChart,
-    MessageSquare
+    MessageSquare,
+    ExternalLink,
+    Bookmark,
+    BookOpen
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -97,7 +100,7 @@ const sectionFade = {
 
 // ── Sub-components (memoised — prevent re-render on parent state changes) ─────
 const QuestionCard = memo(({ item, index }) => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(index === 0)
 
     const categories = ["system design", "technical deep-dive", "coding architecture", "behavioral alignment", "problem solving"];
     const category = categories[index % categories.length];
@@ -167,8 +170,8 @@ const getResourceIcon = (type) => {
         case "official": return <FileText size={14} />;
         case "interactive": return <Play size={14} />;
         case "practice": return <CodeXml size={14} />;
-        case "project": return <Code size={14} />;
-        case "cheatSheet": return <Map size={14} />;
+        case "project": return <CodeXml size={14} />;
+        case "cheatSheet": return <Bookmark size={14} />;
         default: return <FileText size={14} />;
     }
 }
@@ -178,14 +181,26 @@ const getOldResourceIcon = (type) => {
         case "video": return <Video size={14} />;
         case "practice": return <CodeXml size={14} />;
         case "article": return <FileText size={14} />;
-        default: return <Map size={14} />;
+        case "docs":
+        case "documentation": return <BookOpen size={14} />;
+        case "cheatsheet": return <Bookmark size={14} />;
+        default: return <BookOpen size={14} />;
     }
 }
 
-const RoadMapDay = memo(({ day, isCompleted, isActive, onToggleCompleted, completedTaskIds }) => {
-    // Determine how many tasks are completed in this day
-    const completedCount = day.tasks.filter(t => completedTaskIds.includes(t._id || t.title)).length;
-    const progress = Math.round((completedCount / day.tasks.length) * 100) || 0;
+const RoadMapDay = memo(({ day, isCompleted, isActive, onToggleCompleted, completedTaskIds, defaultExpanded }) => {
+    const [isOpen, setIsOpen] = useState(defaultExpanded ?? (isActive || day.day === 1));
+
+    useEffect(() => {
+        if (defaultExpanded !== undefined) {
+            setIsOpen(defaultExpanded);
+        }
+    }, [defaultExpanded]);
+
+    const tasks = day.tasks || [];
+    const completedCount = tasks.filter(t => completedTaskIds.includes(t._id || t.title)).length;
+    const progress = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+    const cleanFocus = String(day.focus || '').replace(/^Day\s*\d+\s*[:\-–—]\s*/i, '').trim() || `Technical Mastery Focus`;
 
     return (
         <motion.div 
@@ -199,56 +214,95 @@ const RoadMapDay = memo(({ day, isCompleted, isActive, onToggleCompleted, comple
                     <span className="roadmap-marker__inner"></span>
                 )}
             </div>
-            <div className="roadmap-card glass-card premium-dark">
-                <div className='roadmap-day__header'>
+            <div className={`roadmap-card glass-card premium-dark ${isOpen ? 'is-expanded' : 'is-collapsed'}`}>
+                <div 
+                    className='roadmap-day__header'
+                    onClick={() => setIsOpen(prev => !prev)}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className='roadmap-day__title-row'>
                         <span className='roadmap-day__badge'>Day {day.day}</span>
-                        <h3 className='roadmap-day__focus'>{day.focus}</h3>
+                        <h3 className='roadmap-day__focus'>{cleanFocus}</h3>
+                        <motion.div 
+                            animate={{ rotate: isOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="roadmap-day__chevron"
+                        >
+                            <ChevronDown size={18} />
+                        </motion.div>
                     </div>
                     <div className='roadmap-day__meta-row'>
                         <div className="progress-bar-container">
                             <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
                         </div>
-                        <span className="progress-text">{progress === 100 ? '100% Completed' : `${progress}%`}</span>
+                        <span className="progress-text">
+                            {completedCount}/{tasks.length} tasks • {progress === 100 ? '100% Completed' : `${progress}%`}
+                        </span>
                     </div>
                 </div>
                 
-                <div className='roadmap-day__tasks-detailed'>
-                    {day.tasks.map((task) => {
-                        const taskId = task._id || task.title;
-                        const isTaskCompleted = completedTaskIds.includes(taskId);
-                        
-                        return (
-                            <div key={taskId} className={`detailed-task-row ${isTaskCompleted ? 'task-completed' : ''}`}>
-                                <div className="task-checkbox" onClick={() => onToggleCompleted(taskId)}>
-                                    {isTaskCompleted && <Check size={14} />}
-                                </div>
-                                <div className="task-content">
-                                    <div className="task-top">
-                                        <h4 className="task-title">{task.title}</h4>
-                                        <span className={`task-difficulty badge-${task.difficulty?.toLowerCase()}`}>{task.difficulty}</span>
-                                        <span className="task-time">{task.timeHours} hrs</span>
-                                    </div>
-                                    <div className="task-meta-pills">
-                                        <span className="task-pill">{task.timeOfDay}</span>
-                                        <span className="task-pill">{task.type}</span>
-                                    </div>
+                <AnimatePresence initial={false}>
+                    {isOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            style={{ overflow: 'hidden' }}
+                        >
+                            <div className='roadmap-day__tasks-detailed'>
+                                {tasks.map((task, idx) => {
+                                    const taskId = task._id || `day-${day.day}-task-${idx + 1}`;
+                                    const isTaskCompleted = completedTaskIds.includes(taskId) || completedTaskIds.includes(task.title);
                                     
-                                    {task.resources && task.resources.length > 0 && (
-                                        <div className="task-resources">
-                                            {task.resources.map((res, j) => (
-                                                <a key={j} href={res.url} target="_blank" rel="noopener noreferrer" className="resource-link">
-                                                    {getOldResourceIcon(res.type)}
-                                                    <span>{res.title}</span>
-                                                </a>
-                                            ))}
+                                    return (
+                                        <div key={taskId} className={`detailed-task-row ${isTaskCompleted ? 'task-completed' : ''}`}>
+                                            <div 
+                                                className="task-checkbox" 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onToggleCompleted(taskId);
+                                                }}
+                                            >
+                                                {isTaskCompleted && <Check size={14} />}
+                                            </div>
+                                            <div className="task-content">
+                                                <div className="task-top">
+                                                    <h4 className="task-title">{task.title}</h4>
+                                                    <span className={`task-difficulty badge-${task.difficulty?.toLowerCase()}`}>{task.difficulty}</span>
+                                                    <span className="task-time">{task.timeHours} hrs</span>
+                                                </div>
+                                                <div className="task-meta-pills">
+                                                    <span className="task-pill">{task.timeOfDay}</span>
+                                                    <span className="task-pill">{task.type}</span>
+                                                </div>
+                                                
+                                                {task.resources && task.resources.length > 0 && (
+                                                    <div className="task-resources">
+                                                        {task.resources.map((res, j) => (
+                                                            <a 
+                                                                key={j} 
+                                                                href={res.url} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer" 
+                                                                className="resource-link"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {getOldResourceIcon(res.type)}
+                                                                <span>{res.title}</span>
+                                                                <ExternalLink size={12} className="external-icon" />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
+                                    )
+                                })}
                             </div>
-                        )
-                    })}
-                </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </motion.div>
     )
@@ -673,6 +727,7 @@ import { useRoadmapProgress } from '../hooks/useRoadmapProgress';
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
     const [activeNav, setActiveNav] = useState('technical')
+    const [allDaysExpanded, setAllDaysExpanded] = useState(null)
     const { setActiveTab } = useOutletContext()
     const { report: baseReport, getReportById, loading } = useInterview()
     const { interviewId } = useParams()
@@ -1136,71 +1191,95 @@ const Interview = () => {
                                 </motion.section>
                             )}
 
-                            {activeNav === 'roadmap' && (
-                                <motion.section
-                                    key="roadmap"
-                                    variants={sectionFade}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    className="section-content"
-                                >
-                                    <div className='content-header'>
-                                        <h2>Preparation Strategy</h2>
-                                        <span className='content-header__count'>{report.preparationPlan?.length || 0} Skills</span>
-                                    </div>
+                            {activeNav === 'roadmap' && (() => {
+                                const isDayPlan = Boolean(report.preparationPlan?.[0]?.day);
+                                const allTasks = isDayPlan 
+                                    ? (report.preparationPlan || []).flatMap(d => d.tasks || [])
+                                    : (report.preparationPlan || []);
+                                const totalTasksCount = allTasks.length;
+                                const completedTasksCount = allTasks.filter(t => completedTaskIds.includes(t._id || t.title || t.topic)).length;
+                                const progressPct = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
 
-                                    {!report.preparationPlan || report.preparationPlan.length === 0 ? (
-                                        <div className="empty-state" style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border)', marginTop: '16px' }}>
-                                            {report.status === 'completed' ? (
-                                                <>
-                                                    <Map size={32} style={{ color: 'var(--text-muted)', marginBottom: '12px' }} />
-                                                    <h3 style={{ marginBottom: '4px', fontSize: '1rem' }}>No Roadmap Required</h3>
-                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>You are fully prepared for this role. No preparation strategy is needed.</p>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <AlertTriangle size={32} style={{ color: 'var(--warning)', marginBottom: '12px' }} />
-                                                    <h3 style={{ marginBottom: '4px', fontSize: '1rem' }}>Generation Failed</h3>
-                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>We couldn't generate a preparation strategy. Please try regenerating the report.</p>
-                                                </>
+                                return (
+                                    <motion.section
+                                        key="roadmap"
+                                        variants={sectionFade}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                        className="section-content"
+                                    >
+                                        <div className='content-header roadmap-content-header'>
+                                            <div>
+                                                <h2>Preparation Strategy</h2>
+                                                <span className='content-header__count'>
+                                                    {isDayPlan ? `${report.preparationPlan.length} Days Plan` : `${report.preparationPlan?.length || 0} Skills`} • {completedTasksCount}/{totalTasksCount} Tasks Completed ({progressPct}%)
+                                                </span>
+                                            </div>
+                                            {isDayPlan && report.preparationPlan?.length > 0 && (
+                                                <button 
+                                                    type="button" 
+                                                    className="roadmap-toggle-all-btn"
+                                                    onClick={() => setAllDaysExpanded(prev => (prev === true ? false : true))}
+                                                >
+                                                    {allDaysExpanded ? "Collapse All Days" : "Expand All Days"}
+                                                </button>
                                             )}
                                         </div>
-                                    ) : (
-                                        <div className='roadmap-list premium-timeline'>
-                                            {report.preparationPlan?.map((item, index) => {
-                                                if (item.tasks && item.day) {
-                                                    const isCompleted = item.tasks.every(t => completedTaskIds.includes(t._id || t.title));
-                                                    const isActive = !isCompleted && 
-                                                        (index === 0 || report.preparationPlan[index-1].tasks?.every(t => completedTaskIds.includes(t._id || t.title)))
-                                                    
-                                                    return (
-                                                        <RoadMapDay 
-                                                            key={`day-${item.day}`} 
-                                                            day={item} 
-                                                            isCompleted={isCompleted}
-                                                            isActive={isActive}
-                                                            onToggleCompleted={toggleTask}
-                                                            completedTaskIds={completedTaskIds}
-                                                        />
-                                                    )
-                                                } else if (item.topic) {
-                                                    const isCompleted = completedTaskIds.includes(item._id || item.topic)
-                                                    return (
-                                                        <SkillMasteryCard 
-                                                            key={`skill-${index}`} 
-                                                            skill={item} 
-                                                            isCompleted={isCompleted}
-                                                            onToggleCompleted={toggleTask}
-                                                        />
-                                                    )
-                                                }
-                                                return null;
-                                            })}
-                                        </div>
-                                    )}
-                                </motion.section>
-                            )}
+
+                                        {!report.preparationPlan || report.preparationPlan.length === 0 ? (
+                                            <div className="empty-state" style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border)', marginTop: '16px' }}>
+                                                {report.status === 'completed' ? (
+                                                    <>
+                                                        <Map size={32} style={{ color: 'var(--text-muted)', marginBottom: '12px' }} />
+                                                        <h3 style={{ marginBottom: '4px', fontSize: '1rem' }}>No Roadmap Required</h3>
+                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>You are fully prepared for this role. No preparation strategy is needed.</p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <AlertTriangle size={32} style={{ color: 'var(--warning)', marginBottom: '12px' }} />
+                                                        <h3 style={{ marginBottom: '4px', fontSize: '1rem' }}>Generation Failed</h3>
+                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>We couldn't generate a preparation strategy. Please try regenerating the report.</p>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className='roadmap-list premium-timeline'>
+                                                {report.preparationPlan?.map((item, index) => {
+                                                    if (item.tasks && item.day) {
+                                                        const isCompleted = item.tasks.every(t => completedTaskIds.includes(t._id || t.title));
+                                                        const isActive = !isCompleted && 
+                                                            (index === 0 || report.preparationPlan[index-1].tasks?.every(t => completedTaskIds.includes(t._id || t.title)))
+                                                        
+                                                        return (
+                                                            <RoadMapDay 
+                                                                key={`day-${item.day}`} 
+                                                                day={item} 
+                                                                isCompleted={isCompleted}
+                                                                isActive={isActive}
+                                                                onToggleCompleted={toggleTask}
+                                                                completedTaskIds={completedTaskIds}
+                                                                defaultExpanded={allDaysExpanded === null ? undefined : allDaysExpanded}
+                                                            />
+                                                        )
+                                                    } else if (item.topic) {
+                                                        const isCompleted = completedTaskIds.includes(item._id || item.topic)
+                                                        return (
+                                                            <SkillMasteryCard 
+                                                                key={`skill-${index}`} 
+                                                                skill={item} 
+                                                                isCompleted={isCompleted}
+                                                                onToggleCompleted={toggleTask}
+                                                            />
+                                                        )
+                                                    }
+                                                    return null;
+                                                })}
+                                            </div>
+                                        )}
+                                    </motion.section>
+                                );
+                            })()}
 
                             {activeNav === 'resume' && (
                                 <motion.div

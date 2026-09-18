@@ -211,24 +211,27 @@ class AIWorkerService extends EventEmitter {
                     timings.roadmap = ((Date.now() - roadmapStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 3 - Roadmap Generation complete in ${timings.roadmap} sec`);
 
-                    const prepPlan = Array.isArray(roadmapData.preparationPlan) ? roadmapData.preparationPlan.map((dayPlan, index) => ({
-                        day: typeof dayPlan.day === 'number' ? dayPlan.day : (index + 1),
-                        focus: dayPlan.focus || `Day ${index + 1} Focus`,
-                        tasks: Array.isArray(dayPlan.tasks) ? dayPlan.tasks.map(task => ({
-                            title: task.title || "Untitled Task",
-                            timeHours: typeof task.timeHours === 'number' ? task.timeHours : 1,
-                            timeOfDay: ["Morning", "Afternoon", "Evening", "Night"].includes(task.timeOfDay) ? task.timeOfDay : "Morning",
-                            difficulty: ["Easy", "Medium", "Hard"].includes(task.difficulty) ? task.difficulty : "Medium",
-                            priority: ["High", "Medium", "Low"].includes(task.priority) ? task.priority : "Medium",
-                            type: ["Learn", "Practice", "Project", "Revision", "Mock"].includes(task.type) ? task.type : "Learn",
-                            status: "pending",
-                            resources: Array.isArray(task.resources) ? task.resources.map(res => ({
-                                title: res.title || "Learning Resource",
-                                url: (res.url && String(res.url).trim().length > 0) ? String(res.url).trim() : "https://developer.mozilla.org",
-                                type: ["docs", "video", "practice", "article", "cheatsheet"].includes(res.type) ? res.type : "docs"
+                    const prepPlan = Array.isArray(roadmapData.preparationPlan) ? roadmapData.preparationPlan.map((dayPlan, index) => {
+                        const dayNum = typeof dayPlan.day === 'number' ? dayPlan.day : (index + 1);
+                        return {
+                            day: dayNum,
+                            focus: String(dayPlan.focus || `Core Technical Focus`).replace(/^Day\s*\d+\s*[:\-–—]\s*/i, '').trim() || `Core Technical Focus`,
+                            tasks: Array.isArray(dayPlan.tasks) ? dayPlan.tasks.map((task, taskIdx) => ({
+                                title: task.title || `Task ${taskIdx + 1}`,
+                                timeHours: typeof task.timeHours === 'number' ? task.timeHours : 1.5,
+                                timeOfDay: ["Morning", "Afternoon", "Evening", "Night"].includes(task.timeOfDay) ? task.timeOfDay : "Morning",
+                                difficulty: ["Easy", "Medium", "Hard"].includes(task.difficulty) ? task.difficulty : "Medium",
+                                priority: ["High", "Medium", "Low"].includes(task.priority) ? task.priority : "Medium",
+                                type: ["Learn", "Practice", "Project", "Revision", "Mock"].includes(task.type) ? task.type : "Learn",
+                                status: "pending",
+                                resources: Array.isArray(task.resources) ? task.resources.map(res => ({
+                                    title: res.title || "Learning Resource",
+                                    url: (res.url && String(res.url).trim().length > 0) ? String(res.url).trim() : "https://developer.mozilla.org",
+                                    type: ["docs", "video", "practice", "article", "cheatsheet"].includes(res.type) ? res.type : "docs"
+                                })) : []
                             })) : []
-                        })) : []
-                    })) : [];
+                        };
+                    }) : [];
 
                     console.log("[START] Saving Roadmap to Mongo");
                     await interviewReportModel.updateOne(

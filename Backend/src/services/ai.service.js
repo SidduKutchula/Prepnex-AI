@@ -469,64 +469,80 @@ Our product team had a tight deadline to ship a major enterprise feature in 4 we
 
 function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCount = 7) {
     const totalDays = Math.min(Math.max(parseInt(daysCount) || 7, 1), 7);
-    const plan = [];
+    const jdLower = (jobDescription || "").toLowerCase();
+    
+    const isFrontend = jdLower.includes("react") || jdLower.includes("vue") || jdLower.includes("frontend") || jdLower.includes("ui") || jdLower.includes("next.js") || jdLower.includes("angular");
+    const isDataOrML = jdLower.includes("python") || jdLower.includes("data") || jdLower.includes("machine learning") || jdLower.includes("ai") || jdLower.includes("deep learning");
+    const isCloud = jdLower.includes("aws") || jdLower.includes("docker") || jdLower.includes("kubernetes") || jdLower.includes("devops") || jdLower.includes("ci/cd");
 
-    const topics = [
+    const allCurriculum = [
         {
-            focus: "System Architecture & Core Technical Fundamentals",
+            focus: isFrontend 
+                ? "Core Frontend Architecture & State Management" 
+                : isDataOrML 
+                    ? "Data Pipeline Architecture & Distributed Computing" 
+                    : isCloud 
+                        ? "Cloud Architecture, Containerization & Networking" 
+                        : "Core System Architecture & Technical Fundamentals",
             tasks: [
                 {
-                    title: "Review Core Architecture & Data Structure Patterns",
+                    title: isFrontend 
+                        ? "Master Component Lifecycle, Hooks, State & Render Optimization" 
+                        : "Review Core Architecture Patterns, Concurrency & Data Structures",
                     timeHours: 2,
                     timeOfDay: "Morning",
                     difficulty: "Medium",
                     priority: "High",
                     type: "Learn",
                     status: "pending",
-                    resources: [{ title: "System Design Primer", url: "https://github.com/donnemartin/system-design-primer", type: "docs" }]
+                    resources: [{ 
+                        title: isFrontend ? "React Architecture & Render Cycle Docs" : "System Design Primer", 
+                        url: isFrontend ? "https://react.dev/learn" : "https://github.com/donnemartin/system-design-primer", 
+                        type: "docs" 
+                    }]
                 },
                 {
-                    title: "Practice High-Frequency Technical Interview Questions",
+                    title: "Practice High-Frequency Core Technical Interview Questions",
                     timeHours: 2,
                     timeOfDay: "Afternoon",
                     difficulty: "Hard",
                     priority: "High",
                     type: "Practice",
                     status: "pending",
-                    resources: [{ title: "LeetCode Top 75", url: "https://leetcode.com/studyplan/leetcode-75/", type: "practice" }]
+                    resources: [{ title: "LeetCode Curated Top 75", url: "https://leetcode.com/studyplan/leetcode-75/", type: "practice" }]
                 }
             ]
         },
         {
-            focus: "Database Schema Optimization & Query Tuning",
+            focus: "Database Schema Optimization, Indexing & Caching Strategies",
             tasks: [
                 {
-                    title: "Master Indexing, Transactions & Query Execution Plans",
+                    title: "Master Composite Indexing, Query Plans & EXPLAIN Execution Analysis",
                     timeHours: 2,
                     timeOfDay: "Morning",
                     difficulty: "Medium",
                     priority: "High",
                     type: "Learn",
                     status: "pending",
-                    resources: [{ title: "Use The Index, Luke!", url: "https://use-the-index-luke.com/", type: "docs" }]
+                    resources: [{ title: "Use The Index, Luke! - Indexing Guide", url: "https://use-the-index-luke.com/", type: "docs" }]
                 },
                 {
-                    title: "Design DB Schemas for High-Concurrency Scenarios",
+                    title: "Implement Multi-Tier Caching with Redis & Cache Invalidation Policies",
                     timeHours: 2,
                     timeOfDay: "Afternoon",
                     difficulty: "Hard",
                     priority: "High",
                     type: "Project",
                     status: "pending",
-                    resources: [{ title: "PostgreSQL / MongoDB Performance Docs", url: "https://www.mongodb.com/docs/manual/core/query-optimization/", type: "docs" }]
+                    resources: [{ title: "Redis Architecture & Patterns", url: "https://redis.io/docs/", type: "docs" }]
                 }
             ]
         },
         {
-            focus: "API Security, Authentication & State Management",
+            focus: "API Security, Authentication Boundaries & High Availability",
             tasks: [
                 {
-                    title: "Review JWT Tokens, OAuth2 & Middleware Security Patterns",
+                    title: "Deep Dive into OAuth 2.0, JWT Token Rotation & OWASP Top 10 Mitigation",
                     timeHours: 2,
                     timeOfDay: "Morning",
                     difficulty: "Medium",
@@ -536,73 +552,73 @@ function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCoun
                     resources: [{ title: "OWASP Top 10 Security Guide", url: "https://owasp.org/www-project-top-ten/", type: "cheatsheet" }]
                 },
                 {
-                    title: "Implement Rate-Limiting & Caching with Redis",
-                    timeHours: 2,
+                    title: "Implement Rate Limiting, Input Validation & Security Middleware",
+                    timeHours: 1.5,
                     timeOfDay: "Afternoon",
                     difficulty: "Medium",
                     priority: "Medium",
                     type: "Practice",
                     status: "pending",
-                    resources: [{ title: "Redis Architecture & Patterns", url: "https://redis.io/docs/", type: "docs" }]
+                    resources: [{ title: "MDN Web Security & HTTP Headers", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers", type: "docs" }]
                 }
             ]
         },
         {
-            focus: "Frontend Performance, Rendering & State Optimization",
+            focus: "Scalable Distributed Systems & Asynchronous Task Processing",
             tasks: [
                 {
-                    title: "Optimize Component Rerenders & Core Web Vitals",
-                    timeHours: 2,
+                    title: "Architect Message Queues (BullMQ/Kafka) & Idempotent Worker Processing",
+                    timeHours: 2.5,
                     timeOfDay: "Morning",
-                    difficulty: "Medium",
-                    priority: "Medium",
-                    type: "Learn",
-                    status: "pending",
-                    resources: [{ title: "React Official Performance Optimization", url: "https://react.dev/learn/render-and-commit", type: "docs" }]
-                },
-                {
-                    title: "Build Responsive & Accessible Component Views",
-                    timeHours: 2,
-                    timeOfDay: "Afternoon",
-                    difficulty: "Easy",
-                    priority: "Medium",
-                    type: "Practice",
-                    status: "pending",
-                    resources: [{ title: "MDN Web Docs - Responsive Design", url: "https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design", type: "docs" }]
-                }
-            ]
-        },
-        {
-            focus: "Behavioral Alignment & STAR Framework Mastery",
-            tasks: [
-                {
-                    title: "Draft STAR Stories for Incident Management & Technical Conflicts",
-                    timeHours: 2,
-                    timeOfDay: "Morning",
-                    difficulty: "Easy",
+                    difficulty: "Hard",
                     priority: "High",
-                    type: "Revision",
+                    type: "Project",
                     status: "pending",
-                    resources: [{ title: "Amazon Leadership Principles & STAR Guide", url: "https://www.amazon.jobs/en/principles", type: "article" }]
+                    resources: [{ title: "Distributed Task Queue Patterns", url: "https://github.com/donnemartin/system-design-primer#message-queues", type: "docs" }]
                 },
                 {
-                    title: "Refine Verbal Answers for Recruiter & Hiring Manager Screenings",
+                    title: "Implement Dead-Letter Queues, Exponential Backoff & Fault Recovery",
                     timeHours: 1.5,
                     timeOfDay: "Afternoon",
                     difficulty: "Medium",
                     priority: "High",
-                    type: "Mock",
+                    type: "Practice",
                     status: "pending",
-                    resources: [{ title: "Tech Interview Behavioral Preparation Guide", url: "https://www.techinterviewhandbook.org/behavioral-interview/", type: "article" }]
+                    resources: [{ title: "Reliable Asynchronous Processing Guide", url: "https://roadmap.sh/backend", type: "docs" }]
                 }
             ]
         },
         {
-            focus: "Full-Stack End-to-End Mock Interview Simulation",
+            focus: "Cloud Deployment, CI/CD Automation & Production Monitoring",
             tasks: [
                 {
-                    title: "Execute Timed Mock System Design & Coding Test",
-                    timeHours: 3,
+                    title: "Containerize Applications with Multi-Stage Docker Builds & Health Checks",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Docker Best Practices Guide", url: "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/", type: "docs" }]
+                },
+                {
+                    title: "Configure Automated CI/CD Workflows & Cloud Environment Secrets",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Project",
+                    status: "pending",
+                    resources: [{ title: "GitHub Actions CI/CD Documentation", url: "https://docs.github.com/en/actions", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Full-Stack Mock Simulation & High-Stress Technical Problem Solving",
+            tasks: [
+                {
+                    title: "Execute Timed End-to-End System Design Mock Simulation",
+                    timeHours: 2.5,
                     timeOfDay: "Morning",
                     difficulty: "Hard",
                     priority: "High",
@@ -611,7 +627,7 @@ function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCoun
                     resources: [{ title: "ByteByteGo System Design Visuals", url: "https://bytebytego.com/", type: "article" }]
                 },
                 {
-                    title: "Analyze Mock Feedback & Address Weak Execution Areas",
+                    title: "Analyze Mock Feedback, Benchmark Weak Areas & Refactor Solutions",
                     timeHours: 2,
                     timeOfDay: "Evening",
                     difficulty: "Medium",
@@ -623,40 +639,68 @@ function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCoun
             ]
         },
         {
-            focus: "Final Pre-Interview Review, Resume Polish & Mental Readiness",
+            focus: "Behavioral STAR Mastery, Resume Metrics Walkthrough & Final Polish",
             tasks: [
                 {
-                    title: "Conduct Final ATS Resume Walkthrough & Key Talking Points Review",
-                    timeHours: 1.5,
+                    title: "Rehearse 5 Core STAR Stories (Incident Outages, Technical Conflicts, Trade-offs)",
+                    timeHours: 2,
                     timeOfDay: "Morning",
-                    difficulty: "Easy",
+                    difficulty: "Medium",
                     priority: "High",
                     type: "Revision",
                     status: "pending",
-                    resources: [{ title: "Resume & Portfolio Checklist", url: "https://www.techinterviewhandbook.org/resume/", type: "cheatsheet" }]
+                    resources: [{ title: "Behavioral Interview Prep Handbook", url: "https://www.techinterviewhandbook.org/behavioral-interview/", type: "cheatsheet" }]
                 },
                 {
-                    title: "Final Technical Cheat Sheet & Project Metric Review",
-                    timeHours: 1,
+                    title: "Final ATS Resume Metric Review, Talking Points & Interview Mindset",
+                    timeHours: 1.5,
                     timeOfDay: "Afternoon",
                     difficulty: "Easy",
                     priority: "High",
                     type: "Revision",
                     status: "pending",
-                    resources: [{ title: "Developer Roadmaps Guide", url: "https://roadmap.sh/", type: "docs" }]
+                    resources: [{ title: "Pre-Interview Mental Readiness Checklist", url: "https://www.techinterviewhandbook.org/final-prep/", type: "article" }]
                 }
             ]
         }
     ];
 
-    for (let day = 1; day <= totalDays; day++) {
-        const topicIndex = (day - 1) % topics.length;
-        plan.push({
-            day,
-            focus: `Day ${day}: ${topics[topicIndex].focus}`,
-            tasks: topics[topicIndex].tasks
-        });
+    let selectedCurriculum = [];
+    if (totalDays === 1) {
+        selectedCurriculum = [{
+            focus: "Intensive 24-Hour Final Technical & Behavioral Sprint",
+            tasks: [
+                allCurriculum[0].tasks[0],
+                allCurriculum[5].tasks[0],
+                allCurriculum[6].tasks[0]
+            ]
+        }];
+    } else if (totalDays === 3) {
+        selectedCurriculum = [
+            allCurriculum[0],
+            allCurriculum[1],
+            allCurriculum[6]
+        ];
+    } else if (totalDays === 5) {
+        selectedCurriculum = [
+            allCurriculum[0],
+            allCurriculum[1],
+            allCurriculum[2],
+            allCurriculum[5],
+            allCurriculum[6]
+        ];
+    } else {
+        selectedCurriculum = allCurriculum.slice(0, totalDays);
     }
+
+    const plan = selectedCurriculum.map((item, idx) => ({
+        day: idx + 1,
+        focus: item.focus.replace(/^Day\s*\d+\s*[:\-–—]\s*/i, '').trim(),
+        tasks: item.tasks.map((task, tIdx) => ({
+            ...task,
+            _id: `day-${idx + 1}-task-${tIdx + 1}`
+        }))
+    }));
 
     return { preparationPlan: plan };
 }
@@ -736,19 +780,40 @@ async function generateRoadmap({ resume, selfDescription, jobDescription, remain
     if (!candidateProfile && !jobDescription) throw new Error("Missing candidate profile or job description for generateRoadmap");
     const days = Math.min(Math.max(parseInt(remainingDays) || 7, 1), 7);
     
-    const prompt = `You are an Expert Technical Mentor. Generate a personalized interview preparation strategy.
+    const prompt = `${MASTER_PROMPT}
 
-Candidate Profile / Resume: ${candidateProfile}
-Target Job Description: ${jobDescription}
-Days Remaining Until Interview: ${days}
-Current ATS Score: ${atsScore || "Unknown"}
-Skill Gaps: ${JSON.stringify(skillGaps || [])}
+Task: Generate a high-impact, professional day-by-day technical interview preparation roadmap.
+Create a structured, non-clumsy learning path tailored directly to the candidate's skill gaps and the target role requirements.
 
-RULES:
-1. Generate a day-by-day preparation plan for EXACTLY ${days} days.
-2. For each day, provide a focused main topic and 2-3 actionable tasks targeting identified skill gaps and JD requirements.
-3. Each task must include title, timeHours (1-3), timeOfDay, difficulty, priority, type, and 1 verified learning resource link.
-4. Output strict JSON matching the schema.`;
+Candidate Profile / Resume:
+${candidateProfile}
+
+Target Job Description:
+${jobDescription}
+
+Timeline: EXACTLY ${days} Days Remaining
+ATS Match Score: ${atsScore || "Calculated from JD"}
+Identified Skill Gaps: ${JSON.stringify(skillGaps || [])}
+
+PEDAGOGICAL STRUCTURE & RULES:
+1. Generate an array of EXACTLY ${days} days (day: 1 to ${days}).
+2. LOGICAL CHRONOLOGICAL PROGRESSION:
+   - Day 1: High-priority core technologies & addressing primary skill gaps identified in the JD.
+   - Middle Days: Deep dive into systems, database optimization, caching, backend/frontend architectural patterns, and production API design.
+   - Penultimate Day: System design mock scenarios, high-frequency coding patterns, and edge-case handling.
+   - Final Day: Behavioral mastery (STAR stories), resume metrics walkthrough, and pre-interview readiness checklist.
+3. FOR EACH DAY:
+   - "focus": A concise, high-impact title summarizing the core theme (e.g. "Microservices Architecture & State Management" — DO NOT write "Day X:" because the UI already renders the Day badge).
+   - "tasks": EXACTLY 2 or 3 specific, focused tasks.
+4. FOR EACH TASK:
+   - "title": Action-oriented and descriptive (e.g., "Implement Redis Caching & Invalidation Patterns", not just "Learn Redis").
+   - "timeHours": Realistic focused study time (1 to 3 hours). Total daily hours should not exceed 5-6 hours.
+   - "timeOfDay": "Morning", "Afternoon", "Evening", or "Night".
+   - "difficulty": "Easy", "Medium", or "Hard".
+   - "priority": "High", "Medium", or "Low".
+   - "type": "Learn", "Practice", "Project", "Revision", or "Mock".
+   - "resources": 1 or 2 authoritative, real documentation or tutorial links (e.g., MDN, official docs, GitHub System Design Primer, LeetCode, Roadmap.sh).
+5. Output strict, valid JSON matching the schema.`;
 
     const schemaJson = JSON.stringify(zodToJsonSchema(roadmapSchema), null, 2);
     const fullPrompt = `${prompt}\n\nREQUIRED JSON SCHEMA:\nYou must respond ONLY with a valid JSON object matching this schema:\n${schemaJson}`;
@@ -771,7 +836,7 @@ RULES:
             ],
             response_format: { type: "json_object" },
             temperature: 0.3,
-            max_tokens: 3000
+            max_tokens: 3500
         }), 6, "Roadmap", fullPrompt);
 
         if (result && Array.isArray(result.preparationPlan) && result.preparationPlan.length > 0) {

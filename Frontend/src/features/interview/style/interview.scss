@@ -2130,25 +2130,86 @@
   }
 }
 
+// ── Preparation Strategy Header & Controls ──
+.roadmap-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .roadmap-toggle-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent);
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(var(--accent-rgb, 99, 102, 241), 0.25);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
 // ── Premium Dark Planner UI ──
 .premium-timeline {
   .roadmap-card.premium-dark {
     background-color: var(--bg-card);
     border: 1px solid var(--border);
     color: var(--text-body);
+    transition: all 0.25s ease;
     
+    &.is-collapsed {
+      .roadmap-day__header {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+    }
+
     .roadmap-day__header {
       display: flex;
       flex-direction: column;
       gap: 12px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border);
+      transition: background-color 0.2s ease;
+      border-radius: 8px;
+
+      &:hover {
+        .roadmap-day__focus {
+          color: var(--accent-hover, var(--accent));
+        }
+        .roadmap-day__chevron {
+          color: var(--text-primary);
+        }
+      }
     }
     
     .roadmap-day__title-row {
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    .roadmap-day__chevron {
+      color: var(--text-muted);
+      transition: color 0.2s ease;
     }
     
     .roadmap-day__badge {
@@ -2305,9 +2366,22 @@
           background: var(--accent-subtle);
           border-radius: 6px;
           transition: all 0.2s ease;
+          border: 1px solid transparent;
           
+          .external-icon {
+            margin-left: auto;
+            opacity: 0.6;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+          }
+
           &:hover {
-            background: var(--accent-subtle);
+            background: rgba(var(--accent-rgb, 99, 102, 241), 0.15);
+            border-color: var(--accent-subtle);
+
+            .external-icon {
+              opacity: 1;
+              transform: translate(2px, -2px);
+            }
           }
         }
       }

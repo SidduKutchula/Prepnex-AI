@@ -203,7 +203,8 @@ export function exportFullMasterReportPDF(report) {
             checkNewPage(40);
 
             const dayNum = dayItem.day || dayItem.dayNumber || 'Day';
-            const focus = dayItem.focus || dayItem.topic || 'Daily Preparation Focus';
+            const rawFocus = dayItem.focus || dayItem.topic || 'Daily Preparation Focus';
+            const focus = String(rawFocus).replace(/^Day\s*\d+\s*[:\-–—]\s*/i, '').trim() || 'Daily Preparation Focus';
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(11);

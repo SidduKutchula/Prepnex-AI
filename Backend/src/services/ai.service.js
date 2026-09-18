@@ -1,17 +1,8 @@
-const { GoogleGenAI } = require("@google/genai")
-const { GEMINI_MODEL } = require('../config/ai.config');
+const { getOpenRouterClient } = require("../config/openrouter.client");
+const { OPENROUTER_MODEL } = require('../config/ai.config');
 const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
 
-
-if (!process.env.GOOGLE_GENAI_API_KEY) {
-    console.error("CRITICAL ERROR: GOOGLE_GENAI_API_KEY is not set in the environment variables.");
-    process.exit(1);
-}
-
-const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY
-})
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -63,13 +54,13 @@ function parseAndCleanJson(text) {
 }
 
 const crypto = require('crypto');
-const geminiCache = new Map();
+const openRouterCache = new Map();
 
-async function callGeminiWithRetry(apiCall, maxRetries = 8, stageLabel = "AI", prompt = "") {
+async function callOpenRouterWithRetry(apiCall, maxRetries = 6, stageLabel = "AI", prompt = "") {
     const promptHash = prompt ? crypto.createHash('sha256').update(prompt).digest('hex') : null;
-    if (promptHash && geminiCache.has(promptHash)) {
-        console.log(`[OK] Cache hit for Gemini API [${stageLabel}]`);
-        return geminiCache.get(promptHash);
+    if (promptHash && openRouterCache.has(promptHash)) {
+        console.log(`[OK] Cache hit for OpenRouter API [${stageLabel}]`);
+        return openRouterCache.get(promptHash);
     }
 
     let retries = 0;
@@ -80,31 +71,44 @@ async function callGeminiWithRetry(apiCall, maxRetries = 8, stageLabel = "AI", p
         let result = null;
 
         const currentAttempt = retries + 1;
-        console.log(`[START] Gemini Request [${stageLabel}] (Attempt ${currentAttempt}/${maxRetries + 1})`);
+        console.log(`[START] OpenRouter Request [${stageLabel}] (Attempt ${currentAttempt}/${maxRetries + 1})`);
         const timerId = setInterval(() => {
-            console.log(`STAGE TIME: Gemini API request [${stageLabel}] is taking more than 5 seconds...`);
+            console.log(`STAGE TIME: OpenRouter API request [${stageLabel}] is taking more than 5 seconds...`);
         }, 5000);
 
         console.time(`${stageLabel} Request Time (Attempt ${currentAttempt})`);
         try {
             const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("AI Request Timed Out (60s)")), 60000));
             
-            console.log(`[OK] Initiating Promise.race between Gemini API call [${stageLabel}] and 60s timeout`);
+            console.log(`[OK] Initiating Promise.race between OpenRouter API call [${stageLabel}] and 60s timeout`);
             const apiPromise = apiCall();
             const response = await Promise.race([apiPromise, timeoutPromise]);
-            console.log(`[OK] Gemini Response Received [${stageLabel}]`);
+            console.log(`[OK] OpenRouter Response Received [${stageLabel}]`);
             
-            const text = response.text;
+            const text = response?.choices ? response.choices[0]?.message?.content : response?.text;
             if (!text) throw new Error("Empty response from AI");
             
             console.log(`[OK] JSON Parsed [${stageLabel}]`);
             result = parseAndCleanJson(text);
         } catch (error) {
-            logCompleteError("ai.service", `callGeminiWithRetry:${stageLabel}`, error);
+            logCompleteError("ai.service", `callOpenRouterWithRetry:${stageLabel}`, error);
             const message = error.message || "";
-            const isServiceUnavailable = error.status === 503 || (error.response && error.response.status === 503) || message.includes("503") || message.toLowerCase().includes("unavailable") || message.toLowerCase().includes("high demand") || message.includes("Timed Out");
+            const status = error.status || (error.response && error.response.status);
+
+            // Immediate non-retryable errors
+            if (status === 401) {
+                throw new Error(`OpenRouter Authentication Failed (401): ${message}. Please check your OPENROUTER_API_KEY in .env.`);
+            }
+            if (status === 402) {
+                throw new Error(`OpenRouter Insufficient Credits (402): ${message}. Please check your OpenRouter balance.`);
+            }
+            if (status === 404) {
+                throw new Error(`OpenRouter Model Not Found (404): ${message}. Please verify OPENROUTER_MODEL in .env.`);
+            }
+
+            const isServiceUnavailable = status === 503 || status === 502 || status === 504 || (error.response && error.response.status === 503) || message.includes("503") || message.toLowerCase().includes("unavailable") || message.toLowerCase().includes("high demand") || message.includes("Timed Out");
             const isZeroLimit = message.toLowerCase().includes("limit: 0") || message.toLowerCase().includes("limit = 0");
-            const isRateLimit = (error.status === 429 || message.includes("429")) && !isZeroLimit;
+            const isRateLimit = (status === 429 || message.includes("429")) && !isZeroLimit;
             const isSyntaxError = error instanceof SyntaxError || message.includes("JSON");
             const isNetworkError = message.includes("fetch failed") || message.includes("ENOTFOUND") || message.includes("ECONNRESET") || message.includes("network");
 
@@ -116,7 +120,7 @@ async function callGeminiWithRetry(apiCall, maxRetries = 8, stageLabel = "AI", p
                     delay = (Math.ceil(parseFloat(retryMatch[1])) + 1) * 1000;
                 }
                 shouldRetry = true;
-                console.warn(`[Gemini API] Retrying ${retries}/${maxRetries} in ${delay}ms. Reason: ${message.split('\n')[0]}`);
+                console.warn(`[OpenRouter API] Retrying ${retries}/${maxRetries} in ${delay}ms. Reason: ${message.split('\n')[0]}`);
             } else {
                 finalError = error;
             }
@@ -127,8 +131,8 @@ async function callGeminiWithRetry(apiCall, maxRetries = 8, stageLabel = "AI", p
 
         if (finalError) throw finalError;
         if (result !== null) {
-            console.log(`[SUCCESS] Gemini request [${stageLabel}] complete and parsed successfully`);
-            if (promptHash) geminiCache.set(promptHash, result);
+            console.log(`[SUCCESS] OpenRouter request [${stageLabel}] complete and parsed successfully`);
+            if (promptHash) openRouterCache.set(promptHash, result);
             return result;
         }
         
@@ -137,6 +141,9 @@ async function callGeminiWithRetry(apiCall, maxRetries = 8, stageLabel = "AI", p
         }
     }
 }
+
+// Backwards compatibility alias
+const callGeminiWithRetry = callOpenRouterWithRetry;
 
 const resourceSchema = z.object({
     title: z.string().describe("The title of the resource (e.g. Official Docs, YouTube Course, Frontend Mentor)"),
@@ -237,14 +244,28 @@ Perform a rigorous JOB DESCRIPTION ANALYSIS and RESUME ANALYSIS.
 4. IMPORTANT: Identify EXACT missing keywords that, if added naturally to the resume, would bring the ATS score to 95+. Do NOT recommend generic terms. Provide specific technical keywords, methodologies, or tools mentioned in the JD that are absent from the resume.
 5. Output strict JSON matching the schema.`;
 
-    const res = await callGeminiWithRetry(() => ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(atsGapsSchema),
-        }
-    }), 8, "ATS");
+    const schemaJson = JSON.stringify(zodToJsonSchema(atsGapsSchema), null, 2);
+    const fullPrompt = `${prompt}\n\nREQUIRED JSON SCHEMA:\nYou must respond ONLY with a valid JSON object matching this schema:\n${schemaJson}`;
+
+    const client = getOpenRouterClient();
+    if (!client) throw new Error("OPENROUTER_API_KEY is not configured in .env.");
+
+    const res = await callOpenRouterWithRetry(() => client.chat.completions.create({
+        model: OPENROUTER_MODEL,
+        messages: [
+            {
+                role: "system",
+                content: "You are an expert ATS and resume evaluation AI. Always return valid, parseable raw JSON strictly matching the provided schema."
+            },
+            {
+                role: "user",
+                content: fullPrompt
+            }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 2500
+    }), 6, "ATS", fullPrompt);
     console.log("[5] ATS parsed successfully");
     return res;
 }
@@ -501,15 +522,29 @@ Target Job Description: ${jobDescription}
 3. For EVERY question, generate an optimal, comprehensive answer. Tell the candidate exactly how to structure their response, what key points to hit, and what red flags to avoid.
 4. Output strict JSON matching the schema.`;
 
+    const schemaJson = JSON.stringify(zodToJsonSchema(questionsSchema), null, 2);
+    const fullPrompt = `${prompt}\n\nREQUIRED JSON SCHEMA:\nYou must respond ONLY with a valid JSON object matching this schema:\n${schemaJson}`;
+
     try {
-        const result = await callGeminiWithRetry(() => ai.models.generateContent({
-            model: GEMINI_MODEL,
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: zodToJsonSchema(questionsSchema),
-            }
-        }), 6, "Questions");
+        const client = getOpenRouterClient();
+        if (!client) throw new Error("OPENROUTER_API_KEY is not configured in .env.");
+
+        const result = await callOpenRouterWithRetry(() => client.chat.completions.create({
+            model: OPENROUTER_MODEL,
+            messages: [
+                {
+                    role: "system",
+                    content: "You are an expert technical interviewer. Always return valid, parseable raw JSON strictly matching the provided schema."
+                },
+                {
+                    role: "user",
+                    content: fullPrompt
+                }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.3,
+            max_tokens: 3000
+        }), 6, "Questions", fullPrompt);
 
         if (result && Array.isArray(result.technicalQuestions) && result.technicalQuestions.length > 0 && Array.isArray(result.behavioralQuestions) && result.behavioralQuestions.length > 0) {
             return result;
@@ -540,15 +575,29 @@ RULES:
 3. Each task must include title, timeHours (1-3), timeOfDay, difficulty, priority, type, and 1 verified learning resource link.
 4. Output strict JSON matching the schema.`;
 
+    const schemaJson = JSON.stringify(zodToJsonSchema(roadmapSchema), null, 2);
+    const fullPrompt = `${prompt}\n\nREQUIRED JSON SCHEMA:\nYou must respond ONLY with a valid JSON object matching this schema:\n${schemaJson}`;
+
     try {
-        const result = await callGeminiWithRetry(() => ai.models.generateContent({
-            model: GEMINI_MODEL,
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: zodToJsonSchema(roadmapSchema),
-            }
-        }), 6, "Roadmap");
+        const client = getOpenRouterClient();
+        if (!client) throw new Error("OPENROUTER_API_KEY is not configured in .env.");
+
+        const result = await callOpenRouterWithRetry(() => client.chat.completions.create({
+            model: OPENROUTER_MODEL,
+            messages: [
+                {
+                    role: "system",
+                    content: "You are an expert technical career mentor. Always return valid, parseable raw JSON strictly matching the provided schema."
+                },
+                {
+                    role: "user",
+                    content: fullPrompt
+                }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.3,
+            max_tokens: 3000
+        }), 6, "Roadmap", fullPrompt);
 
         if (result && Array.isArray(result.preparationPlan) && result.preparationPlan.length > 0) {
             return result;
@@ -621,13 +670,27 @@ ${jobDescription}
 
 Generate clean semantic HTML for 'rewrittenResumeHtml' with inline CSS that fits on 1 A4 page with strict 1-page density. Output strict JSON matching the schema.`;
 
-    return await callGeminiWithRetry(() => ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(resumeRewriteSchema),
-        }
-    }), 8, "Rewrite");
+    const schemaJson = JSON.stringify(zodToJsonSchema(resumeRewriteSchema), null, 2);
+    const fullPrompt = `${prompt}\n\nREQUIRED JSON SCHEMA:\nYou must respond ONLY with a valid JSON object matching this schema:\n${schemaJson}`;
+
+    const client = getOpenRouterClient();
+    if (!client) throw new Error("OPENROUTER_API_KEY is not configured in .env.");
+
+    return await callOpenRouterWithRetry(() => client.chat.completions.create({
+        model: OPENROUTER_MODEL,
+        messages: [
+            {
+                role: "system",
+                content: "You are an expert ATS resume reformatter. Always return valid, parseable raw JSON strictly matching the provided schema."
+            },
+            {
+                role: "user",
+                content: fullPrompt
+            }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 3500
+    }), 6, "Rewrite", fullPrompt);
 }
-module.exports = { generateAtsAndGaps, generateQuestions, generateRoadmap, generateResumeRewrite }
+module.exports = { generateAtsAndGaps, generateQuestions, generateRoadmap, generateResumeRewrite, callOpenRouterWithRetry, callGeminiWithRetry }

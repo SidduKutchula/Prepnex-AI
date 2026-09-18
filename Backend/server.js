@@ -6,6 +6,7 @@ validateEnv();
 
 const app = require("./src/app");
 const connectToDB = require("./src/config/database");
+const { startSlackSocketBot } = require("./src/channels/slack/slack.socket");
 
 // Global handlers to prevent silent crashes
 process.on("uncaughtException", (err) => {
@@ -17,14 +18,17 @@ process.on("unhandledRejection", (reason) => {
     console.error("[FATAL] Unhandled Rejection:", reason);
 });
 
-// Boot Sequence: Connect to DB -> Start Server
+// Boot Sequence: Connect to DB -> Start Server -> Start Slack Bot
 async function startServer() {
     try {
         await connectToDB();
         
         const PORT = process.env.PORT || 3000;
-        app.listen(PORT, "0.0.0.0", () => {
+        app.listen(PORT, "0.0.0.0", async () => {
             console.log(`Server is running on port ${PORT}`);
+
+            // Boot Slack Socket Mode bot on top of the backend server layer
+            await startSlackSocketBot();
         });
     } catch (error) {
         console.error("Server failed to start due to Database connection error.");

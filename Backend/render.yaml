@@ -15,7 +15,9 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: GOOGLE_GENAI_API_KEY
+      - key: OPENROUTER_API_KEY
         sync: false
+      - key: OPENROUTER_MODEL
+        value: google/gemini-2.5-flash
       - key: CLIENT_URL
         sync: false

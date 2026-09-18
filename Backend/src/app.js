@@ -14,7 +14,17 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.json())
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString();
+    }
+}))
+app.use(express.urlencoded({
+    extended: true,
+    verify: (req, res, buf) => {
+        req.rawBody = buf.toString();
+    }
+}))
 app.use(cookieParser())
 
 let allowedOrigins = [
@@ -54,10 +64,17 @@ const roadmapRouter = require("./routes/roadmap.routes")
 const autosaveRouter = require("./routes/autosave.routes")
 const activityRouter = require("./routes/activity.routes")
 const historyRouter = require("./routes/history.routes")
+const chatRouter = require("./routes/chat.routes")
+const whatsappRouter = require("./channels/whatsapp/whatsapp.routes")
+const slackRouter = require("./channels/slack/slack.routes")
 
 /* Rate limiting */
 const rateLimit = require("express-rate-limit")
 const authLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false, message: { success: false, error: "Too many auth requests, please try again later." } })
+
+/* Webhook routes (platform signature authenticated) */
+app.use("/webhooks/whatsapp", whatsappRouter)
+app.use("/webhooks/slack", slackRouter)
 
 /* using all the routes here */
 app.use("/api/auth", authLimiter, authRouter)
@@ -66,6 +83,8 @@ app.use("/api/roadmap", roadmapRouter)
 app.use("/api/autosave", autosaveRouter)
 app.use("/api/activity", activityRouter)
 app.use("/api/history", historyRouter)
+app.use("/api/chat", chatRouter)
+app.use("/chat", chatRouter)
 
 // Global Error Handler (must be the last middleware)
 const errorHandler = require("./middlewares/error.middleware")

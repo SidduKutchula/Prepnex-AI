@@ -127,3 +127,8 @@ export const getDashboardAnalyticsApi = async () => {
     const response = await api.get(`/api/interview/analytics/dashboard`)
     return response.data
 }
+
+export const sendChatMessageApi = async ({ message, conversationId, attachments }) => {
+    const response = await api.post(`/api/chat`, { message, conversationId, attachments })
+    return response.data
+}

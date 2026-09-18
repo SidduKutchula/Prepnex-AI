@@ -87,7 +87,8 @@ npm install
 
 **Backend (`Backend/.env`)**:
 ```env
-GOOGLE_GENAI_API_KEY=your_gemini_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_MODEL=google/gemini-2.5-flash
 MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname
 JWT_SECRET=your_super_secret_key_string
 GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
@@ -130,6 +131,61 @@ The frontend is built as a Single Page Application (SPA).
 
 ### Backend (Render / Heroku)
 Ensure your production environment variables include the correct `CLIENT_URL` (e.g., `https://sidmonai.app`) to prevent CORS issues. Set `NODE_ENV=production`.
+
+---
+
+## 💬 Multi-Channel Integration (WhatsApp & Slack)
+
+PrepNex AI supports conversational interactions across WhatsApp and Slack via a **central conversational orchestrator** (`chat.service.js`). All channels talk to the same AI engine — with zero duplication of AI logic.
+
+### 1. Unified Message Architecture
+Regardless of platform, all incoming messages are translated into a standardized **ChannelRequest** format before reaching the AI orchestrator, and responses are formatted per-channel (**ChannelResponse**):
+- **WhatsApp**: Plain text with WhatsApp formatting (`*bold*`, `_italic_`), split messages (<4096 chars), and interactive reply buttons.
+- **Slack**: Slack Block Kit (`mrkdwn` sections, interactive button blocks, thread replies via `thread_ts`).
+- **Web App**: Direct JSON response (`/api/chat`).
+
+### 2. Available Commands & Natural Language
+Users can type naturally or use slash commands:
+- `/help` — Show available commands and instructions
+- `/analyze` — Analyze resume against a job description (ATS score, keywords, feedback)
+- `/gaps` — Identify skill gaps between resume and target role
+- `/plan` — Generate a personalized interview preparation roadmap
+- `/quiz` — Start an interactive technical/behavioral quiz
+- `/mock` — Begin a mock interview simulation
+- `/ready` — Check interview readiness assessment
+
+### 3. Setting Up Webhooks
+
+#### Meta WhatsApp Cloud API
+1. Create a Meta Business App with the **WhatsApp** product in the [Meta App Dashboard](https://developers.facebook.com/).
+2. Under **WhatsApp > Configuration**:
+   - **Callback URL**: `https://<your-domain>/webhooks/whatsapp`
+   - **Verify Token**: Set a custom string matching your `WHATSAPP_VERIFY_TOKEN` env var.
+   - Subscribe to the `messages` webhook field.
+3. Configure environment variables in `Backend/.env`:
+   ```env
+   WHATSAPP_ACCESS_TOKEN=<Permanent or System User Access Token>
+   WHATSAPP_PHONE_NUMBER_ID=<Phone Number ID from WhatsApp App Dashboard>
+   WHATSAPP_APP_SECRET=<App Secret from App Dashboard > Basic Settings>
+   WHATSAPP_VERIFY_TOKEN=<Your custom verify token>
+   ```
+
+#### Slack (Events API + Slash Commands)
+1. Create a Slack App at [api.slack.com/apps](https://api.slack.com/apps).
+2. Under **Event Subscriptions**:
+   - Enable Events and set **Request URL**: `https://<your-domain>/webhooks/slack` (Slack will verify the URL challenge).
+   - Subscribe to bot events: `message.im` (DMs) and `app_mention` (mentions in channels).
+3. Under **OAuth & Permissions**:
+   - Add bot scopes: `chat:write`, `im:history`, `im:read`, `app_mentions:read`, `files:read`.
+   - Install App to Workspace and copy the **Bot User OAuth Token** (`xoxb-...`).
+4. Under **Slash Commands** (optional):
+   - Create commands (e.g. `/prepnex`, `/analyze`, `/gaps`) pointing to `https://<your-domain>/webhooks/slack`.
+5. Configure environment variables in `Backend/.env`:
+   ```env
+   SLACK_BOT_TOKEN=xoxb-your_bot_token_here
+   SLACK_SIGNING_SECRET=your_signing_secret_here
+   ```
+
 
 ---
 

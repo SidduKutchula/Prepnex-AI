@@ -3,11 +3,12 @@ import { useInterview } from '../hooks/useInterview';
 import { ResumeProvider } from '../../resume/resume.context';
 import { ResumeToolbar } from '../../resume/components/ResumeToolbar';
 import { ResumePreview } from '../../resume/components/ResumePreview';
+import { ResumeBotModal } from '../../resume/components/ResumeBotModal';
 import { useNavigate } from 'react-router';
-import { UploadCloud, WandSparkles, FileText } from 'lucide-react';
+import { UploadCloud, WandSparkles, FileText, Bot } from 'lucide-react';
 import '../style/home.scss';
 
-const ResumeContent = ({ report }) => {
+const ResumeContent = ({ report, onOpenBot }) => {
     return (
         <div className="resume-builder-workspace animate-fade-in">
             <ResumeToolbar atsScore={report?.atsScore || 95} reportId={report?._id} />
@@ -21,6 +22,7 @@ const ResumeContent = ({ report }) => {
 const Resume = () => {
     const { getReports, reports, loading } = useInterview();
     const [latestReport, setLatestReport] = useState(null);
+    const [isBotOpen, setIsBotOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -55,21 +57,35 @@ const Resume = () => {
                     </div>
                 </header>
 
-                <div className="glass-card" style={{ padding: '48px', textAlign: 'center', maxWidth: '600px', margin: '40px auto' }}>
+                <div className="glass-card" style={{ padding: '48px', textAlign: 'center', maxWidth: '640px', margin: '40px auto' }}>
                     <FileText size={48} style={{ color: 'var(--accent)', marginBottom: '16px' }} />
-                    <h2 style={{ marginBottom: '8px', color: 'var(--text-heading)' }}>No ATS Resume Generated Yet</h2>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.5' }}>
-                        Generate an interview report by providing a job description and uploading your resume to unlock your AI-rewritten ATS resume builder.
+                    <h2 style={{ marginBottom: '8px', color: 'var(--text-heading)' }}>Build or Optimize Your ATS Resume</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '28px', lineHeight: '1.6' }}>
+                        Create a recruiter-ready resume step-by-step with our conversational AI Resume Bot, or upload your existing resume with a job description for full strategy analysis.
                     </p>
-                    <button 
-                        className="primary-btn pulse-glow" 
-                        onClick={() => navigate('/interview')}
-                        style={{ margin: '0 auto' }}
-                    >
-                        <WandSparkles size={18} />
-                        Generate AI Interview Strategy
-                    </button>
+                    <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button 
+                            className="primary-btn pulse-glow" 
+                            onClick={() => setIsBotOpen(true)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                            <Bot size={18} />
+                            Chat with AI Resume Bot
+                        </button>
+                        <button 
+                            className="secondary-btn" 
+                            onClick={() => navigate('/interview')}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                            <WandSparkles size={18} />
+                            Generate from Job Description
+                        </button>
+                    </div>
                 </div>
+
+                <ResumeProvider>
+                    <ResumeBotModal isOpen={isBotOpen} onClose={() => setIsBotOpen(false)} />
+                </ResumeProvider>
             </div>
         );
     }
@@ -81,7 +97,15 @@ const Resume = () => {
                     <h1 className="greeting">Resume Intelligence</h1>
                     <p className="subtitle">Live ATS Resume Builder & PDF Generation Engine for {latestReport.title || 'Target Role'}.</p>
                 </div>
-                <div className="header-actions">
+                <div className="header-actions" style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                        className="secondary-btn" 
+                        onClick={() => setIsBotOpen(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <Bot size={18} />
+                        AI Resume Bot
+                    </button>
                     <button className="primary-btn" onClick={() => navigate('/interview')}>
                         <UploadCloud size={18} />
                         New Analysis
@@ -90,7 +114,8 @@ const Resume = () => {
             </header>
 
             <ResumeProvider initialHtml={latestReport.rewrittenResumeHtml} reportData={latestReport}>
-                <ResumeContent report={latestReport} />
+                <ResumeContent report={latestReport} onOpenBot={() => setIsBotOpen(true)} />
+                <ResumeBotModal isOpen={isBotOpen} onClose={() => setIsBotOpen(false)} />
             </ResumeProvider>
         </div>
     );

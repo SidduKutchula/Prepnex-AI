@@ -6,14 +6,11 @@ function validateEnv() {
     const requiredEnvVars = [
         "MONGO_URI",
         "JWT_SECRET",
-        "GOOGLE_CLIENT_ID"
+        "GOOGLE_CLIENT_ID",
+        "OPENROUTER_API_KEY"
     ];
 
     const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-    if (!process.env.OPENROUTER_API_KEY && !process.env.GOOGLE_GENAI_API_KEY) {
-        missingVars.push("OPENROUTER_API_KEY");
-    }
 
     if (missingVars.length > 0) {
         console.error(`\n[CRITICAL ERROR] Missing required environment variables:`);

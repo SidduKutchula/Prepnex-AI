@@ -24,7 +24,7 @@ async function authUser(req, res, next) {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
 
         req.user = decoded
 
@@ -55,7 +55,7 @@ async function checkUser(req, res, next) {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
         req.user = decoded
     } catch (err) {
         req.user = null

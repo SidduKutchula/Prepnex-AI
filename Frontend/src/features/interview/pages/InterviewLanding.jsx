@@ -171,8 +171,9 @@ const InterviewLanding = () => {
             setError("Please paste a job description before generating.")
             return
         }
-        if (!remainingDays || remainingDays < 1) {
-            setError("Please specify a valid number of days remaining.")
+        const days = parseInt(remainingDays, 10);
+        if (isNaN(days) || days < 1 || days > 30) {
+            setError("Please specify a valid preparation time (1 to 30 days).")
             return
         }
         
@@ -182,7 +183,7 @@ const InterviewLanding = () => {
                 jobDescription, 
                 selfDescription, 
                 resumeFile, 
-                remainingDays
+                remainingDays: days
             })
             if (response.success) {
                 await clearDraft();
@@ -328,10 +329,21 @@ const InterviewLanding = () => {
                                         <input 
                                             type="number" 
                                             value={remainingDays}
-                                            onChange={(e) => setRemainingDays(parseInt(e.target.value) || "")}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === '') {
+                                                    setRemainingDays('');
+                                                    return;
+                                                }
+                                                const num = parseInt(val, 10);
+                                                if (!isNaN(num)) {
+                                                    setRemainingDays(Math.min(Math.max(num, 1), 30));
+                                                }
+                                            }}
                                             min="1"
-                                            max="90"
-                                            style={{ width: '32px', background: 'transparent', border: 'none', color: 'var(--text-heading)', fontWeight: 700, fontSize: '15px', textAlign: 'center', outline: 'none', padding: 0 }}
+                                            max="30"
+                                            style={{ minWidth: '40px', width: '48px', background: 'transparent', border: 'none', color: 'var(--text-heading)', fontWeight: 700, fontSize: '15px', textAlign: 'center', outline: 'none', padding: '0 4px' }}
+                                            title="Preparation sprint duration (1-30 days)"
                                         />
                                         <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-muted)' }}>days</span>
                                     </div>

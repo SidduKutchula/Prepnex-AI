@@ -6,6 +6,14 @@ const api = axios.create({
     withCredentials: true 
 });
 
+api.interceptors.request.use((config) => {
+    const token = sessionStorage.getItem('interview_ai_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 export function useRoadmapProgress(reportId) {
     const [completedTaskIds, setCompletedTaskIds] = useState([]);
     const [loading, setLoading] = useState(true);

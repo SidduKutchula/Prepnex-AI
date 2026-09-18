@@ -5,14 +5,20 @@ const helmet = require("helmet")
 
 const app = express()
 
-// app.use(helmet({
-//     crossOriginOpenerPolicy: false
-// }))
+// Security headers — crossOriginOpenerPolicy set to 'same-origin-allow-popups'
+// so Google OAuth popup flow works correctly
+app.use(helmet({
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+    contentSecurityPolicy: false // Disable CSP for now to avoid breaking inline styles in resume HTML
+}))
 
-app.use((req, res, next) => {
-    console.log(`[REQ] ${req.method} ${req.url}`);
-    next();
-});
+// Request logger — only in development
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        console.log(`[REQ] ${req.method} ${req.url}`);
+        next();
+    });
+}
 
 app.use(express.json({
     verify: (req, res, buf) => {
@@ -44,14 +50,15 @@ if (process.env.CLIENT_URL) {
 
 app.use(cors({
     origin: function (origin, callback) {
+        // Allow server-to-server requests (no origin header)
         if (!origin) return callback(null, true);
         const cleanOrigin = origin.replace(/\/$/, '');
         const isAllowed = allowedOrigins.some(allowed => cleanOrigin === allowed.replace(/\/$/, '') || cleanOrigin.endsWith('.sidmonai.app') || cleanOrigin.endsWith('.onrender.com'));
         if (isAllowed) {
             callback(null, true);
         } else {
-            console.warn(`[CORS Notice] Origin ${origin} accessing API.`);
-            callback(null, true);
+            console.warn(`[CORS BLOCKED] Origin ${origin} rejected.`);
+            callback(new Error(`CORS policy: Origin ${origin} is not allowed.`));
         }
     },
     credentials: true
@@ -84,7 +91,6 @@ app.use("/api/autosave", autosaveRouter)
 app.use("/api/activity", activityRouter)
 app.use("/api/history", historyRouter)
 app.use("/api/chat", chatRouter)
-app.use("/chat", chatRouter)
 
 // Global Error Handler (must be the last middleware)
 const errorHandler = require("./middlewares/error.middleware")

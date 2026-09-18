@@ -5,7 +5,8 @@ import {
     startInterviewReportApi,
     toggleBookmarkApi,
     deleteInterviewReportApi,
-    renameInterviewReportApi
+    renameInterviewReportApi,
+    toggleTaskCompletionApi
 } from "../services/interview.api"
 import { useContext, useEffect, useCallback, useRef } from "react"
 import { InterviewContext } from "../interview.context"
@@ -92,47 +93,59 @@ export const useInterview = () => {
         try {
             const response = await toggleBookmarkApi(id)
             if (response.success) {
-                setReports(prev => prev.map(r => r._id === id ? { ...r, isBookmarked: response.isBookmarked } : r))
+                setReports(prev => prev.map(r => r._id === id ? { ...r, isBookmarked: response.isBookmarked, favorite: response.isBookmarked } : r))
+                setReport(prev => (prev && prev._id === id ? { ...prev, isBookmarked: response.isBookmarked, favorite: response.isBookmarked } : prev))
             }
             return { success: true, isBookmarked: response.isBookmarked }
         } catch (error) {
             return { success: false, error: error.message || 'Failed to toggle bookmark' }
         }
-    }, [setReports])
+    }, [setReports, setReport])
 
     const deleteReport = useCallback(async (id) => {
         try {
             const response = await deleteInterviewReportApi(id)
             if (response.success) {
                 setReports(prev => prev.filter(r => r._id !== id))
+                setReport(prev => (prev && prev._id === id ? null : prev))
             }
             return { success: true }
         } catch (error) {
             return { success: false, error: error.message || 'Failed to delete report' }
         }
-    }, [setReports])
+    }, [setReports, setReport])
 
     const renameReport = useCallback(async (id, title) => {
         try {
             const response = await renameInterviewReportApi(id, title)
             if (response.success) {
                 setReports(prev => prev.map(r => r._id === id ? { ...r, title: response.report.title } : r))
+                setReport(prev => (prev && prev._id === id ? { ...prev, title: response.report.title } : prev))
             }
             return { success: true }
         } catch (error) {
             return { success: false, error: error.message || 'Failed to rename report' }
         }
-    }, [setReports])
+    }, [setReports, setReport])
 
     const toggleTaskCompletion = useCallback(async (interviewId, taskId, completed) => {
         try {
-            // Import it here or ensure it's imported at the top
-            const { toggleTaskCompletionApi } = await import('../services/interview.api.js')
             const response = await toggleTaskCompletionApi(interviewId, taskId, completed)
             if (response.success) {
                 setReport(prev => {
                     if (!prev || prev._id !== interviewId) return prev
-                    const newPlan = prev.preparationPlan.map(t => t._id === taskId ? { ...t, status: completed ? 'completed' : 'pending' } : t)
+                    // Walk the nested preparationPlan[].tasks[] structure
+                    const newPlan = prev.preparationPlan.map(dayPlan => {
+                        if (!dayPlan.tasks) return dayPlan;
+                        return {
+                            ...dayPlan,
+                            tasks: dayPlan.tasks.map(t => 
+                                (t._id && t._id.toString() === taskId) || t.title === taskId
+                                    ? { ...t, status: completed ? 'completed' : 'pending' }
+                                    : t
+                            )
+                        };
+                    });
                     return { ...prev, preparationPlan: newPlan }
                 })
             }
@@ -150,7 +163,7 @@ export const useInterview = () => {
         }
     }, [ interviewId, getReportById, getReports ])
 
-    return { loading, report, reports, startGeneration, getReportById, getReports, toggleBookmark, deleteReport, renameReport, toggleTaskCompletion }
+    return { loading, report, setReport, reports, setReports, startGeneration, getReportById, getReports, toggleBookmark, deleteReport, renameReport, toggleTaskCompletion }
 
 }
 
@@ -160,84 +173,134 @@ export const useInterviewStream = (reportId) => {
         throw new Error("useInterviewStream must be used within an InterviewProvider")
     }
 
-    const { setReport, report, getReportById } = context
+    const { setReport, report } = context
 
     useEffect(() => {
         if (!reportId) return;
+
+        let isCleanedUp = false;
+        let pollInterval = null;
+
+        const checkReportStatus = async () => {
+            if (isCleanedUp) return;
+            try {
+                const res = await getInterviewReportById(reportId);
+                if (res && res.interviewReport && !isCleanedUp) {
+                    setReport(res.interviewReport);
+                    if (['completed', 'partial', 'failed'].includes(res.interviewReport.status)) {
+                        if (pollInterval) {
+                            clearInterval(pollInterval);
+                            pollInterval = null;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("[Stream/Poll] Error polling report status:", err.message);
+            }
+        };
+
+        // Active safety polling interval every 2.5s as long as status is processing
+        pollInterval = setInterval(() => {
+            if (report?.status === 'processing' || !report?.status) {
+                checkReportStatus();
+            } else if (['completed', 'partial', 'failed'].includes(report?.status)) {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                }
+            }
+        }, 2500);
         
         const token = sessionStorage.getItem('interview_ai_token') || '';
         const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
         const eventSource = new EventSource(`${baseURL}/api/interview/stream/${reportId}?token=${encodeURIComponent(token)}&t=${Date.now()}`, { withCredentials: true })
 
         eventSource.addEventListener("initial", (e) => {
-            const payload = JSON.parse(e.data)
-            setReport(payload.data)
+            if (isCleanedUp) return;
+            try {
+                const payload = JSON.parse(e.data)
+                setReport(payload.data)
+                if (['completed', 'partial', 'failed'].includes(payload.data?.status)) {
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to parse initial SSE event:", err);
+            }
         })
 
         eventSource.addEventListener("progress", (e) => {
-            const payload = JSON.parse(e.data)
-            
-            setReport(prev => {
-                if (!prev) return prev;
-                const updated = { ...prev };
+            if (isCleanedUp) return;
+            try {
+                const payload = JSON.parse(e.data)
                 
-                if (payload.stage === 'ats' && payload.data) {
-                    updated.atsScore = payload.data.atsScore;
-                    updated.improvementSummary = payload.data.improvementSummary;
-                    updated.recruiterFeedback = payload.data.recruiterFeedback;
-                    updated.addedKeywords = payload.data.addedKeywords;
-                    updated.missingKeywords = payload.data.missingKeywords;
-                    updated.skillGaps = payload.data.skillGaps;
-                    updated.matchScore = payload.data.matchScore;
-                    updated.progress = { ...updated.progress, atsGenerated: payload.status === 'completed' };
-                } else if (payload.stage === 'questions') {
-                    if (payload.data) {
-                        if (payload.data.technicalQuestions) updated.technicalQuestions = payload.data.technicalQuestions;
-                        if (payload.data.behavioralQuestions) updated.behavioralQuestions = payload.data.behavioralQuestions;
+                setReport(prev => {
+                    if (!prev) return prev;
+                    const updated = { ...prev };
+                    
+                    if (payload.stage === 'ats' && payload.data) {
+                        updated.atsScore = payload.data.atsScore;
+                        updated.improvementSummary = payload.data.improvementSummary;
+                        updated.recruiterFeedback = payload.data.recruiterFeedback;
+                        updated.addedKeywords = payload.data.addedKeywords;
+                        updated.missingKeywords = payload.data.missingKeywords;
+                        updated.skillGaps = payload.data.skillGaps;
+                        updated.matchScore = payload.data.matchScore;
+                        updated.progress = { ...updated.progress, atsGenerated: payload.status === 'completed' };
+                    } else if (payload.stage === 'questions') {
+                        if (payload.data) {
+                            if (payload.data.technicalQuestions) updated.technicalQuestions = payload.data.technicalQuestions;
+                            if (payload.data.behavioralQuestions) updated.behavioralQuestions = payload.data.behavioralQuestions;
+                        }
+                        updated.progress = { ...updated.progress, questionsGenerated: payload.status === 'completed' };
+                    } else if (payload.stage === 'roadmap') {
+                        if (payload.data && payload.data.preparationPlan) {
+                            updated.preparationPlan = payload.data.preparationPlan;
+                        }
+                        updated.progress = { ...updated.progress, roadmapGenerated: payload.status === 'completed' };
+                    } else if (payload.stage === 'rewrite') {
+                        if (payload.data && payload.data.rewrittenResumeHtml) {
+                            updated.rewrittenResumeHtml = payload.data.rewrittenResumeHtml;
+                        }
+                        updated.progress = { ...updated.progress, rewriteGenerated: payload.status === 'completed' };
                     }
-                    updated.progress = { ...updated.progress, questionsGenerated: payload.status === 'completed' };
-                } else if (payload.stage === 'roadmap') {
-                    if (payload.data && payload.data.preparationPlan) {
-                        updated.preparationPlan = payload.data.preparationPlan;
+                    
+                    if (payload.stage === 'complete') {
+                        updated.status = payload.status;
                     }
-                    updated.progress = { ...updated.progress, roadmapGenerated: payload.status === 'completed' };
-                } else if (payload.stage === 'rewrite') {
-                    if (payload.data && payload.data.rewrittenResumeHtml) {
-                        updated.rewrittenResumeHtml = payload.data.rewrittenResumeHtml;
-                    }
-                    updated.progress = { ...updated.progress, rewriteGenerated: payload.status === 'completed' };
-                }
-                
-                if (payload.stage === 'complete') {
-                    updated.status = payload.status;
-                }
-                return updated;
-            });
+                    return updated;
+                });
 
-            if (payload.stage === 'complete') {
-                setTimeout(async () => {
-                    try {
-                        const res = await getInterviewReportById(reportId);
-                        if (res && res.interviewReport) setReport(res.interviewReport);
-                    } catch (err) {
-                        console.error("Refetch error after SSE complete:", err);
+                if (payload.stage === 'complete') {
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
                     }
-                }, 400);
+                    checkReportStatus();
+                }
+            } catch (err) {
+                console.error("Failed to parse progress SSE event:", err);
             }
         })
 
         eventSource.addEventListener("error", (e) => {
+            console.warn("SSE Stream disconnected or ended, checking report directly...");
             if (e.eventPhase === EventSource.CLOSED || eventSource.readyState === EventSource.CLOSED) {
                 eventSource.close()
-            } else {
-                console.warn("SSE Stream disconnected, closing stream")
-                eventSource.close()
             }
+            checkReportStatus();
         })
 
         return () => {
+            isCleanedUp = true;
+            if (pollInterval) clearInterval(pollInterval);
             eventSource.close()
         }
+    // NOTE: report?.status is intentionally NOT included in the dependency array.
+    // Including it would re-create the EventSource on every status change, causing
+    // duplicate SSE connections. The polling interval reads report?.status via closure.
     }, [reportId, setReport])
 
     return { report }

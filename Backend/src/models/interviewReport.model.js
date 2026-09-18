@@ -86,6 +86,10 @@ const interviewReportSchema = new mongoose.Schema({
     interviewDate: {
         type: Date,
     },
+    remainingDays: {
+        type: Number,
+        default: 7
+    },
     dailyStreak: {
         type: Number,
         default: 0
@@ -177,11 +181,27 @@ const interviewReportSchema = new mongoose.Schema({
     favorite: {
         type: Boolean,
         default: false
+    },
+    isBookmarked: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
 })
 
+// Auto-sync favorite and isBookmarked aliases
+interviewReportSchema.pre('save', function() {
+    if (this.isModified('isBookmarked') && !this.isModified('favorite')) {
+        this.favorite = this.isBookmarked;
+    } else if (this.isModified('favorite') && !this.isModified('isBookmarked')) {
+        this.isBookmarked = this.favorite;
+    }
+});
+
+// Indexes for query performance
+interviewReportSchema.index({ user: 1, createdAt: -1 }); // Primary user-scoped query pattern
+interviewReportSchema.index({ user: 1, status: 1 }); // User + status filter
 
 const interviewReportModel = mongoose.model("InterviewReport", interviewReportSchema);
 

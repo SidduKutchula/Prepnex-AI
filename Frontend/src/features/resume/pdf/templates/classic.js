@@ -115,9 +115,9 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
 
         formattedSkills.forEach(skillItem => {
             checkNewPage(fontSize * lineHeight);
-            const parts = typeof skillItem === 'string' ? skillItem.split(':') : [skillItem];
+            const parts = typeof skillItem === 'string' ? skillItem.split(':') : [String(skillItem || '')];
             const category = parts.length > 1 ? parts[0].trim() : 'Skills';
-            const value = parts.length > 1 ? parts.slice(1).join(':').trim() : skillItem;
+            const value = parts.length > 1 ? parts.slice(1).join(':').trim() : (skillItem || '');
 
             doc.setFont('times', 'bold');
             doc.setTextColor(0, 0, 0);
@@ -125,7 +125,7 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
 
             doc.setFont('times', 'normal');
             doc.setTextColor(30, 41, 59);
-            const splitVal = doc.splitTextToSize(value, contentWidth - 140);
+            const splitVal = doc.splitTextToSize(String(value || ''), contentWidth - 140);
             doc.text(splitVal[0] || '', margin + 140, y);
             y += fontSize * lineHeight;
 
@@ -208,7 +208,7 @@ export function renderClassicTemplate(resumeData, pdfDoc = null) {
             doc.setFont('times', 'bold');
             doc.setFontSize(fontSize + 0.5);
             doc.setTextColor(0, 0, 0);
-            const roleCompany = exp.role + (exp.company ? `  –  ${exp.company}` : '');
+            const roleCompany = (exp.role || '') + (exp.company ? (exp.role ? '  –  ' : '') + exp.company : '');
             doc.text(roleCompany, margin, y);
 
             if (exp.dates) {

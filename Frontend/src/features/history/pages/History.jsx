@@ -18,7 +18,7 @@ const History = () => {
         const matchesSearch = (item.title || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
                               (item.jobDescription || "").toLowerCase().includes(searchQuery.toLowerCase());
         const matchesFilter = filter === 'All' 
-                              || (filter === 'Bookmarked' && item.isBookmarked)
+                              || (filter === 'Bookmarked' && (item.isBookmarked || item.favorite))
                               || (filter === 'Drafts' && item.status === 'draft')
                               || (filter === 'Completed' && (item.status === 'completed' || !item.status));
         return matchesSearch && matchesFilter
@@ -195,14 +195,14 @@ const History = () => {
                                                 </button>
                                                 <button 
                                                     onClick={() => toggleBookmark(item._id)}
-                                                    title={item.isBookmarked ? "Remove Bookmark" : "Add Bookmark"}
+                                                    title={(item.isBookmarked || item.favorite) ? "Remove Bookmark" : "Add Bookmark"}
                                                     style={{ 
                                                     padding: '8px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px',
-                                                    color: item.isBookmarked ? 'var(--accent)' : 'var(--text-muted)', 
+                                                    color: (item.isBookmarked || item.favorite) ? 'var(--accent)' : 'var(--text-muted)', 
                                                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    backgroundColor: item.isBookmarked ? 'var(--accent-subtle)' : 'transparent'
+                                                    backgroundColor: (item.isBookmarked || item.favorite) ? 'var(--accent-subtle)' : 'transparent'
                                                 }}>
-                                                    <Bookmark size={16} fill={item.isBookmarked ? "currentColor" : "none"} />
+                                                    <Bookmark size={16} fill={(item.isBookmarked || item.favorite) ? "currentColor" : "none"} />
                                                 </button>
                                                 <button 
                                                     onClick={() => {

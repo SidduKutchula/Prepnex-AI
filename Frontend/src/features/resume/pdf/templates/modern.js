@@ -105,16 +105,44 @@ export function renderModernTemplate(resumeData, pdfDoc = null) {
     // --- TECHNICAL SKILLS ---
     if (resumeData.skills && resumeData.skills.length > 0) {
         drawSectionHeader('TECHNICAL PROFICIENCIES');
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(fontSize);
-        doc.setTextColor(51, 65, 85);
 
-        const skillsStr = resumeData.skills.join('  |  ');
-        const splitSkills = doc.splitTextToSize(skillsStr, contentWidth);
-        splitSkills.forEach(line => {
+        resumeData.skills.forEach(skillItem => {
             checkNewPage(fontSize * lineHeight);
-            doc.text(line, margin, y);
-            y += fontSize * lineHeight;
+            const str = String(skillItem || '').trim();
+            const colonIdx = str.indexOf(':');
+
+            if (colonIdx > 0) {
+                const category = str.slice(0, colonIdx).trim() + ': ';
+                const items = str.slice(colonIdx + 1).trim();
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(fontSize);
+                doc.setTextColor(37, 99, 235); // Accent Royal Blue
+                const catWidth = doc.getTextWidth(category);
+                doc.text(category, margin, y);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(51, 65, 85);
+                const splitItems = doc.splitTextToSize(items, contentWidth - catWidth);
+                doc.text(splitItems[0] || '', margin + catWidth, y);
+                y += fontSize * lineHeight;
+
+                for (let i = 1; i < splitItems.length; i++) {
+                    checkNewPage(fontSize * lineHeight);
+                    doc.text(splitItems[i], margin + catWidth, y);
+                    y += fontSize * lineHeight;
+                }
+            } else {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(fontSize);
+                doc.setTextColor(51, 65, 85);
+                const split = doc.splitTextToSize(str, contentWidth);
+                split.forEach(line => {
+                    checkNewPage(fontSize * lineHeight);
+                    doc.text(line, margin, y);
+                    y += fontSize * lineHeight;
+                });
+            }
         });
         y += sectionGap;
     }

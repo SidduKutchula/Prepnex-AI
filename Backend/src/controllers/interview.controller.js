@@ -101,12 +101,14 @@ async function startInterviewReportController(req, res) {
             return res.status(400).json({ success: false, message: "Missing job description." });
         }
 
+        const days = Math.min(Math.max(parseInt(remainingDays, 10) || 7, 1), 30);
+
         const interviewReport = await interviewReportModel.create({
             user: req.user.id,
             jobDescription,
             resume: resume || "",
             selfDescription: selfDescription || "",
-            remainingDays: remainingDays || 7,
+            remainingDays: days,
             status: "processing",
             progress: {
                 resumeParsed: true,
@@ -120,7 +122,10 @@ async function startInterviewReportController(req, res) {
 
         // Start background processing
         aiWorker.startBackgroundGeneration(interviewReport._id, {
-            jobDescription, resume: resume || selfDescription, selfDescription, remainingDays
+            jobDescription, 
+            resume: resume || selfDescription, 
+            selfDescription, 
+            remainingDays: days
         });
 
         res.status(201).json({
@@ -145,12 +150,26 @@ async function streamProgressController(req, res) {
     res.flushHeaders();
 
     const sendEvent = (type, payload) => {
-        res.write(`event: ${type}\ndata: ${JSON.stringify(payload)}\n\n`);
+        try {
+            res.write(`event: ${type}\ndata: ${JSON.stringify(payload)}\n\n`);
+        } catch (_) {}
+    };
+
+    // Heartbeat ping every 15s to keep SSE connection alive across firewalls/reverse proxies
+    const heartbeat = setInterval(() => {
+        try {
+            res.write(': keep-alive\n\n');
+        } catch (_) {}
+    }, 15000);
+
+    const cleanup = () => {
+        clearInterval(heartbeat);
     };
 
     try {
         const report = await interviewReportModel.findById(interviewId);
         if (!report) {
+            cleanup();
             sendEvent('error', { message: 'Report not found' });
             return res.end();
         }
@@ -159,24 +178,35 @@ async function streamProgressController(req, res) {
         sendEvent('initial', { status: report.status, progress: report.progress, data: report });
 
         if (report.status === 'completed' || report.status === 'failed') {
-            return res.end(); // Already finished
+            cleanup();
+            return setTimeout(() => {
+                try { res.end(); } catch (_) {}
+            }, 500);
         }
 
         const listener = (data) => {
             sendEvent('progress', data);
             if (data.stage === 'complete') {
+                cleanup();
                 aiWorker.removeListener(`progress:${interviewId}`, listener);
-                res.end();
+                // Delay socket termination to allow browser EventSource to fully receive and process the complete event
+                setTimeout(() => {
+                    try {
+                        res.end();
+                    } catch (_) {}
+                }, 1000);
             }
         };
 
         aiWorker.on(`progress:${interviewId}`, listener);
 
         req.on('close', () => {
+            cleanup();
             aiWorker.removeListener(`progress:${interviewId}`, listener);
         });
 
     } catch (error) {
+        cleanup();
         console.error("Stream Error:", error);
         sendEvent('error', { message: error.message });
         res.end();
@@ -195,6 +225,8 @@ async function saveInterviewReportController(req, res) {
             roadmapData,
             rewriteData
         } = req.body
+
+        const days = Math.min(Math.max(parseInt(remainingDays, 10) || 7, 1), 30);
 
         if (roadmapData && Array.isArray(roadmapData.preparationPlan)) {
             roadmapData.preparationPlan = roadmapData.preparationPlan.map((dayPlan, index) => {
@@ -228,7 +260,7 @@ async function saveInterviewReportController(req, res) {
                 jobDescription,
                 resume,
                 selfDescription,
-                remainingDays,
+                remainingDays: days,
                 ...atsData,
                 ...questionsData,
                 ...roadmapData,
@@ -329,9 +361,11 @@ async function toggleBookmarkController(req, res) {
         const { interviewId } = req.params;
         const report = await interviewReportModel.findOne({ _id: interviewId, user: req.user.id });
         if (!report) return res.status(404).json({ success: false, message: "Report not found" });
-        report.isBookmarked = !report.isBookmarked;
+        const nextState = !(report.isBookmarked || report.favorite);
+        report.isBookmarked = nextState;
+        report.favorite = nextState;
         await report.save();
-        res.status(200).json({ success: true, isBookmarked: report.isBookmarked });
+        res.status(200).json({ success: true, isBookmarked: report.isBookmarked, favorite: report.favorite });
     } catch (error) {
         res.status(500).json({ success: false, message: "Failed to toggle bookmark", error: error.message });
     }
@@ -342,6 +376,7 @@ async function deleteInterviewReportController(req, res) {
         const { interviewId } = req.params;
         const deleted = await interviewReportModel.findOneAndDelete({ _id: interviewId, user: req.user.id });
         if (!deleted) return res.status(404).json({ success: false, message: "Report not found" });
+        await RoadmapProgress.deleteMany({ $or: [{ interviewReport: interviewId }, { reportId: interviewId }] });
         res.status(200).json({ success: true, message: "Report deleted" });
     } catch (error) {
         res.status(500).json({ success: false, message: "Failed to delete report", error: error.message });
@@ -549,7 +584,7 @@ async function resetRoadmapProgressController(req, res) {
 const enhanceResumeController = async (req, res) => {
     try {
         const { interviewId } = req.params;
-        const report = await interviewReportModel.findOne({ _id: interviewId, user: req.user._id });
+        const report = await interviewReportModel.findOne({ _id: interviewId, user: req.user.id });
         
         if (!report) {
             return res.status(404).json({ success: false, message: "Report not found" });

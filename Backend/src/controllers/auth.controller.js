@@ -109,7 +109,7 @@ const getMeController = asyncHandler(async (req, res) => {
 
         let decoded;
         try {
-            decoded = jwt.verify(token, process.env.JWT_SECRET);
+            decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
         } catch (jwtErr) {
             console.warn('[Auth:GetMe] Invalid/expired token:', jwtErr.message);
             return res.status(401).json({ success: false, error: 'Session expired, please log in again', code: 'TOKEN_INVALID' });

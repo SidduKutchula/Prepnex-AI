@@ -1,7 +1,6 @@
 import { useContext } from "react";
-import axios from "axios";
 import { AuthContext } from "../auth.context";
-import { googleLogin, logout } from "../services/auth.api";
+import { googleLogin, logout, api } from "../services/auth.api";
 
 export const useAuth = () => {
     const context = useContext(AuthContext)
@@ -26,7 +25,6 @@ export const useAuth = () => {
         try {
             // Delete cloud autosave draft while token is still active
             try {
-                const { api } = await import('../services/auth.api');
                 await api.delete('/api/autosave');
             } catch (e) {
                 // Ignore failure if network error

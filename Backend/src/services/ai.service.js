@@ -54,13 +54,39 @@ function parseAndCleanJson(text) {
 }
 
 const crypto = require('crypto');
+
+// Bounded cache with max size and TTL to prevent memory leaks
+const CACHE_MAX_SIZE = 100;
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const openRouterCache = new Map();
+
+function getCacheEntry(key) {
+    const entry = openRouterCache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+        openRouterCache.delete(key);
+        return null;
+    }
+    return entry.value;
+}
+
+function setCacheEntry(key, value) {
+    // Evict oldest entries if at capacity
+    if (openRouterCache.size >= CACHE_MAX_SIZE) {
+        const oldestKey = openRouterCache.keys().next().value;
+        openRouterCache.delete(oldestKey);
+    }
+    openRouterCache.set(key, { value, timestamp: Date.now() });
+}
 
 async function callOpenRouterWithRetry(apiCall, maxRetries = 6, stageLabel = "AI", prompt = "") {
     const promptHash = prompt ? crypto.createHash('sha256').update(prompt).digest('hex') : null;
-    if (promptHash && openRouterCache.has(promptHash)) {
-        console.log(`[OK] Cache hit for OpenRouter API [${stageLabel}]`);
-        return openRouterCache.get(promptHash);
+    if (promptHash) {
+        const cached = getCacheEntry(promptHash);
+        if (cached) {
+            console.log(`[OK] Cache hit for OpenRouter API [${stageLabel}]`);
+            return cached;
+        }
     }
 
     let retries = 0;
@@ -132,7 +158,7 @@ async function callOpenRouterWithRetry(apiCall, maxRetries = 6, stageLabel = "AI
         if (finalError) throw finalError;
         if (result !== null) {
             console.log(`[SUCCESS] OpenRouter request [${stageLabel}] complete and parsed successfully`);
-            if (promptHash) openRouterCache.set(promptHash, result);
+            if (promptHash) setCacheEntry(promptHash, result);
             return result;
         }
         
@@ -468,7 +494,7 @@ Our product team had a tight deadline to ship a major enterprise feature in 4 we
 }
 
 function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCount = 7) {
-    const totalDays = Math.min(Math.max(parseInt(daysCount) || 7, 1), 7);
+    const totalDays = Math.min(Math.max(parseInt(daysCount, 10) || 7, 1), 30);
     const jdLower = (jobDescription || "").toLowerCase();
     
     const isFrontend = jdLower.includes("react") || jdLower.includes("vue") || jdLower.includes("frontend") || jdLower.includes("ui") || jdLower.includes("next.js") || jdLower.includes("angular");
@@ -614,6 +640,581 @@ function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCoun
             ]
         },
         {
+            focus: "High-Concurrency Programming, Thread Safety & Distributed Locking",
+            tasks: [
+                {
+                    title: "Study Race Conditions, Mutex Locks & Distributed Locks with Redlock",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Distributed Locks with Redis", url: "https://redis.io/docs/manual/patterns/distributed-locks/", type: "docs" }]
+                },
+                {
+                    title: "Solve Concurrency and Producer-Consumer Coding Scenarios",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Concurrency Patterns & LeetCode Practice", url: "https://leetcode.com/problemset/concurrency/", type: "practice" }]
+                }
+            ]
+        },
+        {
+            focus: "Microservices Communication, gRPC & Circuit Breaker Patterns",
+            tasks: [
+                {
+                    title: "Evaluate REST vs gRPC vs Protocol Buffers for Service Interconnect",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "gRPC Official Concepts & Architecture", url: "https://grpc.io/docs/what-is-grpc/introduction/", type: "docs" }]
+                },
+                {
+                    title: "Implement Resilience Patterns: Retries with Jitter, Circuit Breakers & Fallbacks",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Microsoft Cloud Design Patterns: Circuit Breaker", url: "https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Real-Time Streaming, WebSockets & Event-Driven Push Notifications",
+            tasks: [
+                {
+                    title: "Design Bidirectional WebSocket Architecture with Socket.io / Native WS",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "MDN WebSockets API Specification", url: "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API", type: "docs" }]
+                },
+                {
+                    title: "Handle Reconnection Backoff, Heartbeats & Distributed Session Pub/Sub",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Project",
+                    status: "pending",
+                    resources: [{ title: "Scalable Real-time PubSub Patterns", url: "https://redis.io/docs/interact/pubsub/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "NoSQL Data Modeling, Partitioning & Consistency Guarantees",
+            tasks: [
+                {
+                    title: "Analyze CAP Theorem, PACELC, Eventual Consistency & Document vs Columnar DBs",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "AWS DynamoDB Modeling & Partition Key Strategies", url: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html", type: "docs" }]
+                },
+                {
+                    title: "Design Sharded NoSQL Schemas for High-Write Volume Applications",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "MongoDB Sharding Architecture Guide", url: "https://www.mongodb.com/docs/manual/sharding/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Container Orchestration & Kubernetes Architecture Fundamentals",
+            tasks: [
+                {
+                    title: "Understand K8s Pods, Deployments, ReplicaSets, Services & Ingress Controllers",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Kubernetes Core Architectural Concepts", url: "https://kubernetes.io/docs/concepts/", type: "docs" }]
+                },
+                {
+                    title: "Write Declarative Manifests with Liveness, Readiness & Resource Limits",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "K8s Pod Lifecycle & Probes", url: "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Observability, Distributed Tracing & Production APM Metrics",
+            tasks: [
+                {
+                    title: "Instrument Applications with OpenTelemetry, Structured Logs & Trace IDs",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "OpenTelemetry Architectural Concepts", url: "https://opentelemetry.io/docs/concepts/", type: "docs" }]
+                },
+                {
+                    title: "Define Golden Signals (Latency, Traffic, Errors, Saturation) & Alerting Rules",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Google SRE Book: Monitoring Distributed Systems", url: "https://sre.google/sre-book/monitoring-distributed-systems/", type: "article" }]
+                }
+            ]
+        },
+        {
+            focus: "High-Frequency Algorithmic Patterns: Graphs, Trees & Topological Sorts",
+            tasks: [
+                {
+                    title: "Master BFS, DFS, Cycle Detection & Topological Sorts for Dependency Graphs",
+                    timeHours: 2.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "NeetCode Graph Algorithms Mastery", url: "https://neetcode.io/practice", type: "practice" }]
+                },
+                {
+                    title: "Review Trie Prefix Trees & Lowest Common Ancestor Patterns",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "LeetCode Top Interview Questions - Trees & Graphs", url: "https://leetcode.com/explore/interview/card/top-interview-questions-medium/", type: "practice" }]
+                }
+            ]
+        },
+        {
+            focus: "High-Frequency Algorithmic Patterns: Dynamic Programming & Sliding Window",
+            tasks: [
+                {
+                    title: "Master 1D/2D Dynamic Programming (Knapsack, Subsequences & State Transitions)",
+                    timeHours: 2.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "DP Patterns for Coding Interviews", url: "https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patterns", type: "article" }]
+                },
+                {
+                    title: "Master Variable-Size Sliding Window & Two-Pointer Invariants",
+                    timeHours: 1.5,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "LeetCode Sliding Window Collection", url: "https://leetcode.com/tag/sliding-window/", type: "practice" }]
+                }
+            ]
+        },
+        {
+            focus: "Large-Scale System Design: High-Throughput URL Shortener & Rate Limiting",
+            tasks: [
+                {
+                    title: "Design a Scalable Distributed URL Shortener (Base62, Hash Collisions & Redirection)",
+                    timeHours: 2.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Mock",
+                    status: "pending",
+                    resources: [{ title: "System Design Primer: URL Shortener Case Study", url: "https://github.com/donnemartin/system-design-primer#design-a-url-shortener", type: "docs" }]
+                },
+                {
+                    title: "Design Distributed Rate Limiter with Token Bucket & Sliding Window Logs",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "ByteByteGo Rate Limiter Architectural Deep Dive", url: "https://bytebytego.com/", type: "article" }]
+                }
+            ]
+        },
+        {
+            focus: "Edge Computing, Content Delivery Networks (CDNs) & Global Traffic Routing",
+            tasks: [
+                {
+                    title: "Master Anycast Routing, CDN Caching Headers (Cache-Control, Stale-While-Revalidate)",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Cloudflare Edge Architecture & Caching Guide", url: "https://developers.cloudflare.com/cache/", type: "docs" }]
+                },
+                {
+                    title: "Design Edge Worker Transformations & Geographic Latency Minimization",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Project",
+                    status: "pending",
+                    resources: [{ title: "Vercel Edge Functions & Static Asset Optimization", url: "https://vercel.com/docs/functions/edge-functions", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Infrastructure as Code (Terraform) & Cloud Security Posture",
+            tasks: [
+                {
+                    title: "Structure Modular Terraform Code with State Locking, S3 Backends & Workspaces",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Terraform Best Practices Documentation", url: "https://www.terraform-best-practices.com/", type: "docs" }]
+                },
+                {
+                    title: "Enforce Principle of Least Privilege with Cloud IAM Roles & KMS Encryption",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "AWS Security Best Practices Whitepaper", url: "https://docs.aws.amazon.com/whitepapers/latest/architecting-for-the-cloud/security.html", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Performance Profiling, Memory Leaks & Garbage Collection Tuning",
+            tasks: [
+                {
+                    title: "Capture and Inspect V8 Heap Snapshots, Event Loop Lag & Memory Leaks",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Node.js Memory Profiling Guide", url: "https://nodejs.org/en/docs/guides/diagnostics/memory/", type: "docs" }]
+                },
+                {
+                    title: "Optimize Synchronous Blockers and Asynchronous Context Overhead",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Clinic.js Profiling & Flamegraph Diagnostics", url: "https://clinicjs.org/documentation/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Resilient Network Protocols, HTTP/3, TLS & Load Balancing",
+            tasks: [
+                {
+                    title: "Compare Layer 4 (TCP/UDP) vs Layer 7 (HTTP/gRPC) Load Balancing Algorithms",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Envoy Proxy Architecture & Threading Model", url: "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/arch_overview", type: "docs" }]
+                },
+                {
+                    title: "Understand TLS Handshakes, Session Resumption, HTTP/2 Multiplexing & HTTP/3 QUIC",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "High Performance Browser Networking - Ilya Grigorik", url: "https://hpbn.co/", type: "article" }]
+                }
+            ]
+        },
+        {
+            focus: "Storage Engine Internals: LSM-Trees vs B-Trees & Write-Ahead Logs",
+            tasks: [
+                {
+                    title: "Study Database Internals: Page Caches, B-Tree Splits, Write-Ahead Logs & ACID",
+                    timeHours: 2.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Database Internals: Alex Petrov Summary", url: "https://www.databass.dev/", type: "docs" }]
+                },
+                {
+                    title: "Compare LSM-Tree Compaction Strategies (RocksDB/Cassandra) for Heavy Writes",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "RocksDB Architecture Guide", url: "https://github.com/facebook/rocksdb/wiki/RocksDB-Basics", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Disaster Recovery, Database Replication Lag & Multi-Region Failover",
+            tasks: [
+                {
+                    title: "Design Primary-Replica, Multi-Leader & Active-Active Replication Topologies",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Designing Data-Intensive Applications (DDIA) Notes", url: "https://github.com/ept/ddia-references", type: "docs" }]
+                },
+                {
+                    title: "Formulate Automated RPO (Recovery Point Objective) & RTO Failover Strategies",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Project",
+                    status: "pending",
+                    resources: [{ title: "AWS Disaster Recovery Whitepaper", url: "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Clean Architecture, Domain-Driven Design (DDD) & SOLID Principles",
+            tasks: [
+                {
+                    title: "Refactor Monolith Layers into Domain Entities, Use Cases & Interface Adapters",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Clean Architecture by Robert C. Martin Overview", url: "https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html", type: "article" }]
+                },
+                {
+                    title: "Implement Bounded Contexts, Value Objects & Dependency Inversion Patterns",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Domain-Driven Design Reference Guide", url: "https://www.domainlanguage.com/ddd/reference/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "API Gateway Architecture, Backend For Frontend (BFF) & GraphQL",
+            tasks: [
+                {
+                    title: "Evaluate API Gateway Responsibilities: Auth, Rate Limiting, SSL Termination & Routing",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Kong API Gateway Architecture", url: "https://docs.konghq.com/gateway/latest/", type: "docs" }]
+                },
+                {
+                    title: "Compare REST vs GraphQL vs tRPC for Type-Safe Multi-Client Contracts",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "GraphQL Official Specifications & Schema Design", url: "https://graphql.org/learn/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Advanced Search Architectures, Elasticsearch & Inverted Indexes",
+            tasks: [
+                {
+                    title: "Master Full-Text Search: Inverted Indexes, Tokenizers, Stemming & BM25 Scoring",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Elasticsearch Architecture & Index Management", url: "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html", type: "docs" }]
+                },
+                {
+                    title: "Explore Vector Embeddings, Cosine Similarity & Hybrid Vector Search Systems",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Vector Database Fundamentals (Pinecone / Milvus)", url: "https://www.pinecone.io/learn/vector-database/", type: "article" }]
+                }
+            ]
+        },
+        {
+            focus: "Engineering Production Incidents, Post-Mortems & SLA/SLO Defense",
+            tasks: [
+                {
+                    title: "Learn Incident Command Frameworks, P1/P0 Triage & Blameless Post-Mortems",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Google SRE Postmortem Culture & Templates", url: "https://sre.google/sre-book/postmortem-culture/", type: "article" }]
+                },
+                {
+                    title: "Frame Real Production Outage Stories with Clear Root-Cause-Analysis (RCA)",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Incident Incident Response Handbook", url: "https://response.pagerduty.com/", type: "cheatsheet" }]
+                }
+            ]
+        },
+        {
+            focus: "Full-Stack Integration Testing, Contract Testing & End-to-End Resilience",
+            tasks: [
+                {
+                    title: "Implement Consumer-Driven Contract Testing with Pact for Microservices",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Pact Contract Testing Documentation", url: "https://docs.pact.io/", type: "docs" }]
+                },
+                {
+                    title: "Build Resilient E2E Smoke Tests with Playwright / Cypress for Critical User Journeys",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "Medium",
+                    type: "Practice",
+                    status: "pending",
+                    resources: [{ title: "Playwright Best Practices Documentation", url: "https://playwright.dev/docs/best-practices", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "System Design Mock Simulation: Global Video Streaming Architecture",
+            tasks: [
+                {
+                    title: "Execute Timed Mock: Design YouTube/Netflix (Transcoding, Chunking & Adaptive Bitrate)",
+                    timeHours: 2.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Mock",
+                    status: "pending",
+                    resources: [{ title: "System Design Primer: Design Netflix", url: "https://github.com/donnemartin/system-design-primer", type: "docs" }]
+                },
+                {
+                    title: "Evaluate CDN Edge Caching, Master Manifests & Geo-Distributed Origin Servers",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "ByteByteGo Video Streaming Architecture", url: "https://bytebytego.com/", type: "article" }]
+                }
+            ]
+        },
+        {
+            focus: "System Design Mock Simulation: Real-Time Social Feed & Activity Hub",
+            tasks: [
+                {
+                    title: "Execute Timed Mock: Design Twitter/LinkedIn Feed (Fan-out on Write vs Fan-out on Read)",
+                    timeHours: 2.5,
+                    timeOfDay: "Morning",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Mock",
+                    status: "pending",
+                    resources: [{ title: "System Design Primer: Design Twitter Feed", url: "https://github.com/donnemartin/system-design-primer#design-twitter", type: "docs" }]
+                },
+                {
+                    title: "Handle Celebrity Problem, Cache Pagination with Cursor-Based Offsets & Push Notifs",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Hard",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "Scalable Timeline Architectures (Redis Sorted Sets)", url: "https://redis.io/docs/data-types/sorted-sets/", type: "docs" }]
+                }
+            ]
+        },
+        {
+            focus: "Complex Technical Trade-offs: Modular Monolith vs Distributed Microservices",
+            tasks: [
+                {
+                    title: "Master Trade-offs: Latency, Network Partitions, Debuggability & Organizational Conway's Law",
+                    timeHours: 2,
+                    timeOfDay: "Morning",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Learn",
+                    status: "pending",
+                    resources: [{ title: "Martin Fowler: Microservices Guide & Trade-offs", url: "https://martinfowler.com/articles/microservices.html", type: "article" }]
+                },
+                {
+                    title: "Prepare Compelling Architectural Defense Case Studies from Past Engineering Experience",
+                    timeHours: 2,
+                    timeOfDay: "Afternoon",
+                    difficulty: "Medium",
+                    priority: "High",
+                    type: "Revision",
+                    status: "pending",
+                    resources: [{ title: "Tech Interview Handbook: Behavioral & Architectural Stories", url: "https://www.techinterviewhandbook.org/", type: "docs" }]
+                }
+            ]
+        },
+        {
             focus: "Full-Stack Mock Simulation & High-Stress Technical Problem Solving",
             tasks: [
                 {
@@ -671,26 +1272,54 @@ function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCoun
             focus: "Intensive 24-Hour Final Technical & Behavioral Sprint",
             tasks: [
                 allCurriculum[0].tasks[0],
-                allCurriculum[5].tasks[0],
-                allCurriculum[6].tasks[0]
+                allCurriculum[28].tasks[0],
+                allCurriculum[29].tasks[0]
             ]
         }];
+    } else if (totalDays === 2) {
+        selectedCurriculum = [
+            allCurriculum[0],
+            allCurriculum[29]
+        ];
     } else if (totalDays === 3) {
         selectedCurriculum = [
             allCurriculum[0],
             allCurriculum[1],
-            allCurriculum[6]
+            allCurriculum[29]
         ];
     } else if (totalDays === 5) {
         selectedCurriculum = [
             allCurriculum[0],
             allCurriculum[1],
             allCurriculum[2],
-            allCurriculum[5],
-            allCurriculum[6]
+            allCurriculum[28],
+            allCurriculum[29]
+        ];
+    } else if (totalDays === 7) {
+        selectedCurriculum = [
+            allCurriculum[0],
+            allCurriculum[1],
+            allCurriculum[2],
+            allCurriculum[3],
+            allCurriculum[4],
+            allCurriculum[28],
+            allCurriculum[29]
         ];
     } else {
-        selectedCurriculum = allCurriculum.slice(0, totalDays);
+        // For custom day counts (e.g. 8 to 30 days):
+        // Take technical/architectural modules for days 1 to (totalDays - 2),
+        // penultimate day is full mock simulation, and final day is behavioral STAR polish.
+        const techModulesCount = totalDays - 2;
+        const availableTech = allCurriculum.slice(0, 28);
+        const techModules = [];
+        for (let i = 0; i < techModulesCount; i++) {
+            techModules.push(availableTech[i % availableTech.length]);
+        }
+        selectedCurriculum = [
+            ...techModules,
+            allCurriculum[28], // Mock simulation
+            allCurriculum[29]  // Behavioral STAR & Final readiness
+        ];
     }
 
     const plan = selectedCurriculum.map((item, idx) => ({
@@ -778,7 +1407,7 @@ STRICT GENERATION GUIDELINES:
 async function generateRoadmap({ resume, selfDescription, jobDescription, remainingDays, atsScore, skillGaps }) {
     const candidateProfile = (resume || selfDescription || "").trim();
     if (!candidateProfile && !jobDescription) throw new Error("Missing candidate profile or job description for generateRoadmap");
-    const days = Math.min(Math.max(parseInt(remainingDays) || 7, 1), 7);
+    const days = Math.min(Math.max(parseInt(remainingDays, 10) || 7, 1), 30);
     
     const prompt = `${MASTER_PROMPT}
 
@@ -792,7 +1421,7 @@ Target Job Description:
 ${jobDescription}
 
 Timeline: EXACTLY ${days} Days Remaining
-ATS Match Score: ${atsScore || "Calculated from JD"}
+ATS Match Score: ${atsScore !== undefined && atsScore !== null ? atsScore : "Calculated from JD"}
 Identified Skill Gaps: ${JSON.stringify(skillGaps || [])}
 
 PEDAGOGICAL STRUCTURE & RULES:
@@ -836,7 +1465,7 @@ PEDAGOGICAL STRUCTURE & RULES:
             ],
             response_format: { type: "json_object" },
             temperature: 0.3,
-            max_tokens: 3500
+            max_tokens: 7500
         }), 6, "Roadmap", fullPrompt);
 
         if (result && Array.isArray(result.preparationPlan) && result.preparationPlan.length > 0) {
@@ -983,4 +1612,13 @@ function getFallbackResumeRewrite(jobDescription = "", candidateProfile = "") {
 </div>`.trim()
     };
 }
-module.exports = { generateAtsAndGaps, generateQuestions, generateRoadmap, generateResumeRewrite, callOpenRouterWithRetry, callGeminiWithRetry }
+module.exports = { 
+    generateAtsAndGaps, 
+    generateQuestions, 
+    generateRoadmap, 
+    generateResumeRewrite, 
+    getFallbackRoadmap, 
+    callOpenRouterWithRetry, 
+    callGeminiWithRetry,
+    _cacheInternal: { getCacheEntry, setCacheEntry, openRouterCache, CACHE_MAX_SIZE, CACHE_TTL_MS }
+}

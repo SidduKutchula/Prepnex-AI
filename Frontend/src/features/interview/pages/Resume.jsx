@@ -11,7 +11,7 @@ import '../style/home.scss';
 const ResumeContent = ({ report, onOpenBot }) => {
     return (
         <div className="resume-builder-workspace animate-fade-in">
-            <ResumeToolbar atsScore={report?.atsScore || 95} reportId={report?._id} />
+            <ResumeToolbar atsScore={report?.atsScore ?? 95} reportId={report?._id} />
             <div className="builder-single-preview" style={{ display: 'flex', justifyContent: 'center', margin: '24px auto', maxWidth: '850px' }}>
                 <ResumePreview />
             </div>

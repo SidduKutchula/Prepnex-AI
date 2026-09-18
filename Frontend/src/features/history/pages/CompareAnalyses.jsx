@@ -45,7 +45,7 @@ const CompareAnalyses = () => {
                     <option value="">Select First Analysis...</option>
                     {history.map(item => (
                         <option key={item._id} value={item._id}>
-                            {item.company} ({new Date(item.createdAt).toLocaleDateString()}) - ATS: {item.atsScore}
+                            {item.company || item.title || 'Analysis'} ({new Date(item.createdAt).toLocaleDateString()}) - ATS: {item.atsScore ?? 'N/A'}
                         </option>
                     ))}
                 </select>
@@ -58,7 +58,7 @@ const CompareAnalyses = () => {
                     <option value="">Select Second Analysis...</option>
                     {history.map(item => (
                         <option key={item._id} value={item._id}>
-                            {item.company} ({new Date(item.createdAt).toLocaleDateString()}) - ATS: {item.atsScore}
+                            {item.company || item.title || 'Analysis'} ({new Date(item.createdAt).toLocaleDateString()}) - ATS: {item.atsScore ?? 'N/A'}
                         </option>
                     ))}
                 </select>
@@ -75,42 +75,46 @@ const CompareAnalyses = () => {
             {comparisonData && (
                 <div className="comparison-results animate-fade-in">
                     <div className="result-column">
-                        <h3>{comparisonData.report1.company || 'Analysis 1'}</h3>
+                        <h3>{comparisonData.report1.company || comparisonData.report1.title || 'Analysis 1'}</h3>
                         <p className="result-date">{new Date(comparisonData.report1.createdAt).toLocaleDateString()}</p>
                         
                         <div className="result-scores">
                             <div className="score-row">
                                 <span>ATS Score:</span>
-                                <span className="score-val">{comparisonData.report1.atsScore}</span>
+                                <span className="score-val">{comparisonData.report1.atsScore ?? 'N/A'}</span>
                             </div>
                             <div className="score-row">
                                 <span>Match Score:</span>
-                                <span className="score-val">{comparisonData.report1.matchScore}%</span>
+                                <span className="score-val">{comparisonData.report1.matchScore ?? 'N/A'}%</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="result-column">
-                        <h3>{comparisonData.report2.company || 'Analysis 2'}</h3>
+                        <h3>{comparisonData.report2.company || comparisonData.report2.title || 'Analysis 2'}</h3>
                         <p className="result-date">{new Date(comparisonData.report2.createdAt).toLocaleDateString()}</p>
                         
                         <div className="result-scores">
                             <div className="score-row">
                                 <span>ATS Score:</span>
                                 <span className="score-val">
-                                    {comparisonData.report2.atsScore}
-                                    <span style={{ color: comparisonData.comparison.atsDiff >= 0 ? '#4ade80' : '#f87171', marginLeft: '8px', fontSize: '14px' }}>
-                                        ({comparisonData.comparison.atsDiff >= 0 ? '+' : ''}{comparisonData.comparison.atsDiff})
-                                    </span>
+                                    {comparisonData.report2.atsScore ?? 'N/A'}
+                                    {comparisonData.comparison?.atsDiff !== undefined && (
+                                        <span style={{ color: comparisonData.comparison.atsDiff >= 0 ? '#4ade80' : '#f87171', marginLeft: '8px', fontSize: '14px' }}>
+                                            ({comparisonData.comparison.atsDiff >= 0 ? '+' : ''}{comparisonData.comparison.atsDiff})
+                                        </span>
+                                    )}
                                 </span>
                             </div>
                             <div className="score-row">
                                 <span>Match Score:</span>
                                 <span className="score-val">
-                                    {comparisonData.report2.matchScore}%
-                                    <span style={{ color: comparisonData.comparison.matchDiff >= 0 ? '#4ade80' : '#f87171', marginLeft: '8px', fontSize: '14px' }}>
-                                        ({comparisonData.comparison.matchDiff >= 0 ? '+' : ''}{comparisonData.comparison.matchDiff}%)
-                                    </span>
+                                    {comparisonData.report2.matchScore ?? 'N/A'}%
+                                    {comparisonData.comparison?.matchDiff !== undefined && (
+                                        <span style={{ color: comparisonData.comparison.matchDiff >= 0 ? '#4ade80' : '#f87171', marginLeft: '8px', fontSize: '14px' }}>
+                                            ({comparisonData.comparison.matchDiff >= 0 ? '+' : ''}{comparisonData.comparison.matchDiff}%)
+                                        </span>
+                                    )}
                                 </span>
                             </div>
                         </div>

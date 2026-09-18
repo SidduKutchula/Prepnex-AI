@@ -10,9 +10,11 @@ const DashboardLayout = () => {
     const [searchOpen, setSearchOpen] = useState(false)
 
     // Reset active tab if returning to dashboard
-    if (location.pathname === '/interview' && activeTab !== '') {
-        setActiveTab('')
-    }
+    React.useEffect(() => {
+        if (location.pathname === '/interview' && activeTab !== '') {
+            setActiveTab('')
+        }
+    }, [location.pathname, activeTab])
 
     return (
         <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>

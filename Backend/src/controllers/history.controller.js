@@ -1,4 +1,5 @@
 const InterviewReport = require("../models/interviewReport.model");
+const RoadmapProgress = require("../models/roadmapProgress.model");
 const asyncHandler = require("../utils/asyncHandler");
 
 // @route   GET /api/history
@@ -100,9 +101,10 @@ exports.getAnalytics = asyncHandler(async (req, res) => {
 // @desc    Compare two history analyses
 exports.compareHistory = asyncHandler(async (req, res) => {
     const { id1, id2 } = req.query;
+    const userId = req.user.id;
 
-    const report1 = await InterviewReport.findById(id1);
-    const report2 = await InterviewReport.findById(id2);
+    const report1 = await InterviewReport.findOne({ _id: id1, user: userId });
+    const report2 = await InterviewReport.findOne({ _id: id2, user: userId });
 
     if (!report1 || !report2) {
         return res.status(404).json({ success: false, message: "One or both reports not found" });
@@ -145,10 +147,12 @@ exports.toggleFavorite = asyncHandler(async (req, res) => {
         return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    report.favorite = !report.favorite;
+    const nextState = !(report.favorite || report.isBookmarked);
+    report.favorite = nextState;
+    report.isBookmarked = nextState;
     await report.save();
 
-    res.status(200).json({ success: true, data: report });
+    res.status(200).json({ success: true, data: report, isBookmarked: report.isBookmarked, favorite: report.favorite });
 });
 
 // @route   DELETE /api/history/:id
@@ -165,6 +169,7 @@ exports.deleteHistory = asyncHandler(async (req, res) => {
     }
 
     await report.deleteOne();
+    await RoadmapProgress.deleteMany({ $or: [{ interviewReport: req.params.id }, { reportId: req.params.id }] });
 
     res.status(200).json({ success: true, message: "Report deleted" });
 });

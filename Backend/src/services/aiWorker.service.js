@@ -5,6 +5,7 @@ const aiService = require('./ai.service');
 class AIWorkerService extends EventEmitter {
     constructor() {
         super();
+        this.setMaxListeners(50); // Support up to 50 concurrent report generations
         this.activeJobs = new Map();
     }
 
@@ -63,8 +64,10 @@ class AIWorkerService extends EventEmitter {
                         severity: validSeverities.includes((g?.severity || "").toLowerCase()) ? g.severity.toLowerCase() : "medium"
                     })).filter(g => g.skill.length > 0);
 
-                    const atsScore = Math.min(Math.max(Math.round(Number(atsData?.atsScore) || 75), 0), 100);
-                    const matchScore = Math.min(Math.max(Math.round(Number(atsData?.matchScore) || atsScore), 0), 100);
+                    const rawAts = Number(atsData?.atsScore);
+                    const atsScore = !isNaN(rawAts) ? Math.min(Math.max(Math.round(rawAts), 0), 100) : 75;
+                    const rawMatch = Number(atsData?.matchScore);
+                    const matchScore = !isNaN(rawMatch) ? Math.min(Math.max(Math.round(rawMatch), 0), 100) : atsScore;
                     const addedKeywords = (Array.isArray(atsData?.addedKeywords) ? atsData.addedKeywords : []).map(k => String(k).trim()).filter(Boolean);
                     const missingKeywords = (Array.isArray(atsData?.missingKeywords) ? atsData.missingKeywords : []).map(k => String(k).trim()).filter(Boolean);
 

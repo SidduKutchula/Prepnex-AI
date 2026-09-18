@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
 
 import { useInterview, useInterviewStream } from '../hooks/useInterview.js'
+import { useRoadmapProgress } from '../hooks/useRoadmapProgress'
 import { useNavigate, useParams, useOutletContext } from 'react-router'
 import { ResumeProvider } from '../../resume/resume.context'
 import { ResumeToolbar } from '../../resume/components/ResumeToolbar'
@@ -65,9 +66,14 @@ const NAV_ITEMS = [
         icon: (<FileText size={22} />) 
     },
     {
-        id: 'overview',
-        label: 'Match & Gaps',
-        icon: (<Target size={22} />)
+        id: 'coach',
+        label: 'AI Mock Coach',
+        icon: (<Bot size={22} />)
+    },
+    { 
+        id: 'overview', 
+        label: 'Match & Gaps', 
+        icon: (<Target size={22} />) 
     }
 ]
 
@@ -198,7 +204,7 @@ const RoadMapDay = memo(({ day, isCompleted, isActive, onToggleCompleted, comple
     }, [defaultExpanded]);
 
     const tasks = day.tasks || [];
-    const completedCount = tasks.filter(t => completedTaskIds.includes(t._id || t.title)).length;
+    const completedCount = tasks.filter(t => completedTaskIds.some(id => id === (t._id?.toString() || t._id) || id === t.title)).length;
     const progress = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
     const cleanFocus = String(day.focus || '').replace(/^Day\s*\d+\s*[:\-–—]\s*/i, '').trim() || `Technical Mastery Focus`;
 
@@ -252,8 +258,8 @@ const RoadMapDay = memo(({ day, isCompleted, isActive, onToggleCompleted, comple
                         >
                             <div className='roadmap-day__tasks-detailed'>
                                 {tasks.map((task, idx) => {
-                                    const taskId = task._id || `day-${day.day}-task-${idx + 1}`;
-                                    const isTaskCompleted = completedTaskIds.includes(taskId) || completedTaskIds.includes(task.title);
+                                    const taskId = (task._id ? task._id.toString() : null) || task.title || `day-${day.day}-task-${idx + 1}`;
+                                    const isTaskCompleted = completedTaskIds.some(id => id === taskId || id === (task._id?.toString() || task._id) || id === task.title);
                                     
                                     return (
                                         <div key={taskId} className={`detailed-task-row ${isTaskCompleted ? 'task-completed' : ''}`}>
@@ -481,6 +487,7 @@ const AIInterviewCoachSection = memo(({ report }) => {
     const videoRef = useRef(null)
     const streamRef = useRef(null)
     const chatEndRef = useRef(null)
+    const aiTimerRef = useRef(null)
 
     useEffect(() => {
         if (chatEndRef.current) {
@@ -503,6 +510,9 @@ const AIInterviewCoachSection = memo(({ report }) => {
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop())
             }
+            if (aiTimerRef.current) {
+                clearTimeout(aiTimerRef.current)
+            }
         }
     }, [])
 
@@ -511,10 +521,18 @@ const AIInterviewCoachSection = memo(({ report }) => {
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop())
             }
+            if (videoRef.current) {
+                videoRef.current.srcObject = null
+            }
             setCameraActive(false)
         } else {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+                let stream
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: micActive })
+                } catch {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true })
+                }
                 streamRef.current = stream
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream
@@ -522,9 +540,21 @@ const AIInterviewCoachSection = memo(({ report }) => {
                 setCameraActive(true)
             } catch (err) {
                 console.error("Camera access failed:", err)
-                alert("Could not access camera feed. Please check permissions.")
+                alert("Could not access camera feed. Please check camera permissions in your browser.")
             }
         }
+    }
+
+    const toggleMic = () => {
+        setMicActive(prev => {
+            const next = !prev
+            if (streamRef.current) {
+                streamRef.current.getAudioTracks().forEach(track => {
+                    track.enabled = next
+                })
+            }
+            return next
+        })
     }
 
     const startSession = () => {
@@ -545,7 +575,13 @@ const AIInterviewCoachSection = memo(({ report }) => {
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => track.stop())
         }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null
+        }
         setCameraActive(false)
+        if (aiTimerRef.current) {
+            clearTimeout(aiTimerRef.current)
+        }
         setMessages(prev => [...prev, {
             sender: 'coach',
             text: `Mock session complete. You did a great job reviewing technical topics! Download your customized resume to proceed.`
@@ -560,7 +596,11 @@ const AIInterviewCoachSection = memo(({ report }) => {
         setInputText("")
         setAiThinking(true)
 
-        setTimeout(() => {
+        if (aiTimerRef.current) {
+            clearTimeout(aiTimerRef.current)
+        }
+
+        aiTimerRef.current = setTimeout(() => {
             setAiThinking(false)
             const currentQ = report?.technicalQuestions?.[currentQuestionIndex]
             const evaluationText = `**Coach Evaluation:** Excellent structural focus in your answer. You mapped the key requirements well.\n\n**Intention behind question:** ${currentQ?.intention || "Evaluates core structural capabilities."}\n\n**Key suggestion:** Reference scaling metrics. For example: ${currentQ?.answer?.slice(0, 100) || "describe scaling limits"}...`
@@ -694,10 +734,10 @@ const AIInterviewCoachSection = memo(({ report }) => {
                             </div>
                         )}
                         <div className="media-controls">
-                            <button onClick={toggleCamera} className={`control-btn ${cameraActive ? 'active' : ''}`} title="Toggle Video Feed">
+                            <button type="button" onClick={toggleCamera} className={`control-btn ${cameraActive ? 'active' : ''}`} title="Toggle Video Feed">
                                 {cameraActive ? <Video size={16} /> : <VideoOff size={16} />}
                             </button>
-                            <button onClick={() => setMicActive(m => !m)} className={`control-btn ${micActive ? 'active' : ''}`} title="Toggle Audio Feed">
+                            <button type="button" onClick={toggleMic} className={`control-btn ${micActive ? 'active' : ''}`} title="Toggle Audio Feed">
                                 {micActive ? <Mic size={16} /> : <MicOff size={16} />}
                             </button>
                         </div>
@@ -722,14 +762,13 @@ const AIInterviewCoachSection = memo(({ report }) => {
     )
 })
 
-import { useRoadmapProgress } from '../hooks/useRoadmapProgress';
-
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
     const [activeNav, setActiveNav] = useState('technical')
     const [allDaysExpanded, setAllDaysExpanded] = useState(null)
-    const { setActiveTab } = useOutletContext()
-    const { report: baseReport, getReportById, loading } = useInterview()
+    const outletCtx = useOutletContext()
+    const setActiveTab = outletCtx?.setActiveTab
+    const { report: baseReport, getReportById, setReport, loading } = useInterview()
     const { interviewId } = useParams()
     const navigate = useNavigate()
     const { report: streamedReport } = useInterviewStream(interviewId)
@@ -748,6 +787,27 @@ const Interview = () => {
             getReportById(interviewId)
         }
     }, [interviewId, getReportById])
+
+    // Auto-heal: If report is stuck in 'processing' but all generation stages are finished
+    useEffect(() => {
+        if (!interviewId || !report || report.status !== 'processing') return;
+
+        const progress = report.progress || {};
+        const isAllStagesDone = progress.atsGenerated && progress.questionsGenerated && progress.roadmapGenerated && progress.rewriteGenerated;
+
+        if (isAllStagesDone) {
+            const timer = setTimeout(async () => {
+                const res = await getReportById(interviewId);
+                // If backend completed or if all core sections are present, ensure status transitions out of processing
+                if (res?.data?.status === 'processing') {
+                    if (res.data.technicalQuestions?.length > 0 && res.data.preparationPlan?.length > 0) {
+                        setReport(prev => prev ? { ...prev, status: 'completed' } : prev);
+                    }
+                }
+            }, 1200);
+            return () => clearTimeout(timer);
+        }
+    }, [interviewId, report?.status, report?.progress, getReportById, setReport]);
 
     const { generatePdf, isGenerating: isDownloadingPdf } = useResumePdf()
 
@@ -1197,7 +1257,7 @@ const Interview = () => {
                                     ? (report.preparationPlan || []).flatMap(d => d.tasks || [])
                                     : (report.preparationPlan || []);
                                 const totalTasksCount = allTasks.length;
-                                const completedTasksCount = allTasks.filter(t => completedTaskIds.includes(t._id || t.title || t.topic)).length;
+                                const completedTasksCount = allTasks.filter(t => completedTaskIds.some(id => id === (t._id?.toString() || t._id) || id === t.title || id === t.topic)).length;
                                 const progressPct = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
 
                                 return (
@@ -1247,9 +1307,9 @@ const Interview = () => {
                                             <div className='roadmap-list premium-timeline'>
                                                 {report.preparationPlan?.map((item, index) => {
                                                     if (item.tasks && item.day) {
-                                                        const isCompleted = item.tasks.every(t => completedTaskIds.includes(t._id || t.title));
+                                                        const isCompleted = item.tasks.every(t => completedTaskIds.some(id => id === (t._id?.toString() || t._id) || id === t.title));
                                                         const isActive = !isCompleted && 
-                                                            (index === 0 || report.preparationPlan[index-1].tasks?.every(t => completedTaskIds.includes(t._id || t.title)))
+                                                            (index === 0 || report.preparationPlan[index-1].tasks?.every(t => completedTaskIds.some(id => id === (t._id?.toString() || t._id) || id === t.title)))
                                                         
                                                         return (
                                                             <RoadMapDay 
@@ -1263,7 +1323,7 @@ const Interview = () => {
                                                             />
                                                         )
                                                     } else if (item.topic) {
-                                                        const isCompleted = completedTaskIds.includes(item._id || item.topic)
+                                                        const isCompleted = completedTaskIds.some(id => id === (item._id?.toString() || item._id) || id === item.topic);
                                                         return (
                                                             <SkillMasteryCard 
                                                                 key={`skill-${index}`} 
@@ -1294,6 +1354,19 @@ const Interview = () => {
                                         report={report}
                                     />
                                 </motion.div>
+                            )}
+
+                            {activeNav === 'coach' && (
+                                <motion.section
+                                    key="coach"
+                                    variants={sectionFade}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    className="section-content"
+                                >
+                                    <AIInterviewCoachSection report={report} />
+                                </motion.section>
                             )}
                         </AnimatePresence>
                     </main>

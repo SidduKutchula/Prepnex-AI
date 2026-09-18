@@ -91,7 +91,7 @@ export function exportFullMasterReportPDF(report) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(37, 99, 235);
-    doc.text(`${report.atsScore || 85}%`, margin + 14, y + 26);
+    doc.text(`${report.atsScore ?? 85}%`, margin + 14, y + 26);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);
@@ -103,7 +103,7 @@ export function exportFullMasterReportPDF(report) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(16, 185, 129);
-    doc.text(`${report.matchScore || report.readinessScore || 88}%`, margin + cardWidth + 24, y + 26);
+    doc.text(`${report.matchScore ?? report.readinessScore ?? 88}%`, margin + cardWidth + 24, y + 26);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);

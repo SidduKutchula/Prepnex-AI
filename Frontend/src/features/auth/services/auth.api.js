@@ -17,6 +17,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
+        // Silently handle expected 401 on initial session check when not logged in
+        if (error.config?.url?.includes('/api/auth/get-me') && error.response?.status === 401) {
+            const err = new Error('Not authenticated');
+            err.status = 401;
+            return Promise.reject(err);
+        }
+
         let message = 'Something went wrong';
         const data = error.response?.data;
 

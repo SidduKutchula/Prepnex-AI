@@ -102,8 +102,7 @@ const logoutUserController = asyncHandler(async (req, res) => {
 const getMeController = asyncHandler(async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
-        // ONLY read from authHeader for getMe to enforce sessionStorage on frontend
-        const token = (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
+        const token = (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : req.cookies?.token);
         if (!token) {
             return res.status(401).json({ success: false, error: 'Not authenticated', code: 'NO_TOKEN' });
         }

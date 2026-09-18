@@ -10,6 +10,7 @@ const app = express()
 // }))
 
 app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
     console.log(`[REQ] ${req.method} ${req.url}`);
     next();
 });

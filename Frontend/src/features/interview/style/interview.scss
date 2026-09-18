@@ -1614,15 +1614,96 @@
   }
 }
 
+@media (max-width: 768px) {
+  .interview-sidebar {
+    flex-direction: column;
+    padding: 1rem;
+
+    .match-score,
+    .skill-gaps {
+      min-width: 100%;
+    }
+  }
+
+  .roadmap-timeline {
+    padding-left: 0;
+    border-left: none;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .roadmap-day {
+    .roadmap-marker {
+      display: none;
+    }
+
+    .roadmap-card {
+      padding: 1rem;
+    }
+
+    &__header {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    &__focus {
+      font-size: 15px;
+    }
+
+    &__tasks {
+      .task-text {
+        font-size: 14px;
+      }
+
+      .task-meta {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .resume-preview-panel {
+    .preview-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+      h2 {
+        font-size: 18px;
+      }
+    }
+
+    .ats-score-circle {
+      width: 100px;
+      height: 100px;
+
+      .score-value {
+        font-size: 22px;
+      }
+    }
+  }
+
+  .premium-workspace {
+    border-radius: var(--radius-md);
+
+    &__grid {
+      grid-template-columns: 1fr;
+      padding: 12px;
+    }
+  }
+}
+
 @media (max-width: 480px) {
   .page-wrapper {
-    padding: 2rem 1rem;
-    gap: 1rem;
+    padding: 1rem 0.75rem;
+    gap: 0.75rem;
   }
 
   .interview-nav {
     flex-direction: column;
     align-items: stretch;
+    padding: 0.75rem;
 
     .nav-content {
       flex-direction: column;
@@ -1632,6 +1713,61 @@
     .download-btn {
       width: 100%;
       justify-content: center;
+    }
+  }
+
+  .back-nav {
+    font-size: 13px;
+  }
+
+  .roadmap-day .roadmap-card {
+    padding: 0.75rem;
+  }
+
+  .roadmap-day__focus {
+    font-size: 14px;
+  }
+
+  .roadmap-day__tasks {
+    .task-text {
+      font-size: 13px;
+    }
+  }
+
+  .q-card__header {
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .q-card__question {
+    font-size: 14px;
+  }
+
+  .q-card__body {
+    padding: 0 0.75rem 0.75rem;
+  }
+
+  .match-score {
+    padding: 14px;
+
+    .score-value {
+      font-size: 28px;
+    }
+  }
+
+  .skill-gaps {
+    padding: 14px;
+  }
+
+  .resume-preview-panel {
+    .ats-metrics-row {
+      gap: 1rem;
+    }
+
+    .ats-score-card,
+    .ats-feedback-card,
+    .keywords-card {
+      padding: 1rem;
     }
   }
 }

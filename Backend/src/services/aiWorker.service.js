@@ -157,14 +157,13 @@ class AIWorkerService extends EventEmitter {
                     let atsScore = undefined;
                     let skillGaps = undefined;
                     try {
-                        await atsPromise;
                         const updatedReport = await interviewReportModel.findById(reportId).select('atsScore skillGaps');
                         if (updatedReport) {
                             atsScore = updatedReport.atsScore;
                             skillGaps = updatedReport.skillGaps;
                         }
                     } catch (atsErr) {
-                        console.warn("[Roadmap Worker] ATS promise failed or pending, proceeding with direct profile:", atsErr.message);
+                        console.warn("[Roadmap Worker] Could not read ATS metrics, proceeding with direct profile:", atsErr.message);
                     }
 
                     const roadmapData = await aiService.generateRoadmap({ 

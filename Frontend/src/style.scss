@@ -76,6 +76,22 @@ p {
   line-height: var(--leading-relaxed);
 }
 
+// ── Responsive Typography ─────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  h1 { font-size: clamp(1.75rem, 5vw, var(--text-4xl)); }
+  h2 { font-size: clamp(1.5rem, 4.5vw, var(--text-3xl)); }
+  h3 { font-size: clamp(1.25rem, 4vw, var(--text-2xl)); }
+  h4 { font-size: var(--text-xl); }
+  h5 { font-size: var(--text-lg); }
+  h6 { font-size: var(--text-base); }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+}
+
 small,
 .meta,
 .report-meta,

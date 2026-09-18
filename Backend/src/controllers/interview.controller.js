@@ -272,7 +272,7 @@ async function getInterviewReportByIdController(req, res) {
             return res.status(400).json({ success: false, message: "Invalid interview ID format." });
         }
 
-        let interviewReport = await interviewReportModel.findOne({ _id: interviewId, user: req.user.id });
+        const interviewReport = await interviewReportModel.findOne({ _id: interviewId, user: req.user.id });
 
         if (!interviewReport) {
             return res.status(404).json({
@@ -281,52 +281,22 @@ async function getInterviewReportByIdController(req, res) {
             });
         }
 
-        // Auto-heal/generate missing questions or roadmap if they are empty
-        let updated = false;
+        // Identify which stages are still missing (don't auto-generate — just report)
+        const missingStages = [];
+        if (!interviewReport.progress?.atsGenerated) missingStages.push("ats");
         if (!Array.isArray(interviewReport.technicalQuestions) || interviewReport.technicalQuestions.length === 0) {
-            console.log(`[Auto-Heal] Generating missing questions for report ${interviewId}`);
-            try {
-                const qData = await aiService.generateQuestions({
-                    resume: interviewReport.resume,
-                    selfDescription: interviewReport.selfDescription,
-                    jobDescription: interviewReport.jobDescription
-                });
-                interviewReport.technicalQuestions = qData.technicalQuestions || [];
-                interviewReport.behavioralQuestions = qData.behavioralQuestions || [];
-                interviewReport.progress = { ...interviewReport.progress, questionsGenerated: true };
-                updated = true;
-            } catch (qErr) {
-                console.error("[Auto-Heal Questions Error]:", qErr.message);
-            }
+            missingStages.push("questions");
         }
-
         if (!Array.isArray(interviewReport.preparationPlan) || interviewReport.preparationPlan.length === 0) {
-            console.log(`[Auto-Heal] Generating missing roadmap for report ${interviewId}`);
-            try {
-                const rmData = await aiService.generateRoadmap({
-                    resume: interviewReport.resume,
-                    selfDescription: interviewReport.selfDescription,
-                    jobDescription: interviewReport.jobDescription,
-                    remainingDays: interviewReport.remainingDays || 7,
-                    atsScore: interviewReport.atsScore,
-                    skillGaps: interviewReport.skillGaps
-                });
-                interviewReport.preparationPlan = rmData.preparationPlan || [];
-                interviewReport.progress = { ...interviewReport.progress, roadmapGenerated: true };
-                updated = true;
-            } catch (rmErr) {
-                console.error("[Auto-Heal Roadmap Error]:", rmErr.message);
-            }
+            missingStages.push("roadmap");
         }
-
-        if (updated) {
-            await interviewReport.save();
-        }
+        if (!interviewReport.progress?.rewriteGenerated) missingStages.push("rewrite");
 
         res.status(200).json({
             success: true,
             message: "Interview report fetched successfully.",
-            interviewReport
+            interviewReport,
+            ...(missingStages.length > 0 && { missingStages })
         });
     } catch (error) {
         console.error("Error fetching report by ID:", error.stack || error);

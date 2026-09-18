@@ -211,7 +211,7 @@ async function saveInterviewReportController(req, res) {
                         status: "pending",
                         resources: Array.isArray(task.resources) ? task.resources.map(res => ({
                             title: res.title || "Resource",
-                            url: res.url || "",
+                            url: (res.url && String(res.url).trim().length > 0) ? String(res.url).trim() : "https://developer.mozilla.org",
                             type: ["docs", "video", "practice", "article", "cheatsheet"].includes(res.type) ? res.type : "docs"
                         })) : []
                     })) : []

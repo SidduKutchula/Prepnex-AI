@@ -177,15 +177,15 @@ const atsGapsSchema = z.object({
 
 const questionsSchema = z.object({
     technicalQuestions: z.array(z.object({
-        question: z.string().describe("The technical question can be asked in the interview"),
-        intention: z.string().describe("The intention of interviewer behind asking this question"),
-        answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
-    })).describe("Technical questions that can be asked in the interview along with their intention and how to answer them"),
+        question: z.string().describe("Direct, realistic technical interview question matching the exact technologies, stack, and architectural challenges required by the target job description."),
+        intention: z.string().describe("Detailed evaluation criteria: what the interviewer is assessing regarding depth of knowledge, system design reasoning, trade-offs, and edge cases."),
+        answer: z.string().describe("Optimal, in-depth model answer formatted with clear sections: 1. Core Concept & High-level Thesis, 2. Step-by-Step Architecture & Implementation Details, 3. Scalability, Latency & Edge Cases, and 4. Common Red Flags / Pitfalls to avoid.")
+    })).describe("Technical questions tailored specifically to the candidate's gaps against the target JD requirements"),
     behavioralQuestions: z.array(z.object({
-        question: z.string().describe("The behavioral question can be asked in the interview"),
-        intention: z.string().describe("The intention of interviewer behind asking this question"),
-        answer: z.string().describe("How to answer this question, what points to cover, what approach to take etc.")
-    })).describe("Behavioral questions that can be asked in the interview along with their intention and how to answer them"),
+        question: z.string().describe("Behavioral or situational interview question targeting leadership, conflict resolution, technical ownership, or cross-functional teamwork relevant to the role."),
+        intention: z.string().describe("What the interviewer is evaluating regarding culture fit, communication maturity, problem resolution, and leadership."),
+        answer: z.string().describe("Optimal model answer structured using the STAR method: Situation & Task, Action (specific technical/leadership steps taken), Result (measurable business/system outcome with quantitative metrics), and Retrospective learning.")
+    })).describe("Behavioral questions testing leadership, culture fit, and teamwork"),
 });
 
 const roadmapSchema = z.object({
@@ -319,44 +319,149 @@ function getFallbackAtsGaps(jobDescription = "", candidateProfile = "") {
 }
 
 function getFallbackQuestions(jobDescription = "", candidateProfile = "") {
+    const jdLower = (jobDescription || "").toLowerCase();
+    const isFrontend = jdLower.includes("react") || jdLower.includes("vue") || jdLower.includes("frontend") || jdLower.includes("ui") || jdLower.includes("angular") || jdLower.includes("next.js");
+    const isDataOrML = jdLower.includes("python") || jdLower.includes("machine learning") || jdLower.includes("data") || jdLower.includes("ai") || jdLower.includes("llm");
+    const isCloud = jdLower.includes("aws") || jdLower.includes("docker") || jdLower.includes("kubernetes") || jdLower.includes("devops") || jdLower.includes("ci/cd");
+
+    const primaryFocus = isFrontend 
+        ? "Frontend Architecture & State Management" 
+        : isDataOrML 
+            ? "Data Engineering & Pipeline Scaling" 
+            : isCloud 
+                ? "Cloud Infrastructure & Containerization" 
+                : "Backend Architecture & Distributed Systems";
+
     return {
         technicalQuestions: [
             {
-                question: "How do you design and optimize a scalable API architecture for high-concurrency workloads based on this job description?",
-                intention: "Assesses system architecture knowledge, scalability strategies, caching (Redis/CDN), and database query optimization.",
-                answer: "1. State key architectural principles (stateless services, load balancing, DB indexing, Redis caching).\n2. Detail database optimizations (read replicas, connection pooling, indexing query paths).\n3. Explain rate limiting, circuit breakers, and monitoring metrics (latency, error rates, throughput)."
+                question: `In the context of ${primaryFocus}, how would you architect and optimize a high-throughput, low-latency system based on the requirements in this job description?`,
+                intention: "Evaluates comprehensive system design thinking, component decoupling, caching strategy (e.g., Redis/CDN), asynchronous processing, and measurable latency optimization.",
+                answer: `1. Core Architectural Thesis:
+State the high-level architecture clearly: decouple read and write paths using stateless services, distribute workloads behind an API gateway/load balancer, and implement multi-tiered caching.
+
+2. Step-by-Step Technical Execution:
+- Implement Redis or CDN layers to cache static and hot-read payloads, reducing origin database load by up to 80%.
+- Partition databases (horizontal sharding or read replicas) and create compound indexes specifically on high-frequency query filter columns.
+- Offload non-blocking workflows (e.g. notifications, report generation, heavy parsing) to asynchronous message queues (BullMQ/Kafka) with dead-letter queue recovery.
+
+3. Production Considerations & Edge Cases:
+- Address cache invalidation strategies (TTL + event-driven invalidation) to prevent stale state.
+- Implement circuit breakers and graceful degradation when downstream dependencies experience latency spikes.
+- Monitor P95/P99 latency, database connection pool exhaustion, and error budgets.
+
+4. Critical Red Flags to Avoid:
+- Failing to discuss database indexing or connection pooling under load.
+- Suggesting synchronous operations for heavy computing or file processing.
+- Ignoring data consistency trade-offs (CAP theorem considerations).`
             },
             {
-                question: "Explain your strategy for database schema design, indexing, and query performance tuning in production environments.",
-                intention: "Evaluates database management, query execution plans, indexing strategies (B-Tree, Hash), and data consistency trade-offs.",
-                answer: "1. Discuss normalization vs denormalization based on read/write ratios.\n2. Explain indexing strategies for frequent query filters and joins, analyzing EXPLAIN execution plans.\n3. Cover transaction isolation levels and concurrency control to prevent race conditions."
+                question: "Explain your database design strategy, indexing choices, and query performance tuning process when scaling to millions of records.",
+                intention: "Tests real-world database expertise, query execution analysis (EXPLAIN ANALYZE), normalization vs denormalization trade-offs, and concurrency management.",
+                answer: `1. Core Architectural Thesis:
+Database performance starts with schema normalization for transactional integrity, transitioning selectively to denormalized views or cache layers for read-heavy query patterns.
+
+2. Step-by-Step Technical Execution:
+- Analyze slow query logs and execute EXPLAIN / EXPLAIN ANALYZE to identify sequential scans, missing indexes, and expensive hash joins.
+- Create B-Tree composite indexes adhering to the leftmost prefix rule for compound filters; utilize partial indexes or GiST/GIN indexes for specialized searches.
+- Implement cursor-based pagination instead of offset-based pagination to prevent performance degradation on large datasets.
+
+3. Production Considerations & Edge Cases:
+- Manage transaction isolation levels (Read Committed vs Serializable) to avoid dirty reads without triggering phantom deadlocks.
+- Establish strict connection pooling (e.g., PgBouncer or Mongo connection pools) to prevent server thread exhaustion.
+- Implement soft-deletes and data archival strategies for historical records over 1 year old.
+
+4. Critical Red Flags to Avoid:
+- Never say you 'just add an index on every column'—highlight index write overhead and storage costs.
+- Overlooking connection pool limits or N+1 query problems in ORMs.`
             },
             {
-                question: "How do you implement robust authentication, authorization (RBAC/ABAC), and security best practices across modern web applications?",
-                intention: "Tests security mindset (OWASP Top 10), JWT/session mechanics, CORS, CSRF, and data encryption.",
-                answer: "1. Explain short-lived JWT access tokens paired with secure HTTP-only refresh tokens.\n2. Detail Role-Based Access Control middleware for enforcing fine-grained endpoint permissions.\n3. Mention sanitizing inputs to prevent XSS/SQLi and enforcing HTTPS and strict CORS headers."
+                question: "How do you implement comprehensive application security (OWASP Top 10), authentication/authorization, and secure API boundaries?",
+                intention: "Assesses security mindset, token lifecycle management (access vs refresh tokens), RBAC/ABAC enforcement, input sanitization, and data protection at rest and in transit.",
+                answer: `1. Core Architectural Thesis:
+Security is defense-in-depth: enforce strict authentication, granular Role-Based Access Control (RBAC), end-to-end transport encryption, and parameterized input validation across every boundary.
+
+2. Step-by-Step Technical Execution:
+- Use short-lived JWT access tokens (15-minute expiration) paired with cryptographically secure, HttpOnly, SameSite=Lax/Strict refresh tokens stored in a revoked-token Redis blacklist.
+- Enforce declarative authorization middleware before controllers to verify user permissions against required resource policies.
+- Sanitize and validate all incoming request bodies using strict schema validators (Zod/Joi) to completely eliminate SQL/NoSQL injection and XSS.
+
+3. Production Considerations & Edge Cases:
+- Enforce strict CORS policies restricted to trusted origins and configure security headers (Helmet, CSP, HSTS).
+- Implement tiered rate limiting by IP and authenticated user ID to defend against brute-force and DDoS vectors.
+- Ensure sensitive secrets and keys are managed through KMS / secure environment variables, never committed in code.
+
+4. Critical Red Flags to Avoid:
+- Storing sensitive tokens in unencrypted localStorage (vulnerable to XSS).
+- Relying purely on client-side validation without strict server-side validation.`
             },
             {
-                question: "Describe your approach to asynchronous task processing, message queues, and error handling in distributed systems.",
-                intention: "Determines experience with background job processing, message brokers (BullMQ/RabbitMQ/Kafka), and failure recovery.",
-                answer: "1. Explain offloading long-running tasks (email notifications, PDF generation, AI processing) to background workers.\n2. Detail dead-letter queues, exponential backoff retries, and idempotent job handlers.\n3. Discuss monitoring queue depth and worker health metrics."
+                question: "Describe your approach to asynchronous background job processing, distributed error handling, and achieving high system availability.",
+                intention: "Determines hands-on experience with background task orchestration, queue worker architectures, idempotent operations, and fault recovery.",
+                answer: `1. Core Architectural Thesis:
+Critical operations must never block the main request-response cycle. Asynchronous task queues provide resilient decoupling, allowing the system to absorb traffic spikes without degrading user response times.
+
+2. Step-by-Step Technical Execution:
+- Dispatch background workloads to durable message queues (e.g. BullMQ with Redis or RabbitMQ/Kafka) immediately upon receiving requests.
+- Ensure all worker job consumers are strictly idempotent (e.g., using unique transaction/event IDs to prevent duplicate charging or processing if a task retries).
+- Configure exponential backoff retry policies with a maximum retry ceiling, forwarding persistently failing jobs to a Dead Letter Queue (DLQ) for alerting.
+
+3. Production Considerations & Edge Cases:
+- Monitor queue depth, active worker concurrency, and consumer lag to trigger auto-scaling.
+- Handle worker shutdown gracefully (SIGTERM/SIGINT) by allowing in-flight jobs to complete or safely re-enqueue.
+- Implement distributed tracing (OpenTelemetry/APM) to track request workflows across async boundaries.
+
+4. Critical Red Flags to Avoid:
+- Forgetting idempotency, leading to duplicate side-effects on automatic retries.
+- Not implementing a Dead Letter Queue or worker health check monitoring.`
             }
         ],
         behavioralQuestions: [
             {
-                question: "Tell me about a time you encountered a severe production bug or critical outage under pressure. How did you resolve and prevent it?",
-                intention: "Tests composure, root-cause analysis, incident management, and blameless post-mortem practices.",
-                answer: "1. Situation: Describe the incident, impact on users, and urgency.\n2. Task: Immediate triage, rollback or hotfix implementation.\n3. Action: Isolated root cause via log monitoring, deployed fix, and conducted post-mortem.\n4. Result: Restored system stability and implemented automated regression tests to prevent recurrence."
+                question: "Tell me about a time you encountered a severe production outage or critical regression under high pressure. How did you triage, resolve, and prevent it?",
+                intention: "Evaluates emotional composure under pressure, methodical incident triage, team communication, and blameless post-mortem commitment.",
+                answer: `1. Situation & Task:
+A critical release caused a 30% surge in 500 errors and degraded checkout latency for 10,000+ active users. As on-call engineer, my responsibility was immediate stabilization and root-cause remediation.
+
+2. Action:
+- Communicated immediate incident acknowledgment to stakeholders and declared an active incident response channel.
+- Analyzed APM error traces and server metrics, identifying that a new database migration had locked a heavily indexed table.
+- Swiftly initiated an automated rollback to the previous stable build within 8 minutes, immediately restoring system health.
+- Investigated the root cause in staging, reproduced the table lock condition, and rewritten the migration to run concurrently without table locks.
+
+3. Result & Reflection:
+- System was restored to 99.99% availability within 12 minutes with zero data corruption.
+- Led a blameless post-mortem, added automated staging load tests for DB migrations, and implemented canary deployments to catch similar issues with zero user impact.`
             },
             {
-                question: "Describe a situation where you had a technical disagreement with a team member or stakeholder. How did you align on a decision?",
-                intention: "Evaluates communication, empathy, evidence-based reasoning, and collaboration skills.",
-                answer: "1. Frame the conflict around technical trade-offs (e.g. speed vs scalability).\n2. Highlight listening to opposing views and gathering objective data/benchmarks.\n3. Detail reaching a collaborative consensus or building a proof-of-concept.\n4. Emphasize committing fully once the decision was finalized."
+                question: "Describe a situation where you had a fundamental technical disagreement with another senior engineer or team lead. How did you resolve it?",
+                intention: "Evaluates empathy, constructive collaboration, reliance on data/benchmarks over ego, and commitment to collective decisions.",
+                answer: `1. Situation & Task:
+During an architectural redesign, a teammate wanted to implement an event-driven microservices architecture, whereas I advocated for a modular monolith given our current team size (4 engineers) and product roadmap deadlines.
+
+2. Action:
+- Avoided emotional debate and scheduled a focused alignment session. Framed the discussion around objective trade-offs: operational overhead, deployment complexity, debugging cost, and time-to-market.
+- Created a lightweight matrix comparing both architectures against our 6-month goals, and built a quick prototype demonstrating how a modular monolith preserved clean service boundaries that could be split into microservices later if scaling required it.
+- Actively validated their valid concerns about future scaling bottlenecks and agreed on clear architectural milestones that would trigger a microservice extraction.
+
+3. Result & Reflection:
+- The team unanimously agreed to proceed with the modular monolith, successfully shipping the MVP 3 weeks ahead of deadline.
+- Preserved strong team trust and established a standardized RFC review process for future architectural decisions.`
             },
             {
-                question: "How do you prioritize technical debt versus shipping new features when deadlines are tight?",
-                intention: "Checks pragmatic engineering judgment, business alignment, and communication with product managers.",
-                answer: "1. Explain assessing tech debt impact on system reliability and developer velocity.\n2. Describe allocating a dedicated percentage of sprint capacity to refactoring.\n3. Highlight articulating technical risks in business terms to non-technical stakeholders."
+                question: "How do you balance aggressive product deadlines with addressing technical debt and maintaining engineering standards?",
+                intention: "Checks pragmatic business alignment, technical judgment, and the ability to articulate technical risk in business value terms.",
+                answer: `1. Situation & Task:
+Our product team had a tight deadline to ship a major enterprise feature in 4 weeks, but the core module had accumulated significant tech debt (untested legacy spaghetti code) that risked severe regressions.
+
+2. Action:
+- Collaborated with the Product Manager rather than pushing back blindly. Quantified the debt in terms of business impact: shipping without refactoring would increase bug turnaround time by 40% and jeopardize release stability.
+- Proposed a phased strategy: allocated 20% of the sprint to extract and unit test the core interfaces first, which reduced complexity for the remaining 80% feature build.
+- Instituted an ongoing policy of allocating 15-20% of each sprint to continuous refactoring and performance optimization.
+
+3. Result & Reflection:
+- Successfully shipped the enterprise feature on schedule with zero high-severity production bugs.
+- Demonstrated to stakeholders that investing in technical health directly improves feature delivery velocity rather than slowing it down.`
             }
         ]
     };
@@ -559,16 +664,38 @@ function getFallbackRoadmap(jobDescription = "", candidateProfile = "", daysCoun
 async function generateQuestions({ resume, selfDescription, jobDescription }) {
     const candidateProfile = (resume || selfDescription || "").trim();
     if (!candidateProfile && !jobDescription) throw new Error("Missing candidate profile or job description for generateQuestions");
-    const prompt = `${MASTER_PROMPT}\n\nTask: Generate interview questions tailored specifically for this candidate based on their profile and the Target Job Description.
-Generate EXACTLY 4 technical questions and EXACTLY 3 behavioral questions with detailed intention and model answers.
+    const prompt = `${MASTER_PROMPT}
 
-Candidate Profile / Resume: ${candidateProfile}
-Target Job Description: ${jobDescription}
+Task: Generate high-caliber, perfectly matching interview questions with comprehensive, optimal model answers.
+Analyze the Candidate Profile / Resume against the Target Job Description to identify technical intersections and critical gaps.
 
-1. Generate high-quality, highly specific technical questions that bridge the gap between the candidate's actual experience and the company's stated requirements.
-2. Generate behavioral questions targeting leadership, culture fit, and soft skills relevant to the company's domain.
-3. For EVERY question, generate an optimal, comprehensive answer. Tell the candidate exactly how to structure their response, what key points to hit, and what red flags to avoid.
-4. Output strict JSON matching the schema.`;
+Candidate Profile / Resume:
+${candidateProfile}
+
+Target Job Description:
+${jobDescription}
+
+STRICT GENERATION GUIDELINES:
+1. TECHNICAL QUESTIONS (EXACTLY 4):
+   - Every question MUST directly target specific technologies, architectural patterns, system design, or engineering practices emphasized in the Job Description.
+   - Do NOT ask trivial trivia (e.g. "What is a variable?"). Ask scenario-based, production-level engineering questions (e.g., handling concurrency, database indexing, caching strategies, microservice communication, distributed state).
+   - For EVERY question, provide an OPTIMAL, IN-DEPTH MODEL ANSWER structured with:
+     * 1. Core Concept & Strategic Approach (the immediate high-level answer)
+     * 2. Step-by-Step Technical Implementation (specific tools, patterns, libraries, schemas)
+     * 3. Production Trade-offs & Edge Cases (latency, throughput, failover, concurrency)
+     * 4. What NOT to say / Pitfalls (amateur traps that cause interview failure)
+
+2. BEHAVIORAL QUESTIONS (EXACTLY 3):
+   - Tailored to the seniority, domain, and collaborative nature of the target role (e.g., cross-functional disputes, handling live production outages, managing tight deadlines vs tech debt).
+   - For EVERY question, provide an OPTIMAL MODEL ANSWER using the STAR method:
+     * Situation: Realistic engineering context and stakes
+     * Task: Explicit responsibility and objective
+     * Action: Decisive technical and communication steps taken
+     * Result: Quantifiable business/system outcome (e.g., 40% latency reduction, 99.99% uptime) and key reflection
+
+3. ACCURACY & QUALITY:
+   - Match the exact stack from the JD (Node.js, React, Python, AWS, Docker, PostgreSQL, etc.).
+   - Output strict JSON strictly following the schema.`;
 
     const schemaJson = JSON.stringify(zodToJsonSchema(questionsSchema), null, 2);
     const fullPrompt = `${prompt}\n\nREQUIRED JSON SCHEMA:\nYou must respond ONLY with a valid JSON object matching this schema:\n${schemaJson}`;
@@ -582,7 +709,7 @@ Target Job Description: ${jobDescription}
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert technical interviewer. Always return valid, parseable raw JSON strictly matching the provided schema."
+                    content: "You are an expert technical interviewer and engineering leader. Always return valid, parseable raw JSON strictly matching the provided schema."
                 },
                 {
                     role: "user",
@@ -591,7 +718,7 @@ Target Job Description: ${jobDescription}
             ],
             response_format: { type: "json_object" },
             temperature: 0.3,
-            max_tokens: 3000
+            max_tokens: 3500
         }), 6, "Questions", fullPrompt);
 
         if (result && Array.isArray(result.technicalQuestions) && result.technicalQuestions.length > 0 && Array.isArray(result.behavioralQuestions) && result.behavioralQuestions.length > 0) {

@@ -57,25 +57,47 @@ class AIWorkerService extends EventEmitter {
                     timings.ats = ((Date.now() - atsStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 1 - ATS Generation complete in ${timings.ats} sec`);
 
+                    const validSeverities = ['low', 'medium', 'high'];
+                    const cleanSkillGaps = (Array.isArray(atsData?.skillGaps) ? atsData.skillGaps : []).map(g => ({
+                        skill: String(g?.skill || "Technical Skill Gap").trim(),
+                        severity: validSeverities.includes((g?.severity || "").toLowerCase()) ? g.severity.toLowerCase() : "medium"
+                    })).filter(g => g.skill.length > 0);
+
+                    const atsScore = Math.min(Math.max(Math.round(Number(atsData?.atsScore) || 75), 0), 100);
+                    const matchScore = Math.min(Math.max(Math.round(Number(atsData?.matchScore) || atsScore), 0), 100);
+                    const addedKeywords = (Array.isArray(atsData?.addedKeywords) ? atsData.addedKeywords : []).map(k => String(k).trim()).filter(Boolean);
+                    const missingKeywords = (Array.isArray(atsData?.missingKeywords) ? atsData.missingKeywords : []).map(k => String(k).trim()).filter(Boolean);
+
                     console.log("[START] Saving ATS to Mongo");
                     await interviewReportModel.updateOne(
                         { _id: reportId },
                         {
                             $set: {
-                                atsScore: atsData.atsScore || 0,
-                                improvementSummary: atsData.improvementSummary || "",
-                                recruiterFeedback: atsData.recruiterFeedback || "",
-                                addedKeywords: atsData.addedKeywords || [],
-                                missingKeywords: atsData.missingKeywords || [],
-                                skillGaps: atsData.skillGaps || [],
-                                matchScore: atsData.matchScore || 0,
+                                atsScore,
+                                improvementSummary: String(atsData?.improvementSummary || "Optimized structural layout and technical alignment.").trim(),
+                                recruiterFeedback: String(atsData?.recruiterFeedback || "Strong foundational qualifications. Emphasize measurable business impact and production scale.").trim(),
+                                addedKeywords,
+                                missingKeywords,
+                                skillGaps: cleanSkillGaps,
+                                matchScore,
                                 'progress.atsGenerated': true
                             }
                         },
                         { runValidators: true }
                     );
                     console.log("[OK] Mongo Saved (ATS)");
-                    emitProgress('ats', { status: 'completed', data: atsData });
+                    emitProgress('ats', { 
+                        status: 'completed', 
+                        data: {
+                            atsScore,
+                            improvementSummary: atsData?.improvementSummary,
+                            recruiterFeedback: atsData?.recruiterFeedback,
+                            addedKeywords,
+                            missingKeywords,
+                            skillGaps: cleanSkillGaps,
+                            matchScore
+                        } 
+                    });
                 } catch (err) {
                     console.error(`[FAILED] Stage 1 - ATS Generation failed for ${reportId}:`, err);
                     await interviewReportModel.updateOne(
@@ -104,13 +126,25 @@ class AIWorkerService extends EventEmitter {
                     timings.questions = ((Date.now() - questionsStart) / 1000).toFixed(1);
                     console.log(`[OK] Stage 2 - Questions Generation complete in ${timings.questions} sec`);
 
+                    const sanitizeQuestionsList = (list, defaultPrefix) => {
+                        if (!Array.isArray(list)) return [];
+                        return list.map((q, i) => ({
+                            question: String(q?.question || `${defaultPrefix} Question ${i + 1}`).trim(),
+                            intention: String(q?.intention || "Evaluates core technical proficiency, architectural reasoning, and practical engineering judgment.").trim(),
+                            answer: String(q?.answer || "1. Core Concept: State the high-level approach.\n2. Implementation: Detail specific patterns and tools.\n3. Scalability: Address performance and edge cases.").trim()
+                        })).filter(q => q.question.length > 0 && q.intention.length > 0 && q.answer.length > 0);
+                    };
+
+                    const cleanTech = sanitizeQuestionsList(questionsData?.technicalQuestions, "Technical");
+                    const cleanBehav = sanitizeQuestionsList(questionsData?.behavioralQuestions, "Behavioral");
+
                     console.log("[START] Saving Questions to Mongo");
                     await interviewReportModel.updateOne(
                         { _id: reportId },
                         {
                             $set: {
-                                technicalQuestions: questionsData.technicalQuestions || [],
-                                behavioralQuestions: questionsData.behavioralQuestions || [],
+                                technicalQuestions: cleanTech,
+                                behavioralQuestions: cleanBehav,
                                 'progress.questionsGenerated': true
                             }
                         },
@@ -120,8 +154,8 @@ class AIWorkerService extends EventEmitter {
                     emitProgress('questions', { 
                         status: 'completed',
                         data: {
-                            technicalQuestions: questionsData.technicalQuestions || [],
-                            behavioralQuestions: questionsData.behavioralQuestions || []
+                            technicalQuestions: cleanTech,
+                            behavioralQuestions: cleanBehav
                         }
                     });
                 } catch (err) {
@@ -189,8 +223,8 @@ class AIWorkerService extends EventEmitter {
                             type: ["Learn", "Practice", "Project", "Revision", "Mock"].includes(task.type) ? task.type : "Learn",
                             status: "pending",
                             resources: Array.isArray(task.resources) ? task.resources.map(res => ({
-                                title: res.title || "Resource",
-                                url: res.url || "",
+                                title: res.title || "Learning Resource",
+                                url: (res.url && String(res.url).trim().length > 0) ? String(res.url).trim() : "https://developer.mozilla.org",
                                 type: ["docs", "video", "practice", "article", "cheatsheet"].includes(res.type) ? res.type : "docs"
                             })) : []
                         })) : []
